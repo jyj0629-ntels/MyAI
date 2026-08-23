@@ -1,0 +1,35 @@
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: myai-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: myai
+      POSTGRES_USER: myai
+      POSTGRES_PASSWORD: wjddudwns.123
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    ports:
+      - "5432:5432"
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: myai-n8n
+    restart: unless-stopped
+
+    ports:
+      - "5678:5678"
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  n8n_data:

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+.venv/
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Database / Runtime Data
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary / Backup
+*.tmp
+*.bak
+backup/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Archive
+*.tar.gz
