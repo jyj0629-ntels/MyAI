@@ -33,6 +33,10 @@ from app.services.conversation_memory_update_service import ConversationMemoryUp
 from app.services.conversation_memory_service import ConversationMemoryService
 
 from app.services.long_term_memory_service import LongTermMemoryService
+from app.services.memory_extraction_orchestrator import MemoryExtractionOrchestrator
+from app.services.llm_memory_extraction_service import LLMMemoryExtractionService
+from app.services.fake_memory_llm_provider import FakeMemoryLLMProvider
+from app.services.chat_orchestrator_service import ChatOrchestratorService
 
 from app.models.ai_prompt_run import AIPromptRun
 from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
@@ -315,13 +319,31 @@ async def chat(
                 )
             )
 
-            memories = ( 
-                LongTermMemoryService()
-                .extract(
+            extractor = (
+                LLMMemoryExtractionService( 
+                    FakeMemoryLLMProvider()
+                )
+            )
+
+            memories = await ( 
+                MemoryExtractionOrchestrator (
+                    extractor
+                )
+                .process(
                     user_id=request.user_id,
                     summary=summary
                 )
             )
+
+            for memory in memories: 
+
+                print(memory.type)
+                print(memory.key)
+                print(memory.content)
+                print()
+
+            print("# --------------------------------")
+            print()
 
             for memory in memories:
 
