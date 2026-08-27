@@ -1,11 +1,13 @@
+import os
+
+from app.core.config import settings
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = (
-    "postgresql+psycopg://"
-    "myai:wjddudwns.123@"
-    "localhost:5432/myai"
-)
+load_dotenv()
+
+DATABASE_URL = settings.DATABASE_URL
 
 engine = create_engine(
     DATABASE_URL,

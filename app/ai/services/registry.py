@@ -1,19 +1,17 @@
 from app.ai.providers.base import AIProvider
 from app.ai.providers.mock import MockProvider
-from app.ai.providers.openai_provider import OpenAIProvider
+from app.ai.providers.gemini_provider import GeminiProvider
 
 
 class AIProviderRegistry:
 
     def __init__(self):
-
         self.providers: dict[str, AIProvider] = {}
 
     def register(
         self,
         provider: AIProvider
     ):
-
         self.providers[provider.name] = provider
 
     def get(
@@ -22,7 +20,6 @@ class AIProviderRegistry:
     ) -> AIProvider:
 
         if name not in self.providers:
-
             raise ValueError(
                 f"AI Provider not registered: {name}"
             )
@@ -30,7 +27,6 @@ class AIProviderRegistry:
         return self.providers[name]
 
     def list(self):
-
         return list(self.providers.keys())
 
 
@@ -42,10 +38,10 @@ def create_orchestrator():
 
     registry.register(
         MockProvider()
-    )
+    ) 
 
-    registry.register(
-        OpenAIProvider()
+    registry.register( 
+        GeminiProvider()
     )
 
     return AIOrchestrator(

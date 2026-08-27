@@ -11,6 +11,13 @@ from app.personalization.services.prompt_builder import (
     PromptBuilder
 )
 
+from app.api.users import router as user_router
+from app.api.ai import router as ai_router
+from app.api.conversations import router as conversation_router
+from app.api.memory import router as memory_router
+from app.api.memory_item import router as memory_item_router
+from app.api.markdown_memory import router as markdown_memory_router
+
 prompt_builder = PromptBuilder()
 
 app = FastAPI(
@@ -19,8 +26,18 @@ app = FastAPI(
 )
 
 
-orchestrator = create_orchestrator()
+app.include_router(user_router)
+app.include_router(ai_router)
+app.include_router(conversation_router)
+app.include_router(memory_router)
+app.include_router(memory_item_router)
+app.include_router(memory_item_router)
 
+app.include_router(
+    markdown_memory_router
+)
+
+orchestrator = create_orchestrator()
 
 @app.get("/")
 def root():
