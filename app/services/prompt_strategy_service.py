@@ -10,7 +10,6 @@ class PromptStrategyService:
 [Role]
 MyAI Architecture Reviewer
 
-[User Context]
 {user_context}
 
 [Decision Criteria]

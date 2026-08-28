@@ -10,19 +10,11 @@ class MemoryProfileService:
 
         if preferences:
 
-            profile.append(
-                "[Core Preferences]"
-            )
-
             profile.extend(
                 preferences
             )
 
         if goals:
-
-            profile.append(
-                "[User Goals]"
-            )
 
             profile.extend(
                 goals

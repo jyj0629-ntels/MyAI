@@ -33,16 +33,45 @@ class LLMMemoryExtractionService:
             )
         )
 
+        print() 
+        print("# --------------------------------") 
+        print("# RAW MEMORY RESPONSE") 
+        print("# --------------------------------") 
+        print(response) 
+        print("# --------------------------------") 
+        print()
+
         try:
+
+            cleaned_response = (
+                response
+                .replace(
+                    "```json",
+                    ""
+                )
+                .replace(
+                    "```",
+                    ""
+                )
+                .strip()
+            )
 
             return (
                 MemoryCandidateResult
                 .model_validate_json(
-                    response
+                    cleaned_response
                 )
             )
 
-        except Exception:
+        except Exception as e:
+
+            print()
+            print("# --------------------------------")
+            print("# MEMORY PARSE ERROR")
+            print("# --------------------------------")
+            print(e)
+            print("# --------------------------------")
+            print()
 
             return (
                 MemoryCandidateResult(

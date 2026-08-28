@@ -43,29 +43,30 @@ class MemoryQueryService:
             )
         )
 
-        relevant_projects = (
-            self.engine.retrieve(
-                question=question,
-                memories=projects
-            )
-        )
-
-        consolidated_preferences = ( 
-            self.engine.consolidation_service 
-            .consolidate( 
+        consolidated_preferences = (
+            self.engine.consolidation_service
+            .consolidate(
                 preferences
             )
         )
 
-        consolidated_goals = ( 
-            self.engine.consolidation_service 
-            .consolidate( 
+        consolidated_goals = (
+            self.engine.consolidation_service
+            .consolidate(
                 goals
+            )
+        )
+
+        consolidated_projects = (
+            self.engine.consolidation_service
+            .consolidate(
+                projects
             )
         )
 
         return (
             consolidated_preferences
             + consolidated_goals
-            + relevant_projects
+            + consolidated_projects
         )
+

@@ -17,11 +17,9 @@ from app.services.chat_service import ChatService
 from app.services.local_brain_service import LocalBrainService
 
 from app.services.memory_item_service import MemoryItemService
-from app.services.memory_extraction_service import MemoryExtractionService
 from app.services.memory_context_service import MemoryContextService
 from app.services.memory_retrieval_service import MemoryRetrievalService
 from app.services.memory_query_service import MemoryQueryService
-from app.services.memory_confidence_service import MemoryConfidenceService
 
 from app.services.prompt_trace_service import PromptTraceService
 
@@ -32,10 +30,9 @@ from app.services.ai_prompt_run_service import AIPromptRunService
 from app.services.conversation_memory_update_service import ConversationMemoryUpdateService
 from app.services.conversation_memory_service import ConversationMemoryService
 
-from app.services.long_term_memory_service import LongTermMemoryService
 from app.services.memory_extraction_orchestrator import MemoryExtractionOrchestrator
 from app.services.llm_memory_extraction_service import LLMMemoryExtractionService
-from app.services.fake_memory_llm_provider import FakeMemoryLLMProvider
+from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
 from app.services.chat_orchestrator_service import ChatOrchestratorService
 
 from app.models.ai_prompt_run import AIPromptRun
@@ -207,163 +204,15 @@ async def chat(
         request=request
     )
 
-    chat_service = ChatService(
-        ChatRepository(db)
+    await (
+        ChatOrchestratorService()
+        .post_process(
+            request=request,
+            response=response,
+            db=db,
+            memory_service=memory_service
+        )
     )
-
-    if request.user_id:
-
-        extractor = (
-            MemoryExtractionService()
-        )
-
-        extracted_memories = (
-            extractor.extract(
-                user_id=request.user_id,
-                question=request.question,
-                answer=response.answer
-            )
-        )
-
-        for memory in extracted_memories:
-
-            existing_memory = (
-                memory_service.exists_by_key(
-                    memory.user_id,
-                    memory.key
-                )
-            )
-
-            if existing_memory:
-    
-                updated_memory = ( 
-                    MemoryConfidenceService() 
-                    .reinforce( 
-                        existing_memory
-                    )
-            )
-
-            memory_service.update(
-                updated_memory
-            )
-
-            print(
-                f"[MEMORY REINFORCED] "
-                f"{memory.key} "
-                f"confidence="
-                f"{updated_memory.confidence}"
-            )
-
-            continue
-
-        memory_service.create(
-            memory
-        )
-
-        print(
-            f"[MEMORY CREATED] "
-            f"{memory.type} : "
-            f"{memory.content}"
-        )
-
-    chat_service.save_chat(
-        conversation_id=request.conversation_id,
-        provider=response.provider,
-        model=response.model,
-        question=request.question,
-        answer=response.answer,
-        input_tokens=response.input_tokens,
-        output_tokens=response.output_tokens,
-        success=response.success
-    )
-
-    if request.conversation_id:
-
-        history = (
-            chat_service
-            .get_recent_by_conversation(
-                request.conversation_id,
-                limit=20
-            )
-        )
-
-        messages = []
-
-        for item in reversed(history):
-
-            messages.append(
-                f"Q: {item.question}"
-            )
-
-            messages.append(
-                f"A: {item.answer}"
-            )
-
-        ConversationMemoryUpdateService(
-            db
-        ).update_summary(
-            conversation_id=request.conversation_id,
-            messages=messages
-        )
-
-        if (
-            request.user_id 
-            and request.conversation_id
-        ):
-    
-            summary = (
-                ConversationMemoryService(
-                    db
-                ).get_summary( 
-                    request.conversation_id
-                )
-            )
-
-            extractor = (
-                LLMMemoryExtractionService( 
-                    FakeMemoryLLMProvider()
-                )
-            )
-
-            memories = await ( 
-                MemoryExtractionOrchestrator (
-                    extractor
-                )
-                .process(
-                    user_id=request.user_id,
-                    summary=summary
-                )
-            )
-
-            for memory in memories: 
-
-                print(memory.type)
-                print(memory.key)
-                print(memory.content)
-                print()
-
-            print("# --------------------------------")
-            print()
-
-            for memory in memories:
-
-                existing_memory = (
-                    memory_service.exists_by_key(
-                        memory.user_id,
-                        memory.key
-                    )
-                )
-                if existing_memory:
-                    continue
-            
-                memory_service.create(
-                    memory
-                )
-
-                print(
-                    f"[LONG TERM MEMORY CREATED] "
-                    f"{memory.key}"
-                )
 
     return response
 

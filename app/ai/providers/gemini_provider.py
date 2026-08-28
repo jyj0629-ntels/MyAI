@@ -33,20 +33,37 @@ class GeminiProvider(AIProvider):
                 f"{prompt}"
             )
 
-        result = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
-        )
+        try:
 
-        if hasattr(
-            result,
-            "usage_metadata"
-        ):
-            print(result.usage_metadata)
+            result = client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=prompt
+            )
 
-        return AIResponse(
-            provider=self.name,
-            model=settings.GEMINI_MODEL,
-            answer=result.text,
-            success=True
-        )
+            if hasattr(
+                result,
+                "usage_metadata"
+            ):
+                print(
+                    result.usage_metadata
+                )
+
+            return AIResponse(
+                provider=self.name,
+                model=settings.GEMINI_MODEL,
+                answer=result.text,
+                success=True
+            )
+
+        except Exception as e:
+
+            print(
+                f"[GEMINI ERROR] {e}"
+            )
+
+            return AIResponse(
+                provider=self.name,
+                model=settings.GEMINI_MODEL,
+                answer=f"[GEMINI ERROR] {str(e)}",
+                success=False
+            )

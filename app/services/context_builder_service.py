@@ -9,45 +9,27 @@ class ContextBuilderService:
         sections = []
 
         sections.append(
-            "##############################"
+            "####### [User Context] #######"
         )
-
-        sections.append(
-            "[User Context]"
-        )
-
-        sections.append(
-            "##############################"
-        )
-
         sections.append("")
-
         sections.append(
             "(1) Core Preferences"
         )
-
-        sections.append(">")
-
-        sections.append(user_profile)
-
+        for line in user_profile.splitlines():
+            if line.strip():
+                sections.append(
+                    f"  > {line}"
+                )
+        sections.append("------------------------------")
         sections.append("")
-
-        sections.append(
-            "------------------------------"
-        )
-
-        sections.append("")
-
         sections.append(
             "(2) Project Context"
         )
-
-        sections.append(">")
-
-        sections.append(project_context)
-
-        sections.append("")
-
+        for line in project_context.splitlines():
+            if line.strip():
+                sections.append(
+                    f"  > {line}"
+                )
         sections.append(
             "##############################"
         )

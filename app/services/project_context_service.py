@@ -10,10 +10,6 @@ class ProjectContextService:
 
         context = []
 
-        context.append(
-            "[Project Context]"
-        )
-
         context.extend(
             projects
         )
