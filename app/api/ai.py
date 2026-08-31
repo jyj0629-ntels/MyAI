@@ -38,6 +38,8 @@ from app.services.chat_orchestrator_service import ChatOrchestratorService
 from app.models.ai_prompt_run import AIPromptRun
 from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
 
+from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
+
 
 router = APIRouter(
     prefix="/ai",
@@ -199,10 +201,37 @@ async def chat(
     print("# --------------------------------")
     print()
     
-    response = await orchestrator.ask(
-        provider_name=provider,
-        request=request
+    multi_result = await (
+        MultiProviderOrchestrator(
+            orchestrator.registry
+        )
+        .ask_all(
+            request
+        )
     )
+
+    selected = (
+        multi_result[
+            "selected"
+        ]
+    )
+
+    if not selected:
+
+        response = await (
+            orchestrator.ask(
+                provider_name=provider,
+                request=request
+            )
+        )
+
+    else:
+
+        response = (
+            multi_result[
+                "responses"
+            ][0]
+        )
 
     await (
         ChatOrchestratorService()

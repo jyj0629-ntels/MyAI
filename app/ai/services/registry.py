@@ -1,7 +1,9 @@
 from app.ai.providers.base import AIProvider
-from app.ai.providers.mock import MockProvider
-from app.ai.providers.gemini_provider import GeminiProvider
 
+from app.ai.providers.gemini_provider import GeminiProvider
+from app.ai.providers.groq_provider import GroqProvider
+
+from app.ai.services.provider_loader import ProviderLoader
 
 class AIProviderRegistry:
 
@@ -36,13 +38,19 @@ def create_orchestrator():
 
     registry = AIProviderRegistry()
 
-    registry.register(
-        MockProvider()
-    ) 
+    for provider in (
+        ProviderLoader()
+        .load_all()
+    ):
 
-    registry.register( 
-        GeminiProvider()
-    )
+        registry.register(
+            provider
+        )
+
+        print(
+            f"[PROVIDER REGISTERED] "
+            f"{provider.name}"
+        )
 
     return AIOrchestrator(
         registry=registry

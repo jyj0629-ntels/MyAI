@@ -11,6 +11,14 @@ class Settings:
         "DATABASE_URL"
     )
 
+    PRIMARY_PROVIDER = os.getenv(
+        "PRIMARY_PROVIDER"
+    )
+
+    FALLBACK_PROVIDERS = os.getenv(
+        "FALLBACK_PROVIDERS"
+    )
+
     GEMINI_API_KEY = os.getenv(
         "GEMINI_API_KEY"
     )
@@ -23,9 +31,80 @@ class Settings:
         "GROQ_API_KEY"
     )
 
+    GROQ_MODEL = os.getenv(
+        "GROQ_MODEL"
+    )
+
     DEEPSEEK_API_KEY = os.getenv(
         "DEEPSEEK_API_KEY"
     )
 
+    DEEPSEEK_MODEL = os.getenv(
+        "DEEPSEEK_MODEL"
+    )
+
+    CONSENSUS_THRESHOLD = int(
+        os.getenv(
+            "CONSENSUS_THRESHOLD",
+            "80"
+        )
+    )
+
+    MIN_CONSENSUS_RESPONSES = int(
+        os.getenv(
+            "MIN_CONSENSUS_RESPONSES",
+            "2"
+        )
+    )
+
+    ALLOW_SINGLE_PROVIDER = (
+        os.getenv(
+            "ALLOW_SINGLE_PROVIDER",
+            "true"
+        ).lower() == "true"
+    )
+
+    CONSENSUS_THRESHOLD = int(
+        os.getenv(
+            "CONSENSUS_THRESHOLD",
+            "80"
+        )
+    )
+
+    PRIMARY_PROVIDER = os.getenv(
+        "PRIMARY_PROVIDER",
+        "gemini"
+    )
+
+    FALLBACK_PROVIDERS = os.getenv(
+        "FALLBACK_PROVIDERS",
+        "groq,openrouter,deepseek"
+    )
+
+    MIN_CONSENSUS_RESPONSES = int(
+        os.getenv(
+            "MIN_CONSENSUS_RESPONSES",
+            "2"
+        )
+    )
+
+    ALLOW_SINGLE_PROVIDER = (
+        os.getenv(
+            "ALLOW_SINGLE_PROVIDER",
+            "true"
+        ).lower() == "true"
+    )
+
+    ENABLE_LOCAL_CONSENSUS = (
+        os.getenv(
+            "ENABLE_LOCAL_CONSENSUS",
+            "true"
+        ).lower() == "true"
+    )
+
+    LOCAL_CONSENSUS_PROVIDER = os.getenv(
+        "LOCAL_CONSENSUS_PROVIDER",
+        "gemini"
+    )
 
 settings = Settings()
