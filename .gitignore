@@ -24,7 +24,6 @@ data/
 # Temporary / Backup
 *.tmp
 *.bak
-backup/
 
 # OS
 .DS_Store
