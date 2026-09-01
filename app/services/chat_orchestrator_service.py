@@ -1,23 +1,11 @@
-from app.services.chat_service import \
-    ChatService
+from app.repositories.chat_repository import ChatRepository
 
-from app.repositories.chat_repository import \
-    ChatRepository
-
-from app.services.conversation_memory_update_service import \
-    ConversationMemoryUpdateService
-
-from app.services.conversation_memory_service import \
-    ConversationMemoryService
-
-from app.services.memory_extraction_orchestrator import \
-    MemoryExtractionOrchestrator
-
-from app.services.llm_memory_extraction_service import \
-    LLMMemoryExtractionService
-
-from app.services.gemini_memory_extraction_provider import \
-    GeminiMemoryExtractionProvider
+from app.services.chat_service import ChatService
+from app.services.conversation_memory_update_service import ConversationMemoryUpdateService
+from app.services.conversation_memory_service import ConversationMemoryService
+from app.services.memory_extraction_orchestrator import MemoryExtractionOrchestrator
+from app.services.llm_memory_extraction_service import LLMMemoryExtractionService
+from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
 
 
 class ChatOrchestratorService:
@@ -87,12 +75,36 @@ class ChatOrchestratorService:
                 request.conversation_id
             )
         )
-
+        
         extractor = (
             LLMMemoryExtractionService(
                 GeminiMemoryExtractionProvider()
             )
         )
+
+        try:
+
+            memories = await (
+                MemoryExtractionOrchestrator(
+                    extractor
+                )
+                .process(
+                    user_id=request.user_id,
+                    summary=summary
+                )
+            )
+
+        except Exception as e:
+
+            print()
+            print("# --------------------------------")
+            print("# MEMORY EXTRACTION FAILED")
+            print("# --------------------------------")
+            print(str(e))
+            print("# --------------------------------")
+            print()
+
+            return
 
         memories = await (
             MemoryExtractionOrchestrator(
@@ -123,6 +135,28 @@ class ChatOrchestratorService:
             )
 
             if existing_memory:
+
+                print(
+                    f"[MEMORY EXISTS] "
+                    f"{memory.key}"
+                )
+
+                continue
+
+
+            
+            content_exists = (
+                memory_service
+                .exists_similar_content(
+                    memory.user_id,
+                    memory.content
+                )
+            )
+
+            if (
+                existing_memory
+                or content_exists
+            ):
 
                 print(
                     f"[MEMORY EXISTS] "

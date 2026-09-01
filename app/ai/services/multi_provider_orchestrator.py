@@ -1,12 +1,12 @@
 import asyncio
 
+from app.core.config import settings
+
 from app.ai.models.request import AIRequest
-from app.ai.services.response_collector import \
-    ResponseCollector
 
-from app.ai.services.consensus_engine import \
-    ConsensusEngine
-
+from app.ai.services.response_collector import ResponseCollector
+from app.ai.services.consensus_engine import ConsensusEngine
+from app.ai.services.local_consensus_service import LocalConsensusService
 
 class MultiProviderOrchestrator:
 
@@ -170,8 +170,16 @@ class MultiProviderOrchestrator:
         print("# --------------------------------")
         print()
 
+        judge_request = ( 
+            LocalConsensusService() 
+            .build_request(
+                collected
+            )
+        )
+
         return {
             "responses": collected,
             "consensus": consensus,
-            "selected": selected
+            "selected": selected,
+            "judge_request": judge_request
         }

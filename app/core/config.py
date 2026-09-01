@@ -104,7 +104,31 @@ class Settings:
 
     LOCAL_CONSENSUS_PROVIDER = os.getenv(
         "LOCAL_CONSENSUS_PROVIDER",
-        "gemini"
+        "ollama"
+    )
+
+    ENABLE_CONFLICT_MODE = (
+        os.getenv(
+            "ENABLE_CONFLICT_MODE",
+            "true"
+        ).lower() == "true"
+    )
+
+    LOCAL_LLM_PROVIDER = os.getenv(
+        "LOCAL_LLM_PROVIDER",
+        "ollama"
+    )
+
+    LOCAL_LLM_MODEL = os.getenv(
+        "LOCAL_LLM_MODEL",
+        "qwen3:8b"
+    )
+
+    ENABLE_LOCAL_LLM_JUDGE = (
+        os.getenv(
+            "ENABLE_LOCAL_LLM_JUDGE",
+            "true"
+        ).lower() == "true"
     )
 
 settings = Settings()

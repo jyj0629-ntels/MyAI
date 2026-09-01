@@ -1,3 +1,4 @@
+from app.ai.models.request import AIRequest
 from app.core.config import settings
 
 
@@ -11,12 +12,14 @@ class LocalConsensusService:
         prompt = """
 당신은 MyAI Consensus Judge 이다.
 
-여러 AI 응답을 비교 분석하라.
+여러 AI의 답변을 비교 분석하라.
 
-반드시 JSON으로만 답변하라.
+반드시 JSON 형식으로만 답변하라.
 
 {
-  "consensus_score": 0,
+  "mode": "consensus",
+  "consensus_score": 95,
+  "consensus_reason": "",
   "common_claims": [],
   "conflicting_claims": [],
   "final_answer": ""
@@ -35,3 +38,22 @@ class LocalConsensusService:
 """
 
         return prompt
+
+    def build_request(
+        self,
+        responses
+    ):
+
+        prompt = (
+            self.build_prompt(
+                responses
+            )
+        )
+
+        return AIRequest(
+            question=prompt,
+            provider=(
+                settings.LOCAL_CONSENSUS_PROVIDER
+            )
+        )
+

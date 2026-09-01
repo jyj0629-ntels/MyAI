@@ -1,5 +1,5 @@
-from app.repositories.memory_item_repository import \
-    MemoryItemRepository
+from app.repositories.memory_item_repository import MemoryItemRepository
+from difflib import SequenceMatcher
 
 
 class MemoryItemService:
@@ -71,3 +71,44 @@ class MemoryItemService:
         return self.repository.update(
             memory
         )
+
+    def exists_similar_content(
+        self,
+        user_id: int,
+        content: str,
+        threshold: float = 0.80
+    ):
+
+        memories = self.get_by_user(
+            user_id
+        )
+
+        target = (
+            content.strip()
+            .lower()
+        )
+
+        for memory in memories:
+            existing = (
+                memory.content
+                .strip()
+                .lower()
+            )
+
+            similarity = (
+                SequenceMatcher(
+                    None,
+                    target,
+                    existing
+                ).ratio()
+            )
+
+            print(
+                f"[SIMILARITY] "
+                f"{similarity:.2f}"
+            )
+
+            if similarity >= threshold:
+                return True
+
+        return False

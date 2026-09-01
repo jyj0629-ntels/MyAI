@@ -40,6 +40,9 @@ from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
 
 from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
 
+from app.core.config import settings
+
+import json
 
 router = APIRouter(
     prefix="/ai",
@@ -87,11 +90,15 @@ async def chat(
         if memory.type == "PREFERENCE"
     ]
 
-    projects = [
-        memory.content
-        for memory in retrieved_memories
-        if memory.type == "PROJECT"
-    ]
+    projects = list(
+        dict.fromkeys(
+            [
+                memory.content.strip()
+                for memory in retrieved_memories
+                if memory.type == "PROJECT"
+            ]
+        )
+    )
 
     goals = [
         memory.content
@@ -210,11 +217,79 @@ async def chat(
         )
     )
 
+    judge_request = (
+        multi_result.get(
+            "judge_request"
+        )
+    )
+
     selected = (
         multi_result[
             "selected"
         ]
     )
+
+    judge_response = None
+
+    if (
+        judge_request
+        and settings.ENABLE_LOCAL_CONSENSUS
+    ):
+
+        judge_response = await (
+            orchestrator.ask(
+                provider_name=
+                settings.LOCAL_CONSENSUS_PROVIDER,
+                request=judge_request
+            )
+        )
+
+        print()
+        print("# --------------------------------")
+        print("# LOCAL CONSENSUS RESULT")
+        print("# --------------------------------")
+        print(
+            judge_response.answer
+        )
+        print("# --------------------------------")
+        print()
+
+
+
+        judge_result = None 
+
+        if judge_response:
+        
+            try:
+
+
+                clean_json = (
+                    judge_response.answer
+                    .replace(
+                        "```json",
+                        ""
+                    )
+                    .replace(
+                        "```",
+                        ""
+                    )
+                    .strip()
+                )
+
+                judge_result = json.loads(
+                    clean_json
+                )
+
+
+            except Exception as e:
+
+                print()
+                print("# --------------------------------")
+                print("# JUDGE JSON PARSE ERROR")
+                print("# --------------------------------")
+                print(str(e))
+                print("# --------------------------------")
+                print()
 
     if not selected:
 
@@ -232,6 +307,49 @@ async def chat(
                 "responses"
             ][0]
         )
+
+        if judge_result:
+
+            score = (
+                judge_result.get(
+                    "consensus_score",
+                    0
+                )
+            )
+
+            mode = "consensus"
+
+            if (
+                score
+                < settings.CONSENSUS_THRESHOLD
+            ):
+                mode = "conflict"
+
+            print()
+            print("# --------------------------------")
+            print("# JUDGE RESULT")
+            print("# --------------------------------")
+            print(
+                f"mode={mode}"
+            )
+            print(
+                f"score={score}"
+            )
+            print("# --------------------------------")
+            print()
+
+            final_answer = (
+                judge_result.get(
+                    "final_answer"
+                )
+            )
+
+            if final_answer:
+
+                response.answer = (
+                    final_answer
+                )
+
 
     await (
         ChatOrchestratorService()
