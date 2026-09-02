@@ -11,14 +11,6 @@ class Settings:
         "DATABASE_URL"
     )
 
-    PRIMARY_PROVIDER = os.getenv(
-        "PRIMARY_PROVIDER"
-    )
-
-    FALLBACK_PROVIDERS = os.getenv(
-        "FALLBACK_PROVIDERS"
-    )
-
     GEMINI_API_KEY = os.getenv(
         "GEMINI_API_KEY"
     )
@@ -41,27 +33,6 @@ class Settings:
 
     DEEPSEEK_MODEL = os.getenv(
         "DEEPSEEK_MODEL"
-    )
-
-    CONSENSUS_THRESHOLD = int(
-        os.getenv(
-            "CONSENSUS_THRESHOLD",
-            "80"
-        )
-    )
-
-    MIN_CONSENSUS_RESPONSES = int(
-        os.getenv(
-            "MIN_CONSENSUS_RESPONSES",
-            "2"
-        )
-    )
-
-    ALLOW_SINGLE_PROVIDER = (
-        os.getenv(
-            "ALLOW_SINGLE_PROVIDER",
-            "true"
-        ).lower() == "true"
     )
 
     CONSENSUS_THRESHOLD = int(
@@ -122,6 +93,23 @@ class Settings:
     LOCAL_LLM_MODEL = os.getenv(
         "LOCAL_LLM_MODEL",
         "qwen3:8b"
+    )
+
+    OLLAMA_HOST = os.getenv(
+        "OLLAMA_HOST",
+        "http://ollama:11434"
+    )
+
+    OLLAMA_GENERATE_URL = os.getenv(
+        "OLLAMA_GENERATE_URL",
+        f"{OLLAMA_HOST}/api/generate"
+    )
+
+    OLLAMA_TIMEOUT = int(
+        os.getenv(
+            "OLLAMA_TIMEOUT",
+            "300"
+        )
     )
 
     ENABLE_LOCAL_LLM_JUDGE = (

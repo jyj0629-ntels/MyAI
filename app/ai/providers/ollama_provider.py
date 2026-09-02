@@ -24,12 +24,12 @@ class OllamaProvider(
         try:
 
             async with httpx.AsyncClient(
-                timeout=300
+		timeout=settings.OLLAMA_TIMEOUT
             ) as client:
 
                 response = await (
                     client.post(
-                        "http://localhost:11434/api/generate",
+			settings.OLLAMA_GENERATE_URL,
                         json={
                             "model":
                             settings.LOCAL_LLM_MODEL,
