@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
@@ -52,9 +51,13 @@ orchestrator = create_orchestrator()
 
 @router.post("/chat")
 async def chat(
-    request: AIRequest,
+    payload: dict | None = Body(default=None),
     db: Session = Depends(get_db)
 ):
+    try:
+        request = AIRequest.from_payload(payload or {})
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     memory_service = MemoryItemService(
         MemoryItemRepository(db)

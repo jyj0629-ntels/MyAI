@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 
 from sqlalchemy import text
 
@@ -73,7 +73,12 @@ def health_db():
     }
 
 @app.post("/ai/ask")
-async def ask_ai(request: AIRequest):
+async def ask_ai(payload: dict | None = Body(default=None)):
+
+    try:
+        request = AIRequest.from_payload(payload or {})
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     provider = request.provider or "mock"
 
