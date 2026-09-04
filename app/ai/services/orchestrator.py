@@ -1,9 +1,6 @@
 from app.core.config import settings
-
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
-
-from app.ai.providers.base import AIProvider
 
 
 class AIOrchestrator:
@@ -18,15 +15,30 @@ class AIOrchestrator:
         request: AIRequest
     ) -> AIResponse:
 
+        available_providers = (
+            self.registry.list()
+        )
+
         fallback_order = []
 
         if provider_name:
-            fallback_order.append(
+
+            provider_name = (
                 provider_name
+                .strip()
+                .lower()
             )
 
+            if (
+                provider_name
+                in available_providers
+            ):
+                fallback_order.append(
+                    provider_name
+                )
+
         fallback_providers = [
-            provider.strip()
+            provider.strip().lower()
             for provider in (
                 settings.FALLBACK_PROVIDERS
                 or ""
@@ -34,15 +46,33 @@ class AIOrchestrator:
             if provider.strip()
         ]
 
-        for provider in (
-            fallback_providers
-        ):
+        for provider in fallback_providers:
+
+            if provider not in available_providers:
+
+                print()
+                print("# --------------------------------")
+                print("# UNKNOWN FALLBACK PROVIDER")
+                print("# --------------------------------")
+                print(provider)
+                print("# --------------------------------")
+                print()
+
+                continue
 
             if provider not in fallback_order:
 
                 fallback_order.append(
                     provider
                 )
+
+        print()
+        print("# --------------------------------")
+        print("# AVAILABLE PROVIDERS")
+        print("# --------------------------------")
+        print(available_providers)
+        print("# --------------------------------")
+        print()
 
         print()
         print("# --------------------------------")
@@ -98,7 +128,9 @@ class AIOrchestrator:
                     f"{current_provider}"
                 )
 
-                print(e)
+                print(
+                    str(e)
+                )
 
         if last_response:
 

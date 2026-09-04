@@ -1,4 +1,0 @@
-app/api/ai.py:from app.services.local_brain_service import LocalBrainService
-app/api/ai.py:    brain = LocalBrainService()
-app/services/local_brain_service.py:class LocalBrainService:
-Binary file app/services/__pycache__/local_brain_service.cpython-36.pyc matches

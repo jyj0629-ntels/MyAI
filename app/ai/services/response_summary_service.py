@@ -5,6 +5,9 @@ class ResponseSummaryService:
         answer: str
     ):
 
+        if not answer:
+            return ""
+
         answer = answer.strip()
 
         lines = []
@@ -13,7 +16,7 @@ class ResponseSummaryService:
 
             line = line.strip()
 
-            if len(line) < 10:
+            if not line:
                 continue
 
             if line.startswith("##"):
@@ -25,9 +28,20 @@ class ResponseSummaryService:
             if "------" in line:
                 continue
 
-            lines.append(line)
+            lines.append(
+                line
+            )
 
-            if len(lines) >= 20:
-                break
+        summary = "\n".join(
+            lines
+        )
 
-        return "\n".join(lines)
+        max_length = 4000
+
+        if len(summary) > max_length:
+
+            summary = (
+                summary[:max_length]
+            )
+
+        return summary

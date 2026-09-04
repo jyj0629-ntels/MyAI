@@ -1,14 +1,10 @@
 import os
 
-from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
 from app.ai.providers.base import AIProvider
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
-
-
-load_dotenv("/home/mrmusic/MyAI/.env")
 
 
 class OpenAIProvider(AIProvider):
@@ -26,7 +22,9 @@ class OpenAIProvider(AIProvider):
             api_key=api_key
         )
 
-        self.model = "gpt-5.4-mini"
+        self.model = (
+            settings.OPENAI_MODEL
+        )
 
     @property
     def name(self) -> str:

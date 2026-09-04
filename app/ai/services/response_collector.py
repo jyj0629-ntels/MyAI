@@ -27,7 +27,8 @@ class ResponseCollector:
                 {
                     "provider": response.provider,
                     "model": response.model,
-                    "answer": summary
+                    "answer": response.answer,
+                    "summary": summary
                 }
             )
 

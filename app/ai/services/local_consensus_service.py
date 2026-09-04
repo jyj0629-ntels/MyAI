@@ -10,13 +10,50 @@ class LocalConsensusService:
         responses
     ):
 
+        response_text = []
+
+        for idx, item in enumerate(
+            responses,
+            start=1
+        ):
+
+            provider = item.get(
+                "provider",
+                ""
+            )
+
+            answer = item.get(
+                "summary",
+                item.get(
+                    "answer",
+                    ""
+                )
+            )
+
+            response_text.append(
+                f"""
+[PROVIDER {idx}]
+NAME:
+{provider}
+
+ANSWER:
+{answer}
+"""
+            )
+
+        responses_block = "\n".join(
+            response_text
+        )
+
         prompt = f"""
 질문:
 {question}
 
-아래 AI 답변 요약을 비교하라.
+아래 여러 AI 응답을 비교 분석하라.
 
-JSON만 반환.
+{responses_block}
+
+반드시 JSON만 반환하라.
 
 {{
   "mode":"consensus",
@@ -27,6 +64,7 @@ JSON만 반환.
   "final_answer":""
 }}
 """
+
         return prompt
 
     def build_request(
@@ -48,4 +86,3 @@ JSON만 반환.
                 settings.LOCAL_CONSENSUS_PROVIDER
             )
         )
-

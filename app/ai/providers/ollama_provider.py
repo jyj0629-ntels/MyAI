@@ -81,10 +81,24 @@ class OllamaProvider(
 
                 data = response.json()
 
+
+
+            answer = (
+                data.get("response")
+                or ""
+            )
+
+            if not answer:
+
+                answer = (
+                    data.get("thinking")
+                    or ""
+                )
+
             return AIResponse(
                 provider=self.name,
                 model=settings.LOCAL_LLM_MODEL,
-                answer=data["response"],
+                answer=answer,
                 success=True
             )
 

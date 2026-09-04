@@ -9,27 +9,41 @@ class MemoryConsolidationService:
 
         for memory in memories:
 
-            if memory.key not in consolidated:
+            if not memory:
+                continue
 
-                consolidated[
-                    memory.key
-                ] = memory
+            key = (
+                memory.key
+                .strip()
+                .lower()
+            )
+
+            if not key:
+                continue
+
+            if key not in consolidated:
+
+                consolidated[key] = memory
 
                 continue
 
             existing = (
-                consolidated[
-                    memory.key
-                ]
+                consolidated[key]
             )
 
-            if (
-                memory.confidence
-                > existing.confidence
-            ):
-                consolidated[
-                    memory.key
-                ] = memory
+            existing_score = (
+                float(existing.confidence)
+                * float(existing.importance)
+            )
+
+            current_score = (
+                float(memory.confidence)
+                * float(memory.importance)
+            )
+
+            if current_score > existing_score:
+
+                consolidated[key] = memory
 
         return list(
             consolidated.values()

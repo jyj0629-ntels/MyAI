@@ -1,0 +1,6460 @@
+==================================================
+PROJECT TREE
+==================================================
+.
+├── Dockerfile
+├── MyAI_FullSourceDump.txt
+├── README.md
+├── alembic
+│   ├── README
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions
+│       ├── 0af6b876c297_add_conversation_id_to_chat_history.py
+│       ├── 154d1238b937_add_token_columns.py
+│       ├── 372e3481a7cb_add_chat_history_table.py
+│       ├── 41e7abf52e2a_add_conversation_memory_table.py
+│       ├── 72ba5f938cbf_add_conversation_table.py
+│       ├── 7d9b63c3e613_create_chat_history.py
+│       ├── 8c9e43daa47c_add_ai_prompt_runs_table.py
+│       ├── 9a012048a79f_add_memory_items_table.py
+│       └── e80d73d5462e_initial_users_table.py
+├── alembic.ini
+├── app
+│   ├── ai
+│   │   ├── models
+│   │   │   ├── __pycache__
+│   │   │   │   └── request.cpython-36.pyc
+│   │   │   ├── consensus_result.py
+│   │   │   ├── request.py
+│   │   │   └── response.py
+│   │   ├── providers
+│   │   │   ├── base.py
+│   │   │   ├── gemini_provider.py
+│   │   │   ├── groq_provider.py
+│   │   │   ├── mock.py
+│   │   │   ├── ollama_provider.py
+│   │   │   └── openai_provider.py
+│   │   └── services
+│   │       ├── __pycache__
+│   │       │   └── response_summary_service.cpython-36.pyc
+│   │       ├── claim_extractor.py
+│   │       ├── claim_matcher.py
+│   │       ├── consensus_engine.py
+│   │       ├── local_consensus_service.py
+│   │       ├── multi_provider_orchestrator.py
+│   │       ├── orchestrator.py
+│   │       ├── provider_loader.py
+│   │       ├── registry.py
+│   │       ├── response_collector.py
+│   │       └── response_summary_service.py
+│   ├── api
+│   │   ├── ai.py
+│   │   ├── conversations.py
+│   │   ├── markdown_memory.py
+│   │   ├── memory.py
+│   │   ├── memory_item.py
+│   │   └── users.py
+│   ├── core
+│   │   └── config.py
+│   ├── db
+│   │   ├── base.py
+│   │   ├── database.py
+│   │   └── dependencies.py
+│   ├── main.py
+│   ├── memory_constants.py
+│   ├── models
+│   │   ├── ai_prompt_run.py
+│   │   ├── chat_history.py
+│   │   ├── conversation.py
+│   │   ├── conversation_memory.py
+│   │   ├── memory_item.py
+│   │   └── user.py
+│   ├── personalization
+│   │   ├── models
+│   │   │   └── profile.py
+│   │   ├── repositories
+│   │   │   └── memory_repository.py
+│   │   └── services
+│   │       ├── personalization_service.py
+│   │       └── prompt_builder.py
+│   ├── repositories
+│   │   ├── ai_prompt_run_repository.py
+│   │   ├── chat_repository.py
+│   │   ├── conversation_memory_repository.py
+│   │   ├── conversation_repository.py
+│   │   ├── conversation_summary_repository.py
+│   │   ├── markdown_memory_repository.py
+│   │   ├── memory_item_repository.py
+│   │   └── user_repository.py
+│   ├── schemas
+│   │   ├── brain_result.py
+│   │   ├── chat_history.py
+│   │   ├── conversation.py
+│   │   ├── conversation_memory.py
+│   │   ├── memory_candidate.py
+│   │   ├── memory_candidate_result.py
+│   │   ├── memory_item.py
+│   │   ├── memory_item_create.py
+│   │   └── user.py
+│   └── services
+│       ├── __pycache__
+│       │   ├── context_builder_service.cpython-36.pyc
+│       │   ├── local_brain_llm_service.cpython-36.pyc
+│       │   ├── local_brain_service.cpython-36.pyc
+│       │   ├── prompt_strategy_service.cpython-36.pyc
+│       │   ├── provider_selection_service.cpython-36.pyc
+│       │   └── task_classifier_service.cpython-36.pyc
+│       ├── ai_prompt_run_service.py
+│       ├── chat_debug_service.py
+│       ├── chat_orchestrator_service.py
+│       ├── chat_service.py
+│       ├── context_builder_service.py
+│       ├── context_package_service.py
+│       ├── conversation_memory_service.py
+│       ├── conversation_memory_update_service.py
+│       ├── conversation_service.py
+│       ├── conversation_summary_service.py
+│       ├── fake_memory_llm_provider.py
+│       ├── gemini_memory_extraction_provider.py
+│       ├── llm_memory_extraction_service.py
+│       ├── local_brain_llm_service.py
+│       ├── local_brain_service.py
+│       ├── long_term_memory_pipeline.py
+│       ├── long_term_memory_service.py
+│       ├── markdown_memory_service.py
+│       ├── memory_candidate_mapper.py
+│       ├── memory_candidate_pipeline.py
+│       ├── memory_candidate_service.py
+│       ├── memory_candidate_validator.py
+│       ├── memory_confidence_service.py
+│       ├── memory_consolidation_service.py
+│       ├── memory_context_service.py
+│       ├── memory_extraction_orchestrator.py
+│       ├── memory_extraction_service.py
+│       ├── memory_extractor_service.py
+│       ├── memory_item_service.py
+│       ├── memory_policy_service.py
+│       ├── memory_profile_service.py
+│       ├── memory_prompt_service.py
+│       ├── memory_query_service.py
+│       ├── memory_retrieval_engine.py
+│       ├── memory_retrieval_service.py
+│       ├── memory_validator_service.py
+│       ├── project_context_service.py
+│       ├── prompt_strategy_service.py
+│       ├── prompt_trace_service.py
+│       ├── provider_selection_service.py
+│       ├── relevant_memory_service.py
+│       ├── task_classifier_service.py
+│       ├── user_profile_service.py
+│       └── user_service.py
+├── backup
+│   └── myai_20260901.dump
+├── create_tables.py
+├── db
+│   └── schema
+│       └── 001_initial.sql
+├── docker-compose.yml
+├── requirements.txt
+├── test_chat_save.py
+├── test_context_builder.py
+├── test_context_package.py
+├── test_conversation_summary.py
+├── test_gemini.py
+├── test_gemini_memory_provider.py
+├── test_llm_memory_extractor.py
+├── test_local_brain.py
+├── test_long_term_memory.py
+├── test_markdown_memory.py
+├── test_memory_candidate.py
+├── test_memory_confidence.py
+├── test_memory_consolidation.py
+├── test_memory_extraction.py
+├── test_memory_extraction_orchestrator.py
+├── test_memory_extractor.py
+├── test_memory_policy.py
+├── test_memory_profile.py
+├── test_memory_retrieval_engine.py
+├── test_memory_validator.py
+├── test_prompt_strategy.py
+├── test_provider_selection.py
+├── test_relevant_memory.py
+└── test_user_profile.py
+
+24 directories, 155 files
+
+==================================================
+DOCKERFILE
+==================================================
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000"]
+
+==================================================
+DOCKER-COMPOSE
+==================================================
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: myai-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: myai
+      POSTGRES_USER: myai
+      POSTGRES_PASSWORD: wjddudwns.123
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    ports:
+      - "5432:5432"
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: myai-n8n
+    restart: unless-stopped
+
+    ports:
+      - "5678:5678"
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+    depends_on:
+      - postgres
+
+  myai:
+    build: .
+    container_name: myai-api
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - postgres
+      - ollama
+
+  ollama:
+    image: ollama/ollama
+
+    container_name: ollama
+
+    environment:
+        LANG: C.UTF-8
+        LC_ALL: C.UTF-8
+
+    restart: unless-stopped
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - /APPDATA/ollama:/root/.ollama
+
+volumes:
+  postgres_data:
+  n8n_data:
+
+==================================================
+REQUIREMENTS
+==================================================
+alembic==1.19.1
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.14.2
+certifi==2026.7.22
+cffi==2.1.1
+charset-normalizer==3.5.1
+click==8.4.2
+cryptography==50.0.0
+distro==1.9.0
+fastapi==0.141.1
+google-auth==2.56.3
+google-genai==2.19.0
+greenlet==3.5.5
+groq==1.7.0
+h11==0.16.0
+httpcore==1.0.9
+httpcore2==2.12.0
+httpx==0.28.1
+httpx2==2.12.0
+idna==3.19
+iniconfig==2.3.0
+jiter==0.16.0
+Mako==1.4.1
+MarkupSafe==3.0.3
+openai==3.5.0
+packaging==26.3
+pluggy==1.6.0
+psycopg==3.3.4
+psycopg-binary==3.3.4
+pyasn1==0.6.4
+pyasn1_modules==0.4.2
+pycparser==3.0
+pydantic==2.13.4
+pydantic_core==2.46.4
+Pygments==2.21.0
+pytest==9.1.1
+python-dotenv==1.2.3
+requests==2.34.2
+sniffio==1.3.1
+SQLAlchemy==2.0.52
+starlette==1.6.0
+tenacity==9.1.4
+truststore==0.10.4
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+urllib3==2.7.0
+uvicorn==0.52.4
+websockets==16.1.1
+
+==================================================
+SOURCE FILES
+==================================================
+
+##################################################
+FILE: app/ai/models/consensus_result.py
+##################################################
+from pydantic import BaseModel
+
+
+class ConsensusResult(
+    BaseModel
+):
+
+    consensus_score: int
+
+    common_claims: list[str]
+
+    conflicting_claims: list
+
+    final_answer: str
+
+##################################################
+FILE: app/ai/models/request.py
+##################################################
+from pydantic import BaseModel
+from typing import Optional
+
+
+class AIRequest(BaseModel):
+
+    user_id: Optional[int] = None
+
+    question: str
+
+    system_prompt: str = ""
+
+    user_context: str = ""
+
+    temperature: float = 0.2
+
+    provider: Optional[str] = None
+
+    conversation_id: Optional[int] = None
+
+    prompt: Optional[str] = None
+
+    think: bool = False
+
+##################################################
+FILE: app/ai/models/response.py
+##################################################
+from pydantic import BaseModel
+from typing import Optional
+
+
+class AIResponse(BaseModel):
+    provider: str
+
+    model: Optional[str] = None
+
+    answer: str
+
+    input_tokens: Optional[int] = None
+
+    output_tokens: Optional[int] = None
+
+    success: bool = True
+
+    error: Optional[str] = None
+
+##################################################
+FILE: app/ai/providers/base.py
+##################################################
+from abc import ABC, abstractmethod
+
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+
+class AIProvider(ABC):
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @abstractmethod
+    async def ask(self, request: AIRequest) -> AIResponse:
+        pass
+
+##################################################
+FILE: app/ai/providers/gemini_provider.py
+##################################################
+from google import genai
+
+from app.core.config import settings
+
+from app.ai.providers.base import AIProvider
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+
+class GeminiProvider(AIProvider):
+
+    @property
+    def name(self) -> str:
+        return "gemini"
+
+    async def ask(
+        self,
+        request: AIRequest
+    ) -> AIResponse:
+
+        client = genai.Client(
+            api_key=settings.GEMINI_API_KEY
+        )
+
+        prompt = (
+            request.prompt
+            or request.question
+        )
+
+        if request.system_prompt:
+            prompt = (
+                f"{request.system_prompt}\n\n"
+                f"{prompt}"
+            )
+
+        try:
+
+            result = client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=prompt
+            )
+
+            if hasattr(
+                result,
+                "usage_metadata"
+            ):
+                print(
+                    result.usage_metadata
+                )
+
+            return AIResponse(
+                provider=self.name,
+                model=settings.GEMINI_MODEL,
+                answer=result.text,
+                success=True
+            )
+
+        except Exception as e:
+
+            print(
+                f"[GEMINI ERROR] {e}"
+            )
+
+            return AIResponse(
+                provider=self.name,
+                model=settings.GEMINI_MODEL,
+                answer=f"[GEMINI ERROR] {str(e)}",
+                success=False
+            )
+
+##################################################
+FILE: app/ai/providers/groq_provider.py
+##################################################
+import os
+
+from app.core.config import settings
+
+from groq import AsyncGroq
+
+from app.ai.providers.base import AIProvider
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+class GroqProvider(AIProvider):
+
+    def __init__(self):
+
+        self.client = AsyncGroq(
+            api_key=os.getenv(
+                "GROQ_API_KEY"
+            )
+        )
+
+        self.model = (
+                settings.GROQ_MODEL
+        )
+
+    @property
+    def name(self) -> str:
+
+        return "groq"
+
+    async def ask(
+        self,
+        request: AIRequest
+    ) -> AIResponse:
+
+        try:
+
+            response = await (
+                self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": (
+                                request.prompt
+                                or request.question
+                            )
+                        }
+                    ]
+                )
+            )
+
+            answer = (
+                response
+                .choices[0]
+                .message
+                .content
+            )
+
+            print(
+                f"[GROQ SUCCESS] "
+                f"{self.model}"
+            )
+
+            return AIResponse(
+                provider=self.name,
+                model=self.model,
+                answer=answer,
+                success=True
+            )
+
+        except Exception as e:
+
+            print()
+            print("# --------------------------------")
+            print("# GROQ ERROR")
+            print("# --------------------------------")
+            print(str(e))
+            print("# --------------------------------")
+            print()
+
+            return AIResponse(
+                provider=self.name,
+                model=self.model,
+                answer="",
+                success=False,
+                error=str(e)
+            )
+
+##################################################
+FILE: app/ai/providers/mock.py
+##################################################
+from app.ai.providers.base import AIProvider
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+
+class MockProvider(AIProvider):
+
+    @property
+    def name(self) -> str:
+        return "mock"
+
+    async def ask(
+        self,
+        request: AIRequest
+    ) -> AIResponse:
+
+        return AIResponse(
+            provider=self.name,
+            model="mock-model",
+            answer=(
+                f"[MOCK AI RESPONSE] "
+                f"Question: {request.question}"
+            ),
+            success=True
+        )
+
+##################################################
+FILE: app/ai/providers/ollama_provider.py
+##################################################
+import httpx
+
+from app.ai.providers.base import AIProvider
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+from app.core.config import settings
+
+
+class OllamaProvider(
+    AIProvider
+):
+
+    @property
+    def name(self):
+
+        return "ollama"
+
+    async def ask(
+        self,
+        request: AIRequest
+    ):
+
+        try:
+
+            print()
+            print("# --------------------------------")
+            print("# OLLAMA REQUEST")
+            print("# --------------------------------")
+            print(
+                f"model={settings.LOCAL_LLM_MODEL}"
+            )
+            print(
+                f"timeout={settings.OLLAMA_TIMEOUT}"
+            )
+            print(
+                f"prompt_length="
+                f"{len(request.prompt or request.question)}"
+            )
+            print("# --------------------------------")
+            print()
+
+
+            async with httpx.AsyncClient(
+		        timeout=settings.OLLAMA_TIMEOUT
+            ) as client:
+
+                response = await (
+                    client.post(
+			            settings.OLLAMA_GENERATE_URL,
+                        json={
+                            "model": settings.LOCAL_LLM_MODEL,
+                            "prompt": request.prompt or request.question,
+                            "stream": False,
+                            "think": getattr(
+                                request,
+                                "think",
+                                False
+                            ),
+                            "options": {
+                                "num_predict": 600
+                            }
+                        }
+                    )
+                )
+                print()
+                print("# --------------------------------")
+                print("# OLLAMA HTTP STATUS")
+                print("# --------------------------------")
+                print(response.status_code)
+                print("# --------------------------------")
+                print()
+
+                print()
+                print("# --------------------------------")
+                print("# OLLAMA RAW RESPONSE")
+                print("# --------------------------------")
+                print(response.text)
+                print("# --------------------------------")
+                print()
+
+                data = response.json()
+
+            return AIResponse(
+                provider=self.name,
+                model=settings.LOCAL_LLM_MODEL,
+                answer=data["response"],
+                success=True
+            )
+
+        except Exception as e:
+
+            import traceback
+
+            print()
+            print("# --------------------------------")
+            print("# OLLAMA ERROR")
+            print("# --------------------------------")
+            print(str(e))
+            print(repr(e))
+            print("# --------------------------------")
+            print()
+
+            traceback.print_exc()
+
+            return AIResponse(
+                provider=self.name,
+                model=settings.LOCAL_LLM_MODEL,
+                answer="",
+                success=False,
+                error=str(e)
+            )
+
+##################################################
+FILE: app/ai/providers/openai_provider.py
+##################################################
+import os
+
+from dotenv import load_dotenv
+from openai import AsyncOpenAI
+
+from app.ai.providers.base import AIProvider
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+
+load_dotenv("/home/mrmusic/MyAI/.env")
+
+
+class OpenAIProvider(AIProvider):
+
+    def __init__(self):
+
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        if not api_key:
+            raise RuntimeError(
+                "OPENAI_API_KEY is not configured."
+            )
+
+        self.client = AsyncOpenAI(
+            api_key=api_key
+        )
+
+        self.model = "gpt-5.4-mini"
+
+    @property
+    def name(self) -> str:
+
+        return "openai"
+
+    async def ask(
+        self,
+        request: AIRequest
+    ) -> AIResponse:
+
+        try:
+
+            messages = []
+
+            if request.system_prompt:
+
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": request.system_prompt
+                    }
+                )
+
+            user_content = request.question
+
+            if request.user_context:
+
+                user_content = (
+                    f"{request.user_context}\n\n"
+                    f"### USER QUESTION\n"
+                    f"{request.question}"
+                )
+
+            messages.append(
+                {
+                    "role": "user",
+                    "content": user_content
+                }
+            )
+
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=request.temperature
+            )
+
+            answer = response.choices[0].message.content or ""
+
+            return AIResponse(
+                provider=self.name,
+                model=self.model,
+                answer=answer,
+                success=True
+            )
+
+        except Exception as e:
+
+            return AIResponse(
+                provider=self.name,
+                model=self.model,
+                answer="",
+                success=False,
+                error=str(e)
+            )
+
+##################################################
+FILE: app/ai/services/claim_extractor.py
+##################################################
+class ClaimExtractor:
+
+    def extract(
+        self,
+        answer: str
+    ):
+
+        claims = []
+
+        lines = (
+            answer.splitlines()
+        )
+
+        for line in lines:
+
+            line = line.strip()
+
+            if line.startswith("##"):
+                continue
+
+            if line.startswith("###"):
+                continue
+
+            if line.startswith("---"):
+                continue
+
+            if "`" in line:
+                continue
+
+            if line.startswith("|------"):
+                continue
+
+            if not line:
+                continue
+
+            if len(line) < 10:
+                continue
+
+            claims.append(
+                line
+            )
+
+            print( 
+                f"[CLAIM] {line}"
+            )
+
+        return claims
+
+##################################################
+FILE: app/ai/services/claim_matcher.py
+##################################################
+class ClaimMatcher:
+
+    def match(
+        self,
+        claim_sets
+    ):
+
+        frequency = {}
+
+        total_sources = len(
+            claim_sets
+        )
+
+        for claims in claim_sets:
+
+            unique_claims = set()
+
+            for claim in claims:
+
+                normalized = (
+                    claim.strip()
+                    .lower()
+                )
+
+                unique_claims.add(
+                    normalized
+                )
+
+            for claim in unique_claims:
+
+                frequency[
+                    claim
+                ] = (
+                    frequency.get(
+                        claim,
+                        0
+                    ) + 1
+                )
+
+        result = []
+
+        for claim, count in (
+            frequency.items()
+        ):
+
+            score = round(
+                (
+                    count
+                    / total_sources
+                ) * 100,
+                2
+            )
+
+            result.append(
+                {
+                    "claim": claim,
+                    "count": count,
+                    "score": score
+                }
+            )
+
+        result.sort(
+            key=lambda x: x["score"],
+            reverse=True
+        )
+
+        return result
+
+##################################################
+FILE: app/ai/services/consensus_engine.py
+##################################################
+from app.core.config import settings
+
+class ConsensusEngine:
+
+    def calculate(
+        self,
+        grouped_answers
+    ):
+
+        total = 0
+
+        for providers in grouped_answers.values():
+
+            total += len(
+                providers
+            )
+
+        results = []
+
+        for answer, providers in (
+            grouped_answers.items()
+        ):
+
+            score = (
+                len(providers)
+                / total
+            ) * 100
+
+            results.append(
+                {
+                    "answer": answer,
+                    "providers": providers,
+                    "score": round(
+                        score,
+                        2
+                    )
+                }
+            )
+
+        results.sort(
+            key=lambda x: x["score"],
+            reverse=True
+        )
+
+        return results
+
+    def select(
+        self,
+        consensus_results,
+        threshold=None
+    ):
+
+        threshold = (
+            threshold
+            or settings.CONSENSUS_THRESHOLD 
+        )
+
+        if not consensus_results:
+            return None
+
+        best = (
+            consensus_results[0]
+        )
+
+        if (
+            best["score"]
+            >= threshold
+        ):
+            return best
+
+        return None
+
+##################################################
+FILE: app/ai/services/local_consensus_service.py
+##################################################
+from app.ai.models.request import AIRequest
+from app.core.config import settings
+
+
+class LocalConsensusService:
+
+    def build_prompt(
+        self,
+        question,
+        responses
+    ):
+
+        prompt = f"""
+질문:
+{question}
+
+아래 AI 답변 요약을 비교하라.
+
+JSON만 반환.
+
+{{
+  "mode":"consensus",
+  "consensus_score":0,
+  "common_claims":[],
+  "conflicting_claims":[],
+  "best_provider":"",
+  "final_answer":""
+}}
+"""
+        return prompt
+
+    def build_request(
+        self,
+        question,
+        responses
+    ):
+
+        prompt = (
+            self.build_prompt(
+                question,
+                responses
+            )
+        )
+
+        return AIRequest(
+            question=prompt,
+            provider=(
+                settings.LOCAL_CONSENSUS_PROVIDER
+            )
+        )
+
+
+##################################################
+FILE: app/ai/services/multi_provider_orchestrator.py
+##################################################
+import asyncio
+
+from app.core.config import settings
+
+from app.ai.models.request import AIRequest
+
+from app.ai.services.response_collector import ResponseCollector
+from app.ai.services.consensus_engine import ConsensusEngine
+from app.ai.services.local_consensus_service import LocalConsensusService
+from app.ai.services.response_summary_service import ResponseSummaryService
+
+class MultiProviderOrchestrator:
+
+    def __init__(
+        self,
+        registry
+    ):
+        self.registry = registry
+
+    async def ask_all(
+        self,
+        request: AIRequest
+    ):
+
+        providers = (
+            self.registry.list()
+        )
+
+        tasks = []
+
+        for provider_name in providers:
+
+            provider = (
+                self.registry.get(
+                    provider_name
+                )
+            )
+
+            if provider_name == "ollama": 
+                continue
+
+            print(
+                f"[PARALLEL START] "
+                f"{provider_name}"
+            )
+
+            tasks.append(
+                provider.ask(
+                    request
+                )
+            )
+
+        results = await (
+            asyncio.gather(
+                *tasks,
+                return_exceptions=True
+            )
+        )
+
+        responses = []
+
+        for result in results:
+
+            if isinstance(
+                result,
+                Exception
+            ):
+
+                print()
+                print("# --------------------------------")
+                print("# PROVIDER EXCEPTION")
+                print("# --------------------------------")
+                print(str(result))
+                print("# --------------------------------")
+                print()
+
+                continue
+
+            if not getattr(
+                result,
+                "success",
+                True
+            ):
+                print()
+                print("# --------------------------------")
+                print("# PROVIDER FAILED")
+                print("# --------------------------------")
+                print(result.provider)
+                print(result.error)
+                print("# --------------------------------")
+                print()
+
+                continue
+
+            responses.append(
+                result
+            )
+
+        print()
+        print("# --------------------------------")
+        print("# PROVIDER RESPONSES")
+        print("# --------------------------------")
+
+        for response in responses:
+
+            print()
+            print(
+                f"[{response.provider}]"
+            )
+
+            print(
+                response.answer[:300]
+            )
+
+            print("# --------------------------------")
+            print()
+
+        collector = (
+            ResponseCollector()
+        )
+
+        collected = (
+            collector.collect(
+                responses
+            )
+        )
+
+        summary_service = (
+            ResponseSummaryService()
+        )
+
+        for item in collected:
+
+            item["answer"] = (
+                summary_service.summarize(
+                    item["answer"]
+            )
+        )
+
+        consensus = []
+
+        selected = (
+            {
+                "mode": "multi",
+                "response_count": len(collected)
+            }
+            if len(collected) >= 2
+            else None
+        )
+
+        required_responses = 2
+
+        if len(collected) == 0:
+
+            print()
+            print("# --------------------------------")
+            print("# NO PROVIDER RESPONSE")
+            print("# --------------------------------")
+            print("# --------------------------------")
+            print()
+
+            selected = None
+
+        elif len(collected) == 1:
+
+            print()
+            print("# --------------------------------")
+            print("# SINGLE PROVIDER MODE")
+            print("# --------------------------------")
+            print(
+                collected[0]["provider"]
+            )
+            print("# --------------------------------")
+            print()
+
+            if settings.ALLOW_SINGLE_PROVIDER:
+
+                selected = {
+                    "mode": "single",
+                    "response": collected[0]
+                }
+
+            else:
+
+                selected = None
+
+        provider_count = len(
+            collected
+        )
+        
+        print()
+        print("# --------------------------------")
+        print("# PROVIDER SUMMARY")
+        print("# --------------------------------")
+        print(
+            f"consensus_threshold="
+            f"{settings.CONSENSUS_THRESHOLD}"
+        )
+        print(
+            f"selected="
+            f"{selected}"
+        )
+        print("# --------------------------------")
+        print()
+
+        print()
+        print("# --------------------------------")
+        print("# CONSENSUS RESULT")
+        print("# --------------------------------")
+        print("Handled by Local LLM Judge")
+        print("# --------------------------------")
+        print()
+
+        judge_request = ( 
+            LocalConsensusService() 
+            .build_request(
+                request.question,
+                collected
+            )
+        )
+
+        return {
+            "responses": collected,
+            "consensus": consensus,
+            "selected": selected,
+            "judge_request": judge_request
+        }
+
+##################################################
+FILE: app/ai/services/orchestrator.py
+##################################################
+from app.core.config import settings
+
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+
+from app.ai.providers.base import AIProvider
+
+
+class AIOrchestrator:
+
+    def __init__(self, registry):
+
+        self.registry = registry
+
+    async def ask(
+        self,
+        provider_name: str,
+        request: AIRequest
+    ) -> AIResponse:
+
+        fallback_order = []
+
+        if provider_name:
+            fallback_order.append(
+                provider_name
+            )
+
+        fallback_providers = [
+            provider.strip()
+            for provider in (
+                settings.FALLBACK_PROVIDERS
+                or ""
+            ).split(",")
+            if provider.strip()
+        ]
+
+        for provider in (
+            fallback_providers
+        ):
+
+            if provider not in fallback_order:
+
+                fallback_order.append(
+                    provider
+                )
+
+        print()
+        print("# --------------------------------")
+        print("# PROVIDER FAILOVER ORDER")
+        print("# --------------------------------")
+        print(fallback_order)
+        print("# --------------------------------")
+        print()
+
+        last_response = None
+
+        for current_provider in fallback_order:
+
+            try:
+
+                print(
+                    f"[TRY PROVIDER] "
+                    f"{current_provider}"
+                )
+
+                provider = (
+                    self.registry.get(
+                        current_provider
+                    )
+                )
+
+                response = await (
+                    provider.ask(
+                        request
+                    )
+                )
+
+                if response.success:
+
+                    print(
+                        f"[PROVIDER SUCCESS] "
+                        f"{current_provider}"
+                    )
+
+                    return response
+
+                print(
+                    f"[PROVIDER FAILED] "
+                    f"{current_provider}"
+                )
+
+                last_response = response
+
+            except Exception as e:
+
+                print(
+                    f"[FAILOVER] "
+                    f"{current_provider}"
+                )
+
+                print(e)
+
+        if last_response:
+
+            return last_response
+
+        return AIResponse(
+            provider="none",
+            model="none",
+            answer="No available AI provider.",
+            success=False
+        )
+
+##################################################
+FILE: app/ai/services/provider_loader.py
+##################################################
+import pkgutil
+import inspect
+import importlib
+
+from pathlib import Path
+
+from app.ai.providers.base import AIProvider
+
+
+class ProviderLoader:
+
+    def load_all(self):
+
+        providers = []
+
+        provider_path = (
+            Path(__file__)
+            .parent
+            .parent
+            / "providers"
+        )
+
+        package = (
+            "app.ai.providers"
+        )
+
+        for module_info in (
+            pkgutil.iter_modules(
+                [str(provider_path)]
+            )
+        ):
+
+            module_name = (
+                module_info.name
+            )
+
+            if module_name in (
+                "base",
+                "__pycache__",
+                "mock"
+            ):
+                continue
+
+            try:
+
+                module = (
+                    importlib.import_module(
+                        f"{package}.{module_name}"
+                    )
+                )
+
+            except Exception as e:
+
+                print(
+                    f"[PROVIDER LOAD FAIL] "
+                    f"{module_name}"
+                )
+                print(e)
+
+                continue
+
+            for _, obj in (
+                inspect.getmembers(
+                    module,
+                    inspect.isclass
+                )
+            ):
+
+                try:
+
+                    if (
+                        issubclass(
+                            obj,
+                            AIProvider
+                        )
+                        and obj is not AIProvider
+                    ):
+
+                        providers.append(
+                            obj()
+                        )
+
+                except Exception:
+                    pass
+
+        return providers
+
+##################################################
+FILE: app/ai/services/registry.py
+##################################################
+from app.ai.providers.base import AIProvider
+
+from app.ai.providers.gemini_provider import GeminiProvider
+from app.ai.providers.groq_provider import GroqProvider
+
+from app.ai.services.provider_loader import ProviderLoader
+
+class AIProviderRegistry:
+
+    def __init__(self):
+        self.providers: dict[str, AIProvider] = {}
+
+    def register(
+        self,
+        provider: AIProvider
+    ):
+        self.providers[provider.name] = provider
+
+    def get(
+        self,
+        name: str
+    ) -> AIProvider:
+
+        if name not in self.providers:
+            raise ValueError(
+                f"AI Provider not registered: {name}"
+            )
+
+        return self.providers[name]
+
+    def list(self):
+        return list(self.providers.keys())
+
+
+def create_orchestrator():
+
+    from app.ai.services.orchestrator import AIOrchestrator
+
+    registry = AIProviderRegistry()
+
+    for provider in (
+        ProviderLoader()
+        .load_all()
+    ):
+
+        registry.register(
+            provider
+        )
+
+        print(
+            f"[PROVIDER REGISTERED] "
+            f"{provider.name}"
+        )
+
+    return AIOrchestrator(
+        registry=registry
+    )
+
+##################################################
+FILE: app/ai/services/response_collector.py
+##################################################
+from collections import defaultdict
+from app.ai.services.response_summary_service import ResponseSummaryService
+
+
+class ResponseCollector:
+
+    def collect(
+        self,
+        responses
+    ):
+
+        result = []
+
+        for response in responses:
+
+            if not response.success:
+                continue
+
+            summary = (
+                ResponseSummaryService()
+                .summarize(
+                    response.answer
+                )
+            )
+
+            result.append(
+                {
+                    "provider": response.provider,
+                    "model": response.model,
+                    "answer": summary
+                }
+            )
+
+        return result
+
+    def group_by_answer(
+        self,
+        responses
+    ):
+
+        groups = defaultdict(list)
+
+        for item in responses:
+
+            answer = (
+                item["answer"]
+                .strip()
+            )
+
+            groups[
+                answer
+            ].append(
+                item["provider"]
+            )
+
+        return groups
+
+##################################################
+FILE: app/ai/services/response_summary_service.py
+##################################################
+class ResponseSummaryService:
+
+    def summarize(
+        self,
+        answer: str
+    ):
+
+        answer = answer.strip()
+
+        lines = []
+
+        for line in answer.splitlines():
+
+            line = line.strip()
+
+            if len(line) < 10:
+                continue
+
+            if line.startswith("##"):
+                continue
+
+            if line.startswith("---"):
+                continue
+
+            if "------" in line:
+                continue
+
+            lines.append(line)
+
+            if len(lines) >= 20:
+                break
+
+        return "\n".join(lines)
+
+##################################################
+FILE: app/api/ai.py
+##################################################
+from fastapi import APIRouter
+from fastapi import Depends
+
+from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
+from app.ai.services.registry import create_orchestrator
+from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
+
+from sqlalchemy.orm import Session
+
+from app.db.dependencies import get_db
+
+from app.repositories.chat_repository import ChatRepository
+from app.repositories.memory_item_repository import MemoryItemRepository
+
+from app.schemas.chat_history import ChatHistoryResponse
+
+from app.services.chat_service import ChatService
+from app.services.local_brain_service import LocalBrainService
+
+from app.services.memory_item_service import MemoryItemService
+from app.services.memory_context_service import MemoryContextService
+from app.services.memory_retrieval_service import MemoryRetrievalService
+from app.services.memory_query_service import MemoryQueryService
+
+from app.services.prompt_trace_service import PromptTraceService
+
+from app.services.context_package_service import ContextPackageService
+
+from app.services.ai_prompt_run_service import AIPromptRunService
+
+from app.services.conversation_memory_update_service import ConversationMemoryUpdateService
+from app.services.conversation_memory_service import ConversationMemoryService
+
+from app.services.memory_extraction_orchestrator import MemoryExtractionOrchestrator
+from app.services.llm_memory_extraction_service import LLMMemoryExtractionService
+from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
+from app.services.chat_orchestrator_service import ChatOrchestratorService
+
+from app.models.ai_prompt_run import AIPromptRun
+from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
+
+from app.core.config import settings
+
+import json
+
+router = APIRouter(
+    prefix="/ai",
+    tags=["ai"]
+)
+
+orchestrator = create_orchestrator()
+
+
+@router.post("/chat")
+async def chat(
+    request: AIRequest,
+    db: Session = Depends(get_db)
+):
+
+    provider = (
+        request.provider
+        or "gemini"
+    )
+
+    memory_service = MemoryItemService(
+        MemoryItemRepository(db)
+    )
+
+    memory_query_service = (
+        MemoryQueryService(
+            memory_service
+        )
+    )
+
+    retrieved_memories = []
+
+    if request.user_id:
+
+        retrieved_memories = (
+            memory_query_service.query(
+                user_id=request.user_id,
+                question=request.question
+            )
+        )
+
+    preferences = [
+        memory.content
+        for memory in retrieved_memories
+        if memory.type == "PREFERENCE"
+    ]
+
+    projects = list(
+        dict.fromkeys(
+            [
+                memory.content.strip()
+                for memory in retrieved_memories
+                if memory.type == "PROJECT"
+            ]
+        )
+    )
+
+    goals = [
+        memory.content
+        for memory in retrieved_memories
+        if memory.type == "GOAL"
+    ]
+
+    context_package = ( 
+        ContextPackageService()
+        .build(
+            preferences=preferences,
+            goals=goals,
+            projects=projects
+        )
+    )
+
+    brain = LocalBrainService()
+
+    brain_result = await (
+        brain.analyze(
+            question=request.question,
+            user_profile=(
+                context_package[
+                    "user_profile"
+                ]
+            ),
+            project_context=(
+                context_package[
+                    "project_context"
+                ]
+            )
+        )
+    )
+
+    print()
+    print("# --------------------------------")
+    print("# SELECTED PROVIDER")
+    print("# --------------------------------")
+    print(
+        brain_result.provider
+    )
+    print("# --------------------------------")
+    print()
+
+    print("# --------------------------------")
+    print("# TASK TYPE")
+    print("# --------------------------------")
+    print(
+        brain_result.task_type
+    )
+    print("# --------------------------------")
+    print()
+
+    provider = (
+        request.provider
+        or brain_result.provider
+    )
+
+    prompt = (
+        brain_result.prompt
+    )
+
+    trace = (
+        PromptTraceService()
+        .build_trace(
+            provider=provider,
+            task_type=brain_result.task_type,
+            preferences=preferences,
+            projects=projects,
+            goals=goals
+        )
+    )
+
+    print()
+
+    print("# --------------------------------")
+    print("# PROMPT TRACE")
+    print("# --------------------------------")
+
+    print(trace)
+
+    print("# --------------------------------")
+    print()
+
+    request.prompt = prompt
+
+    prompt_run_service = ( 
+        AIPromptRunService(
+            AIPromptRunRepository(db)
+        )
+    )
+
+    prompt_run_service.create(
+        AIPromptRun(
+            conversation_id=request.conversation_id,
+            selected_provider=provider,
+            selected_model=None,
+            strategy_md="Local Brain Prompt Strategy",
+            final_prompt=prompt
+        )
+    )
+
+    print()
+    print("# --------------------------------")
+    print("# LOCAL BRAIN GENERATED PROMPT")
+    print("# --------------------------------")
+    print(prompt)
+    print("# --------------------------------")
+    print()
+    
+    multi_result = await (
+        MultiProviderOrchestrator(
+            orchestrator.registry
+        )
+        .ask_all(
+            request
+        )
+    )
+
+    judge_request = (
+        multi_result.get(
+            "judge_request"
+        )
+    )
+
+    selected = (
+        multi_result[
+            "selected"
+        ]
+    )
+
+    judge_response = None
+
+    if (
+        judge_request
+        and settings.ENABLE_LOCAL_CONSENSUS
+    ):
+
+        judge_response = await (
+            orchestrator.ask(
+                provider_name=
+                settings.LOCAL_CONSENSUS_PROVIDER,
+                request=judge_request
+            )
+        )
+
+        print()
+        print("# --------------------------------")
+        print("# LOCAL CONSENSUS RESULT")
+        print("# --------------------------------")
+        print(
+            judge_response.answer
+        )
+        print("# --------------------------------")
+        print()
+
+
+
+        judge_result = None 
+
+        if judge_response:
+        
+            try:
+
+
+                clean_json = (
+                    judge_response.answer
+                    .replace(
+                        "```json",
+                        ""
+                    )
+                    .replace(
+                        "```",
+                        ""
+                    )
+                    .strip()
+                )
+
+                judge_result = json.loads(
+                    clean_json
+                )
+
+
+            except Exception as e:
+
+                print()
+                print("# --------------------------------")
+                print("# JUDGE JSON PARSE ERROR")
+                print("# --------------------------------")
+                print(str(e))
+                print("# --------------------------------")
+                print()
+
+    if not selected:
+
+        response = await (
+            orchestrator.ask(
+                provider_name=provider,
+                request=request
+            )
+        )
+
+    else:
+
+        response = AIResponse(
+            provider=multi_result["responses"][0]["provider"],
+            model=multi_result["responses"][0]["model"],
+            answer=multi_result["responses"][0]["answer"],
+            success=True
+        )
+
+        if judge_result:
+
+            score = (
+                judge_result.get(
+                    "consensus_score",
+                    0
+                )
+            )
+
+            mode = "consensus"
+
+            if (
+                score
+                < settings.CONSENSUS_THRESHOLD
+            ):
+                mode = "conflict"
+
+            print()
+            print("# --------------------------------")
+            print("# JUDGE RESULT")
+            print("# --------------------------------")
+            print(
+                f"mode={mode}"
+            )
+            print(
+                f"score={score}"
+            )
+            print("# --------------------------------")
+            print()
+
+            final_answer = (
+                judge_result.get(
+                    "final_answer"
+                )
+            )
+
+            if final_answer:
+
+                if isinstance(
+                    response,
+                    dict
+                ):
+
+                    response["answer"] = (
+                        final_answer
+                    )
+
+                else:
+
+                    response.answer = (
+                        final_answer
+                    )
+
+    await (
+        ChatOrchestratorService()
+        .post_process(
+            request=request,
+            response=response,
+            db=db,
+            memory_service=memory_service
+        )
+    )
+
+    return response
+
+@router.get(
+    "/history",
+    response_model=list[ChatHistoryResponse]
+)
+def get_history(
+    limit: int = 20,
+    db: Session = Depends(get_db)
+):
+
+    service = ChatService(
+        ChatRepository(db)
+    )
+
+    return service.get_recent_history(
+        limit
+    )
+
+##################################################
+FILE: app/api/conversations.py
+##################################################
+from fastapi import APIRouter
+from fastapi import Depends
+
+from sqlalchemy.orm import Session
+
+from app.db.dependencies import get_db
+
+from app.repositories.conversation_repository import \
+    ConversationRepository
+
+from app.services.conversation_service import \
+    ConversationService
+
+from app.schemas.conversation import \
+    ConversationCreate
+
+from app.schemas.conversation import \
+    ConversationResponse
+
+from app.repositories.chat_repository import ChatRepository
+from app.services.chat_service import ChatService
+
+from app.schemas.chat_history import ChatHistoryResponse
+
+router = APIRouter(
+    prefix="/conversations",
+    tags=["conversations"]
+)
+
+
+@router.post(
+    "/",
+    response_model=ConversationResponse
+)
+def create_conversation(
+    request: ConversationCreate,
+    db: Session = Depends(get_db)
+):
+
+    service = ConversationService(
+        ConversationRepository(db)
+    )
+
+    return service.create(
+        request.title
+    )
+
+
+@router.get(
+    "/",
+    response_model=list[ConversationResponse]
+)
+def get_conversations(
+    db: Session = Depends(get_db)
+):
+
+    service = ConversationService(
+        ConversationRepository(db)
+    )
+
+    return service.get_all()
+
+
+@router.get(
+    "/{conversation_id}",
+    response_model=ConversationResponse
+)
+def get_conversation(
+    conversation_id: int,
+    db: Session = Depends(get_db)
+):
+
+    service = ConversationService(
+        ConversationRepository(db)
+    )
+
+    return service.get_by_id(
+        conversation_id
+    )
+
+# --------------------------------------------------
+# Conversation History
+# --------------------------------------------------
+
+@router.get(
+    "/{conversation_id}/history",
+    response_model=list[ChatHistoryResponse]
+)
+def get_conversation_history(
+    conversation_id: int,
+    db: Session = Depends(get_db)
+):
+
+    service = ChatService(
+        ChatRepository(db)
+    )
+
+    return service.get_conversation_history(
+        conversation_id
+    )
+
+##################################################
+FILE: app/api/markdown_memory.py
+##################################################
+from fastapi import APIRouter
+
+from app.repositories.markdown_memory_repository import \
+    MarkdownMemoryRepository
+
+from app.services.markdown_memory_service import \
+    MarkdownMemoryService
+
+
+router = APIRouter(
+    prefix="/markdown-memory",
+    tags=["markdown-memory"]
+)
+
+
+@router.get("/{file_name}")
+def get_markdown_memory(
+    file_name: str
+):
+
+    service = MarkdownMemoryService(
+        MarkdownMemoryRepository()
+    )
+
+    return {
+        "content": service.load_memory(
+            file_name
+        )
+    }
+
+
+@router.post("/{file_name}")
+def save_markdown_memory(
+    file_name: str,
+    content: str
+):
+
+    service = MarkdownMemoryService(
+        MarkdownMemoryRepository()
+    )
+
+    service.save_memory(
+        file_name,
+        content
+    )
+
+    return {
+        "success": True
+    }
+
+##################################################
+FILE: app/api/memory.py
+##################################################
+from fastapi import APIRouter
+from fastapi import Depends
+
+from sqlalchemy.orm import Session
+
+from app.db.dependencies import get_db
+
+from app.repositories.conversation_memory_repository import ConversationMemoryRepository
+
+from app.services.conversation_memory_service import ConversationMemoryService
+
+from app.schemas.conversation_memory import ConversationMemoryCreate
+
+from app.schemas.conversation_memory import ConversationMemoryResponse
+
+
+router = APIRouter(
+    prefix="/memory",
+    tags=["memory"]
+)
+
+
+@router.post(
+    "/conversation",
+    response_model=ConversationMemoryResponse
+)
+def create_conversation_memory(
+    request: ConversationMemoryCreate,
+    db: Session = Depends(get_db)
+):
+
+    service = ConversationMemoryService(
+        ConversationMemoryRepository(db)
+    )
+
+    return service.create(
+        request.conversation_id
+    )
+
+
+@router.get(
+    "/conversation/{conversation_id}",
+    response_model=ConversationMemoryResponse
+)
+def get_conversation_memory(
+    conversation_id: int,
+    db: Session = Depends(get_db)
+):
+
+    service = ConversationMemoryService(
+        ConversationMemoryRepository(db)
+    )
+
+    return service.get_by_conversation_id(
+        conversation_id
+    )
+
+##################################################
+FILE: app/api/memory_item.py
+##################################################
+from fastapi import APIRouter
+from fastapi import Depends
+
+from sqlalchemy.orm import Session
+
+from app.db.dependencies import get_db
+
+from app.repositories.memory_item_repository import \
+    MemoryItemRepository
+
+from app.services.memory_item_service import \
+    MemoryItemService
+
+from app.schemas.memory_item import \
+    MemoryItemResponse
+
+from app.schemas.memory_item_create import \
+    MemoryItemCreate
+
+from app.models.memory_item import MemoryItem
+
+
+router = APIRouter(
+    prefix="/memory-items",
+    tags=["memory-items"]
+)
+
+
+@router.post(
+    "/",
+    response_model=MemoryItemResponse
+)
+def create_memory_item(
+    request: MemoryItemCreate,
+    db: Session = Depends(get_db)
+):
+
+    service = MemoryItemService(
+        MemoryItemRepository(db)
+    )
+
+    memory_item = MemoryItem(
+        user_id=request.user_id,
+        type=request.type,
+        key=request.key,
+        content=request.content,
+        importance=request.importance,
+        confidence=request.confidence,
+        freshness=request.freshness,
+        source_type=request.source_type,
+        source_conversation_id=request.source_conversation_id,
+        source_chat_history_id=request.source_chat_history_id,
+        scope=request.scope,
+        status=request.status
+    )
+
+    return service.create(
+        memory_item
+    )
+
+@router.get(
+    "/user/{user_id}",
+    response_model=list[MemoryItemResponse]
+)
+def get_user_memories(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    service = MemoryItemService(
+        MemoryItemRepository(db)
+    )
+
+    return service.get_by_user(
+        user_id
+    )
+
+
+@router.get(
+    "/user/{user_id}/active",
+    response_model=list[MemoryItemResponse]
+)
+def get_active_memories(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    service = MemoryItemService(
+        MemoryItemRepository(db)
+    )
+
+    return service.get_active_memories(
+        user_id
+    )
+
+##################################################
+FILE: app/api/users.py
+##################################################
+from fastapi import APIRouter
+from fastapi import Depends
+
+from sqlalchemy.orm import Session
+
+from app.db.dependencies import get_db
+from app.repositories.user_repository import UserRepository
+from app.services.user_service import UserService
+
+from app.schemas.user import UserCreate
+from app.schemas.user import UserResponse
+
+
+router = APIRouter(
+    prefix="/users",
+    tags=["users"]
+)
+
+
+@router.get(
+    "/{email}",
+    response_model=UserResponse
+)
+def get_user(
+    email: str,
+    db: Session = Depends(get_db)
+):
+
+    service = UserService(
+        UserRepository(db)
+    )
+
+    user = service.get_user(email)
+
+    if not user:
+        return {
+            "id": 0,
+            "email": "",
+            "name": "not found"
+        }
+
+    return user
+
+
+@router.post(
+    "/",
+    response_model=UserResponse
+)
+def create_user(
+    request: UserCreate,
+    db: Session = Depends(get_db)
+):
+
+    service = UserService(
+        UserRepository(db)
+    )
+
+    return service.create_user(
+        email=request.email,
+        name=request.name
+    )
+
+##################################################
+FILE: app/core/config.py
+##################################################
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class Settings:
+
+    DATABASE_URL = os.getenv(
+        "DATABASE_URL"
+    )
+
+    GEMINI_API_KEY = os.getenv(
+        "GEMINI_API_KEY"
+    )
+
+    GEMINI_MODEL = os.getenv(
+        "GEMINI_MODEL"
+    )
+
+    GROQ_API_KEY = os.getenv(
+        "GROQ_API_KEY"
+    )
+
+    GROQ_MODEL = os.getenv(
+        "GROQ_MODEL"
+    )
+
+    DEEPSEEK_API_KEY = os.getenv(
+        "DEEPSEEK_API_KEY"
+    )
+
+    DEEPSEEK_MODEL = os.getenv(
+        "DEEPSEEK_MODEL"
+    )
+
+    CONSENSUS_THRESHOLD = int(
+        os.getenv(
+            "CONSENSUS_THRESHOLD",
+            "80"
+        )
+    )
+
+    PRIMARY_PROVIDER = os.getenv(
+        "PRIMARY_PROVIDER",
+        "gemini"
+    )
+
+    FALLBACK_PROVIDERS = os.getenv(
+        "FALLBACK_PROVIDERS",
+        "groq,openrouter,deepseek"
+    )
+
+    MIN_CONSENSUS_RESPONSES = int(
+        os.getenv(
+            "MIN_CONSENSUS_RESPONSES",
+            "2"
+        )
+    )
+
+    ALLOW_SINGLE_PROVIDER = (
+        os.getenv(
+            "ALLOW_SINGLE_PROVIDER",
+            "true"
+        ).lower() == "true"
+    )
+
+    ENABLE_LOCAL_CONSENSUS = (
+        os.getenv(
+            "ENABLE_LOCAL_CONSENSUS",
+            "true"
+        ).lower() == "true"
+    )
+
+    LOCAL_CONSENSUS_PROVIDER = os.getenv(
+        "LOCAL_CONSENSUS_PROVIDER",
+        "ollama"
+    )
+
+    ENABLE_CONFLICT_MODE = (
+        os.getenv(
+            "ENABLE_CONFLICT_MODE",
+            "true"
+        ).lower() == "true"
+    )
+
+    LOCAL_LLM_PROVIDER = os.getenv(
+        "LOCAL_LLM_PROVIDER",
+        "ollama"
+    )
+
+    LOCAL_LLM_MODEL = os.getenv(
+        "LOCAL_LLM_MODEL",
+        "qwen3:8b"
+    )
+
+    OLLAMA_HOST = os.getenv(
+        "OLLAMA_HOST",
+        "http://ollama:11434"
+    )
+
+    OLLAMA_GENERATE_URL = os.getenv(
+        "OLLAMA_GENERATE_URL",
+        f"{OLLAMA_HOST}/api/generate"
+    )
+
+    OLLAMA_TIMEOUT = int(
+        os.getenv(
+            "OLLAMA_TIMEOUT",
+            "300"
+        )
+    )
+
+    ENABLE_LOCAL_LLM_JUDGE = (
+        os.getenv(
+            "ENABLE_LOCAL_LLM_JUDGE",
+            "true"
+        ).lower() == "true"
+    )
+
+settings = Settings()
+
+##################################################
+FILE: app/db/base.py
+##################################################
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    pass
+
+##################################################
+FILE: app/db/database.py
+##################################################
+import os
+
+from app.core.config import settings
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+load_dotenv()
+
+DATABASE_URL = settings.DATABASE_URL
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+)
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    autocommit=False,
+)
+
+##################################################
+FILE: app/db/dependencies.py
+##################################################
+from app.db.database import SessionLocal
+
+
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
+
+##################################################
+FILE: app/main.py
+##################################################
+from fastapi import FastAPI, HTTPException
+
+from sqlalchemy import text
+
+from app.db.database import engine
+
+from app.ai.models.request import AIRequest
+from app.ai.services.registry import create_orchestrator
+
+from app.personalization.services.prompt_builder import (
+    PromptBuilder
+)
+
+from app.api.users import router as user_router
+from app.api.ai import router as ai_router
+from app.api.conversations import router as conversation_router
+from app.api.memory import router as memory_router
+from app.api.memory_item import router as memory_item_router
+from app.api.markdown_memory import router as markdown_memory_router
+
+prompt_builder = PromptBuilder()
+
+app = FastAPI(
+    title="My AI Assistant",
+    version="0.2.0",
+)
+
+
+app.include_router(user_router)
+app.include_router(ai_router)
+app.include_router(conversation_router)
+app.include_router(memory_router)
+app.include_router(memory_item_router)
+
+app.include_router(
+    markdown_memory_router
+)
+
+orchestrator = create_orchestrator()
+
+@app.get("/")
+def root():
+
+    return {
+        "system": "My AI Assistant",
+        "version": "0.2.0",
+        "status": "OK",
+    }
+
+
+@app.get("/health")
+def health():
+
+    return {
+        "status": "UP"
+    }
+
+
+@app.get("/health/db")
+def health_db():
+
+    with engine.connect() as connection:
+
+        result = connection.execute(
+            text("SELECT 1")
+        )
+
+        value = result.scalar()
+
+    return {
+        "database": "UP",
+        "result": value
+    }
+
+@app.post("/ai/ask")
+async def ask_ai(request: AIRequest):
+
+    provider = request.provider or "mock"
+
+    user_id = 1
+
+    personalized_request = (
+        prompt_builder.build(
+            user_id=user_id,
+            question=request.question
+        )
+    )
+
+    personalized_request.provider = provider
+
+    try:
+
+        response = await orchestrator.ask(
+            provider,
+            personalized_request
+        )
+
+        return {
+            "request": {
+                "original_question": request.question,
+                "provider": provider
+            },
+            "personalized_prompt": {
+                "system_prompt":
+                    personalized_request.system_prompt,
+
+                "user_context":
+                    personalized_request.user_context
+            },
+            "response": response
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+##################################################
+FILE: app/memory_constants.py
+##################################################
+MEMORY_STATUS_CANDIDATE = "CANDIDATE"
+MEMORY_STATUS_VALIDATED = "VALIDATED"
+MEMORY_STATUS_ACTIVE = "ACTIVE"
+MEMORY_STATUS_UPDATED = "UPDATED"
+MEMORY_STATUS_SUPERSEDED = "SUPERSEDED"
+MEMORY_STATUS_ARCHIVED = "ARCHIVED"
+
+
+MEMORY_TYPE_PROFILE = "PROFILE"
+MEMORY_TYPE_PREFERENCE = "PREFERENCE"
+MEMORY_TYPE_INTEREST = "INTEREST"
+MEMORY_TYPE_GOAL = "GOAL"
+MEMORY_TYPE_PROJECT = "PROJECT"
+MEMORY_TYPE_KNOWLEDGE = "KNOWLEDGE"
+MEMORY_TYPE_CONVERSATION = "CONVERSATION"
+
+##################################################
+FILE: app/models/ai_prompt_run.py
+##################################################
+from datetime import datetime
+
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
+from sqlalchemy import Text
+from sqlalchemy import String
+from sqlalchemy import func
+
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
+from app.db.base import Base
+
+
+class AIPromptRun(Base):
+    __tablename__ = "ai_prompt_runs"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True
+    )
+
+    conversation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("conversation.id"),
+        nullable=True
+    )
+
+    selected_provider: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+    selected_model: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
+    )
+
+    strategy_md: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    final_prompt: Mapped[str] = mapped_column(
+        Text,
+        nullable=False
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False
+    )
+
+##################################################
+FILE: app/models/chat_history.py
+##################################################
+from datetime import datetime
+
+from sqlalchemy import func
+from sqlalchemy import DateTime
+from sqlalchemy import Text
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
+from app.db.base import Base
+
+from sqlalchemy import ForeignKey
+
+
+class ChatHistory(Base):
+    __tablename__ = "chat_history"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True
+    )
+
+    conversation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("conversation.id"),
+        nullable=True
+    )
+
+    provider: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False
+    )
+
+    model: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+    question: Mapped[str] = mapped_column(
+        Text,
+        nullable=False
+    )
+
+    answer: Mapped[str] = mapped_column(
+        Text,
+        nullable=False
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False
+    )
+
+    input_tokens: Mapped[int | None] = mapped_column(
+        nullable=True
+    )
+
+    output_tokens: Mapped[int | None] = mapped_column(
+        nullable=True
+    )
+
+    success: Mapped[bool] = mapped_column( 
+        nullable=False, 
+        default=True
+    ) 
+
+##################################################
+FILE: app/models/conversation.py
+##################################################
+from datetime import datetime
+
+from sqlalchemy import DateTime
+from sqlalchemy import String
+from sqlalchemy import func
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
+from app.db.base import Base
+
+
+class Conversation(Base):
+    __tablename__ = "conversation"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False
+    )
+
+##################################################
+FILE: app/models/conversation_memory.py
+##################################################
+from datetime import datetime
+
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
+from sqlalchemy import Text
+from sqlalchemy import func
+
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
+from app.db.base import Base
+
+
+class ConversationMemory(Base):
+    __tablename__ = "conversation_memory"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True
+    )
+
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversation.id"),
+        unique=True,
+        nullable=False
+    )
+
+    summary_md: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    current_goal: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    current_state: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    important_decisions: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    next_action: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+##################################################
+FILE: app/models/memory_item.py
+##################################################
+from datetime import datetime
+
+from sqlalchemy import DateTime
+from sqlalchemy import Float
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
+from sqlalchemy import Text
+from sqlalchemy import func
+
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
+from app.db.base import Base
+
+
+class MemoryItem(Base):
+    __tablename__ = "memory_items"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True
+    )
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False
+    )
+
+    key: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False
+    )
+
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False
+    )
+
+    importance: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.5
+    )
+
+    confidence: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.5
+    )
+
+    freshness: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=1.0
+    )
+
+    source_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False
+    )
+
+    source_conversation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("conversation.id"),
+        nullable=True
+    )
+
+    source_chat_history_id: Mapped[int | None] = mapped_column(
+        ForeignKey("chat_history.id"),
+        nullable=True
+    )
+
+    scope: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="CANDIDATE"
+    )
+
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False
+    )
+
+    last_confirmed_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+##################################################
+FILE: app/models/user.py
+##################################################
+from datetime import datetime
+
+from sqlalchemy import String, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.base import Base
+
+from sqlalchemy import func
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True
+    )
+
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False
+    )
+
+    name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False
+    )
+
+##################################################
+FILE: app/personalization/models/profile.py
+##################################################
+from pydantic import BaseModel
+from typing import List, Dict
+
+
+class PersonalProfile(BaseModel):
+
+    user_id: int
+
+    preferred_answer_style: str = ""
+
+    interests: List[str] = []
+
+    preferences: Dict[str, str] = {}
+
+    decision_style: str = ""
+
+    important_constraints: List[str] = []
+
+##################################################
+FILE: app/personalization/repositories/memory_repository.py
+##################################################
+from sqlalchemy import text
+
+from app.db.database import SessionLocal
+
+
+class MemoryRepository:
+
+    def get_memories(self, user_id: int):
+
+        db = SessionLocal()
+
+        try:
+
+            result = db.execute(
+                text(
+                    """
+                    SELECT
+                        memory_type,
+                        memory_key,
+                        memory_value,
+                        confidence,
+                        status
+                    FROM personal_memory
+                    WHERE user_id = :user_id
+                      AND status = 'CONFIRMED'
+                    ORDER BY confidence DESC
+                    """
+                ),
+                {
+                    "user_id": user_id
+                }
+            )
+
+            return [
+                {
+                    "memory_type": row.memory_type,
+                    "memory_key": row.memory_key,
+                    "memory_value": row.memory_value,
+                    "confidence": float(row.confidence or 0),
+                    "status": row.status
+                }
+                for row in result
+            ]
+
+        finally:
+
+            db.close()
+
+##################################################
+FILE: app/personalization/services/personalization_service.py
+##################################################
+from app.personalization.repositories.memory_repository import (
+    MemoryRepository
+)
+
+
+class PersonalizationService:
+
+    def __init__(self):
+
+        self.memory_repository = MemoryRepository()
+
+    def build_context(self, user_id: int) -> str:
+
+        memories = self.memory_repository.get_memories(
+            user_id
+        )
+
+        if not memories:
+            return ""
+
+        lines = []
+
+        lines.append(
+            "### USER PERSONAL CONTEXT"
+        )
+
+        for memory in memories:
+
+            lines.append(
+                f"- {memory['memory_key']}: "
+                f"{memory['memory_value']}"
+            )
+
+        return "\n".join(lines)
+
+##################################################
+FILE: app/personalization/services/prompt_builder.py
+##################################################
+from app.personalization.services.personalization_service import (
+    PersonalizationService
+)
+
+from app.ai.models.request import AIRequest
+
+
+class PromptBuilder:
+
+    def __init__(self):
+
+        self.personalization_service = (
+            PersonalizationService()
+        )
+
+    def build(
+        self,
+        user_id: int,
+        question: str
+    ) -> AIRequest:
+
+        personal_context = (
+            self.personalization_service
+            .build_context(user_id)
+        )
+
+        system_prompt = """
+You are a personal AI assistant.
+
+Always consider the user's personal context.
+
+Do not unnecessarily repeat information.
+
+Prefer concise and structured answers.
+
+When useful, provide:
+1. Key conclusion
+2. Important reasons
+3. Comparison
+4. Recommendation
+"""
+
+        return AIRequest(
+            question=question,
+            system_prompt=system_prompt,
+            user_context=personal_context,
+            temperature=0.2
+        )
+
+##################################################
+FILE: app/repositories/ai_prompt_run_repository.py
+##################################################
+from app.models.ai_prompt_run import AIPromptRun
+
+
+class AIPromptRunRepository:
+
+    def __init__(self, db):
+        self.db = db
+
+    def create(
+        self,
+        prompt_run: AIPromptRun
+    ):
+
+        self.db.add(prompt_run)
+
+        self.db.commit()
+
+        self.db.refresh(
+            prompt_run
+        )
+
+        return prompt_run
+
+##################################################
+FILE: app/repositories/chat_repository.py
+##################################################
+from app.models.chat_history import ChatHistory
+
+
+class ChatRepository:
+
+    def __init__(self, db):
+        self.db = db
+
+    def save(
+        self,
+        conversation_id,
+        provider,
+        model,
+        question,
+        answer,
+        input_tokens,
+        output_tokens,
+        success
+    ):
+
+        chat = ChatHistory(
+            conversation_id=conversation_id,
+            provider=provider,
+            model=model,
+            question=question,
+            answer=answer,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            success=success
+        )
+
+        self.db.add(chat)
+        self.db.commit()
+        self.db.refresh(chat)
+
+        return chat
+
+    def get_recent(
+        self,
+        limit: int = 20
+    ):
+
+        return (
+            self.db.query(ChatHistory)
+            .order_by(ChatHistory.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+# --------------------------------------------------
+# Conversation History
+# --------------------------------------------------
+
+    def get_by_conversation_id(
+        self,
+        conversation_id: int
+    ):
+
+        return (
+            self.db.query(ChatHistory)
+            .filter(
+                ChatHistory.conversation_id
+                == conversation_id
+            )
+            .order_by(ChatHistory.id.asc())
+            .all()
+        )
+
+    def get_recent_by_conversation(
+        self,
+        conversation_id: int,
+        limit: int = 20
+    ):
+
+        return (
+            self.db.query(
+                ChatHistory
+            )
+            .filter(
+                ChatHistory.conversation_id
+                == conversation_id
+            )
+            .order_by(
+                ChatHistory.id.desc()
+            )
+            .limit(limit)
+            .all()
+        )
+
+##################################################
+FILE: app/repositories/conversation_memory_repository.py
+##################################################
+from app.models.conversation_memory import ConversationMemory
+
+
+class ConversationMemoryRepository:
+
+    def __init__(
+        self,
+        db
+    ):
+        self.db = db
+
+    def get_by_conversation_id(
+        self,
+        conversation_id: int
+    ):
+
+        return (
+            self.db.query(
+                ConversationMemory
+            )
+            .filter(
+                ConversationMemory.conversation_id
+                == conversation_id
+            )
+            .first()
+        )
+
+##################################################
+FILE: app/repositories/conversation_repository.py
+##################################################
+from app.models.conversation import Conversation
+
+
+class ConversationRepository:
+
+    def __init__(self, db):
+        self.db = db
+
+    def create(
+        self,
+        title: str
+    ):
+
+        conversation = Conversation(
+            title=title
+        )
+
+        self.db.add(conversation)
+        self.db.commit()
+        self.db.refresh(conversation)
+
+        return conversation
+
+    def get_all(self):
+
+        return (
+            self.db.query(Conversation)
+            .order_by(Conversation.id.desc())
+            .all()
+        )
+
+    def get_by_id(
+        self,
+        conversation_id: int
+    ):
+
+        return (
+            self.db.query(Conversation)
+            .filter(
+                Conversation.id == conversation_id
+            )
+            .first()
+        )
+
+##################################################
+FILE: app/repositories/conversation_summary_repository.py
+##################################################
+from app.models.conversation_memory import \
+    ConversationMemory
+
+
+class ConversationSummaryRepository:
+
+    def __init__(
+        self,
+        db
+    ):
+        self.db = db
+
+    def get_by_conversation_id(
+        self,
+        conversation_id: int
+    ):
+
+        return (
+            self.db.query(
+                ConversationMemory
+            )
+            .filter(
+                ConversationMemory.conversation_id
+                == conversation_id
+            )
+            .first()
+        )
+
+    def save_summary(
+        self,
+        conversation_memory,
+        summary: str
+    ):
+
+        conversation_memory.summary_md = (
+            summary
+        )
+
+        self.db.commit()
+
+        self.db.refresh(
+            conversation_memory
+        )
+
+        return conversation_memory
+
+##################################################
+FILE: app/repositories/markdown_memory_repository.py
+##################################################
+from pathlib import Path
+
+
+class MarkdownMemoryRepository:
+
+    def __init__(
+        self,
+        base_path: str = "/opt/MyAI/data/memory"
+    ):
+        self.base_path = Path(base_path)
+
+        self.base_path.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+    def read(
+        self,
+        file_name: str
+    ):
+
+        file_path = self.base_path / file_name
+
+        if not file_path.exists():
+            return ""
+
+        return file_path.read_text(
+            encoding="utf-8"
+        )
+
+    def write(
+        self,
+        file_name: str,
+        content: str
+    ):
+
+        file_path = self.base_path / file_name
+
+        file_path.write_text(
+            content,
+            encoding="utf-8"
+        )
+
+        return file_path
+
+    def exists(
+        self,
+        file_name: str
+    ):
+
+        return (
+            self.base_path / file_name
+        ).exists()
+
+##################################################
+FILE: app/repositories/memory_item_repository.py
+##################################################
+from app.models.memory_item import MemoryItem
+
+
+class MemoryItemRepository:
+
+    def __init__(self, db):
+        self.db = db
+
+    def create(
+        self,
+        memory_item: MemoryItem
+    ):
+
+        self.db.add(memory_item)
+        self.db.commit()
+        self.db.refresh(memory_item)
+
+        return memory_item
+
+    def get_by_user(
+        self,
+        user_id: int
+    ):
+
+        return (
+            self.db.query(MemoryItem)
+            .filter(
+                MemoryItem.user_id == user_id
+            )
+            .all()
+        )
+
+    def get_by_type(
+        self,
+        user_id: int,
+        memory_type: str
+    ):
+
+        return (
+            self.db.query(MemoryItem)
+            .filter(
+                MemoryItem.user_id == user_id,
+                MemoryItem.type == memory_type
+            )
+            .all()
+        )
+
+    def get_active_memories(
+        self,
+        user_id: int
+    ):
+
+        return (
+            self.db.query(MemoryItem)
+            .filter(
+                MemoryItem.user_id == user_id,
+                MemoryItem.status == "ACTIVE"
+            )
+            .all()
+        )
+    def get_by_key(
+        self,
+        user_id: int,
+        memory_key: str
+    ):
+
+        return (
+            self.db.query(MemoryItem)
+            .filter(
+                MemoryItem.user_id == user_id,
+                MemoryItem.key == memory_key
+            )
+            .first()
+        )
+    def exists_by_key(
+        self,
+        user_id: int,
+        memory_key: str
+    ):
+
+        return (
+            self.db.query(MemoryItem)
+            .filter(
+                MemoryItem.user_id == user_id,
+                MemoryItem.key == memory_key
+            )
+            .first()
+        )
+
+    def update(
+        self,
+        memory
+    ):
+
+        self.db.commit()
+
+        self.db.refresh(
+            memory
+        )
+
+        return memory
+
+##################################################
+FILE: app/repositories/user_repository.py
+##################################################
+from sqlalchemy.orm import Session
+
+from app.models.user import User
+
+
+class UserRepository:
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(
+        self,
+        email: str,
+        name: str
+    ) -> User:
+
+        user = User(
+            email=email,
+            name=name
+        )
+
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+
+        return user
+
+    def get_by_email(
+        self,
+        email: str
+    ):
+
+        return (
+            self.db.query(User)
+            .filter(User.email == email)
+            .first()
+        )
+
+##################################################
+FILE: app/schemas/brain_result.py
+##################################################
+from pydantic import BaseModel
+
+
+class BrainResult(BaseModel):
+
+    task_type: str
+
+    role: str
+
+    provider: str
+
+    reason: str
+
+    prompt: str
+
+##################################################
+FILE: app/schemas/chat_history.py
+##################################################
+from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional
+
+
+class ChatHistoryResponse(BaseModel):
+
+    id: int
+    provider: str
+    model: str
+
+    question: str
+    answer: str
+
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
+
+    success: bool
+
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+##################################################
+FILE: app/schemas/conversation.py
+##################################################
+from datetime import datetime
+
+from pydantic import BaseModel
+
+
+class ConversationCreate(BaseModel):
+    title: str
+
+
+class ConversationResponse(BaseModel):
+
+    id: int
+    title: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+##################################################
+FILE: app/schemas/conversation_memory.py
+##################################################
+from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional
+
+
+class ConversationMemoryCreate(BaseModel):
+
+    conversation_id: int
+
+
+class ConversationMemoryResponse(BaseModel):
+
+    id: int
+
+    conversation_id: int
+
+    summary_md: Optional[str] = None
+
+    current_goal: Optional[str] = None
+
+    current_state: Optional[str] = None
+
+    important_decisions: Optional[str] = None
+
+    next_action: Optional[str] = None
+
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+##################################################
+FILE: app/schemas/memory_candidate.py
+##################################################
+from pydantic import BaseModel
+
+
+class MemoryCandidate(
+    BaseModel
+):
+    type: str
+
+    key: str
+
+    content: str
+
+    importance: float = 0.8
+
+    confidence: float = 0.8
+
+##################################################
+FILE: app/schemas/memory_candidate_result.py
+##################################################
+from pydantic import BaseModel
+
+from app.schemas.memory_candidate import \
+    MemoryCandidate
+
+
+class MemoryCandidateResult(
+    BaseModel
+):
+    memories: list[
+        MemoryCandidate
+    ]
+
+##################################################
+FILE: app/schemas/memory_item.py
+##################################################
+from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional
+
+
+class MemoryItemResponse(BaseModel):
+
+    id: int
+
+    user_id: int
+
+    type: str
+
+    key: str
+
+    content: str
+
+    importance: float
+
+    confidence: float
+
+    freshness: float
+
+    source_type: str
+
+    source_conversation_id: Optional[int] = None
+
+    source_chat_history_id: Optional[int] = None
+
+    last_confirmed_at: Optional[datetime] = None
+
+    scope: str
+
+    status: str
+
+    first_seen_at: datetime
+
+
+    created_at: datetime
+
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+##################################################
+FILE: app/schemas/memory_item_create.py
+##################################################
+from pydantic import BaseModel
+from typing import Optional
+
+
+class MemoryItemCreate(BaseModel):
+
+    user_id: int
+
+    type: str
+
+    key: str
+
+    content: str
+
+    importance: float = 0.5
+
+    confidence: float = 0.5
+
+    freshness: float = 1.0
+
+    source_type: str = "MANUAL"
+
+    source_conversation_id: Optional[int] = None
+    
+    source_chat_history_id: Optional[int] = None
+
+    scope: str = "USER"
+
+    status: str = "ACTIVE"
+
+##################################################
+FILE: app/schemas/user.py
+##################################################
+from pydantic import BaseModel
+
+
+class UserCreate(BaseModel):
+    email: str
+    name: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+##################################################
+FILE: app/services/ai_prompt_run_service.py
+##################################################
+from app.repositories.ai_prompt_run_repository import \
+    AIPromptRunRepository
+
+
+class AIPromptRunService:
+
+    def __init__(
+        self,
+        repository: AIPromptRunRepository
+    ):
+        self.repository = repository
+
+    def create(
+        self,
+        prompt_run
+    ):
+        return self.repository.create(
+            prompt_run
+        )
+
+##################################################
+FILE: app/services/chat_debug_service.py
+##################################################
+class ChatDebugService:
+
+    def print_provider(
+        self,
+        provider: str
+    ):
+
+        print()
+        print("# --------------------------------")
+        print("# SELECTED PROVIDER")
+        print("# --------------------------------")
+        print(provider)
+        print("# --------------------------------")
+        print()
+
+    def print_task_type(
+        self,
+        task_type: str
+    ):
+
+        print()
+        print("# --------------------------------")
+        print("# TASK TYPE")
+        print("# --------------------------------")
+        print(task_type)
+        print("# --------------------------------")
+        print()
+
+    def print_trace(
+        self,
+        trace
+    ):
+
+        print()
+        print("# --------------------------------")
+        print("# PROMPT TRACE")
+        print("# --------------------------------")
+        print(trace)
+        print("# --------------------------------")
+        print()
+
+    def print_prompt(
+        self,
+        prompt: str
+    ):
+
+        print()
+        print("# --------------------------------")
+        print("# LOCAL BRAIN GENERATED PROMPT")
+        print("# --------------------------------")
+        print(prompt)
+        print("# --------------------------------")
+        print()
+
+##################################################
+FILE: app/services/chat_orchestrator_service.py
+##################################################
+from app.repositories.chat_repository import ChatRepository
+
+from app.services.chat_service import ChatService
+from app.services.conversation_memory_update_service import ConversationMemoryUpdateService
+from app.services.conversation_memory_service import ConversationMemoryService
+from app.services.memory_extraction_orchestrator import MemoryExtractionOrchestrator
+from app.services.llm_memory_extraction_service import LLMMemoryExtractionService
+from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
+
+
+class ChatOrchestratorService:
+
+    async def post_process(
+        self,
+        request,
+        response,
+        db,
+        memory_service
+    ):
+
+        chat_service = (
+            ChatService(
+                ChatRepository(db)
+            )
+        )
+
+        chat_service.save_chat(
+            conversation_id=request.conversation_id,
+            provider=response.provider,
+            model=response.model,
+            question=request.question,
+            answer=response.answer,
+            input_tokens=response.input_tokens,
+            output_tokens=response.output_tokens,
+            success=response.success
+        )
+
+        if not request.conversation_id:
+            return
+
+        history = (
+            chat_service
+            .get_recent_by_conversation(
+                request.conversation_id,
+                limit=20
+            )
+        )
+
+        messages = []
+
+        for item in reversed(history):
+
+            messages.append(
+                f"Q: {item.question}"
+            )
+
+            messages.append(
+                f"A: {item.answer}"
+            )
+
+        ConversationMemoryUpdateService(
+            db
+        ).update_summary(
+            conversation_id=request.conversation_id,
+            messages=messages
+        )
+
+        if not request.user_id:
+            return
+
+        summary = (
+            ConversationMemoryService(
+                db
+            ).get_summary(
+                request.conversation_id
+            )
+        )
+        
+        extractor = (
+            LLMMemoryExtractionService(
+                GeminiMemoryExtractionProvider()
+            )
+        )
+
+        try:
+
+            memories = await (
+                MemoryExtractionOrchestrator(
+                    extractor
+                )
+                .process(
+                    user_id=request.user_id,
+                    summary=summary
+                )
+            )
+
+        except Exception as e:
+
+            print()
+            print("# --------------------------------")
+            print("# MEMORY EXTRACTION FAILED")
+            print("# --------------------------------")
+            print(str(e))
+            print("# --------------------------------")
+            print()
+
+            return
+
+        memories = await (
+            MemoryExtractionOrchestrator(
+                extractor
+            )
+            .process(
+                user_id=request.user_id,
+                summary=summary
+            )
+        )
+
+        print()
+        print("# --------------------------------")
+        print("# MEMORY CANDIDATES")
+        print("# --------------------------------")
+
+        for memory in memories:
+
+            print(memory.type)
+            print(memory.key)
+            print(memory.content)
+
+            existing_memory = (
+                memory_service.exists_by_key(
+                    memory.user_id,
+                    memory.key
+                )
+            )
+
+            if existing_memory:
+
+                print(
+                    f"[MEMORY EXISTS] "
+                    f"{memory.key}"
+                )
+
+                continue
+
+
+            
+            content_exists = (
+                memory_service
+                .exists_similar_content(
+                    memory.user_id,
+                    memory.content
+                )
+            )
+
+            if (
+                existing_memory
+                or content_exists
+            ):
+
+                print(
+                    f"[MEMORY EXISTS] "
+                    f"{memory.key}"
+                )
+
+                continue
+
+            memory_service.create(
+                memory
+            )
+
+            print(
+                f"[MEMORY SAVED] "
+                f"{memory.key}"
+            )
+
+        print("# --------------------------------")
+        print()
+
+##################################################
+FILE: app/services/chat_service.py
+##################################################
+from app.repositories.chat_repository import ChatRepository
+
+
+class ChatService:
+
+    def __init__(
+        self,
+        repository: ChatRepository
+    ):
+        self.repository = repository
+
+    def save_chat(
+        self,
+        conversation_id,
+        provider,
+        model,
+        question,
+        answer,
+        input_tokens,
+        output_tokens,
+        success
+    ):
+        return self.repository.save(
+            conversation_id,
+            provider,
+            model,
+            question,
+            answer,
+            input_tokens,
+            output_tokens,
+            success
+        )
+
+    def get_recent_history(
+        self,
+        limit: int = 20
+    ):
+        return self.repository.get_recent(
+            limit
+        )
+
+# --------------------------------------------------
+# Conversation History
+# --------------------------------------------------
+
+    def get_conversation_history(
+        self,
+        conversation_id: int
+    ):
+
+        return self.repository.get_by_conversation_id(
+            conversation_id
+        )
+
+    def get_recent_by_conversation(
+        self,
+        conversation_id: int,
+        limit: int = 20
+    ):
+        return (
+            self.repository
+            .get_recent_by_conversation(
+                conversation_id,
+                limit
+            )
+        )
+
+##################################################
+FILE: app/services/context_builder_service.py
+##################################################
+class ContextBuilderService:
+
+    def build(
+        self,
+        user_profile: str,
+        project_context: str
+    ):
+
+        sections = []
+
+        sections.append(
+            "####### [User Context] #######"
+        )
+        sections.append("")
+        sections.append(
+            "(1) Core Preferences"
+        )
+        for line in user_profile.splitlines():
+            if line.strip():
+                sections.append(
+                    f"  > {line}"
+                )
+        sections.append("------------------------------")
+        sections.append("")
+        sections.append(
+            "(2) Project Context"
+        )
+        for line in project_context.splitlines():
+            if line.strip():
+                sections.append(
+                    f"  > {line}"
+                )
+        sections.append(
+            "##############################"
+        )
+
+        return "\n".join(
+            sections
+        )
+
+##################################################
+FILE: app/services/context_package_service.py
+##################################################
+from app.services.user_profile_service import \
+    UserProfileService
+
+from app.services.project_context_service import \
+    ProjectContextService
+
+
+class ContextPackageService:
+
+    def build(
+        self,
+        preferences: list[str],
+        goals: list[str],
+        projects: list[str]
+    ):
+
+        user_profile = (
+            UserProfileService()
+            .build(
+                preferences=preferences,
+                goals=goals
+            )
+        )
+
+        project_context = (
+            ProjectContextService()
+            .build(
+                projects
+            )
+        )
+
+        return {
+            "user_profile": user_profile,
+            "project_context": project_context
+        }
+
+##################################################
+FILE: app/services/conversation_memory_service.py
+##################################################
+from app.repositories.conversation_memory_repository import ConversationMemoryRepository
+
+
+class ConversationMemoryService:
+
+    def __init__(
+        self,
+        db
+    ):
+        self.repository = (
+            ConversationMemoryRepository(
+                db
+            )
+        )
+
+    def get_summary(
+        self,
+        conversation_id: int
+    ):
+
+        memory = (
+            self.repository
+            .get_by_conversation_id(
+                conversation_id
+            )
+        )
+
+        if not memory:
+            return ""
+
+        return (
+            memory.summary_md
+            or ""
+        )
+
+##################################################
+FILE: app/services/conversation_memory_update_service.py
+##################################################
+from app.services.conversation_summary_service import \
+    ConversationSummaryService
+
+from app.repositories.conversation_summary_repository import \
+    ConversationSummaryRepository
+
+
+class ConversationMemoryUpdateService:
+
+    def __init__(
+        self,
+        db
+    ):
+
+        self.repository = (
+            ConversationSummaryRepository(
+                db
+            )
+        )
+
+        self.summary_service = (
+            ConversationSummaryService()
+        )
+
+    def update_summary(
+        self,
+        conversation_id: int,
+        messages: list[str]
+    ):
+
+        memory = (
+            self.repository
+            .get_by_conversation_id(
+                conversation_id
+            )
+        )
+
+        if not memory:
+            return None
+
+        summary = (
+            self.summary_service
+            .summarize(messages)
+        )
+
+        return (
+            self.repository
+            .save_summary(
+                memory,
+                summary
+            )
+        )
+
+##################################################
+FILE: app/services/conversation_service.py
+##################################################
+from app.repositories.conversation_repository import ConversationRepository
+
+
+class ConversationService:
+
+    def __init__(
+        self,
+        repository: ConversationRepository
+    ):
+        self.repository = repository
+
+    def create(
+        self,
+        title: str
+    ):
+        return self.repository.create(title)
+
+    def get_all(self):
+        return self.repository.get_all()
+
+    def get_by_id(
+        self,
+        conversation_id: int
+    ):
+        return self.repository.get_by_id(
+            conversation_id
+        )
+
+##################################################
+FILE: app/services/conversation_summary_service.py
+##################################################
+class ConversationSummaryService:
+
+    def summarize(
+        self,
+        messages: list[str]
+    ):
+
+        if not messages:
+            return ""
+
+        recent_messages = (
+            messages[-10:]
+        )
+
+        return "\n".join(
+            recent_messages
+        )
+
+##################################################
+FILE: app/services/fake_memory_llm_provider.py
+##################################################
+class FakeMemoryLLMProvider:
+
+    async def ask(
+        self,
+        prompt: str
+    ):
+
+        return """
+{
+  "memories": [
+    {
+      "type": "PREFERENCE",
+      "key": "answer_quality_priority",
+      "content": "사용자는 빠른 답변보다 정확한 답변을 선호한다.",
+      "importance": 0.95,
+      "confidence": 0.90
+    }
+  ]
+}
+"""
+
+##################################################
+FILE: app/services/gemini_memory_extraction_provider.py
+##################################################
+from google import genai
+
+from app.core.config import settings
+
+
+class GeminiMemoryExtractionProvider:
+
+    async def ask(
+        self,
+        prompt: str
+    ):
+
+        client = genai.Client(
+            api_key=settings.GEMINI_API_KEY
+        )
+
+        result = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=prompt
+        )
+
+        return result.text
+
+##################################################
+FILE: app/services/llm_memory_extraction_service.py
+##################################################
+import json
+
+from app.schemas.memory_candidate_result import \
+    MemoryCandidateResult
+
+from app.services.memory_prompt_service import \
+    MemoryPromptService
+
+
+class LLMMemoryExtractionService:
+
+    def __init__(
+        self,
+        llm_provider
+    ):
+        self.llm_provider = (
+            llm_provider
+        )
+
+    async def extract(
+        self,
+        summary: str
+    ):
+
+        prompt = (
+            MemoryPromptService()
+            .build(summary)
+        )
+
+        response = await (
+            self.llm_provider.ask(
+                prompt
+            )
+        )
+
+        print() 
+        print("# --------------------------------") 
+        print("# RAW MEMORY RESPONSE") 
+        print("# --------------------------------") 
+        print(response) 
+        print("# --------------------------------") 
+        print()
+
+        try:
+
+            cleaned_response = (
+                response
+                .replace(
+                    "```json",
+                    ""
+                )
+                .replace(
+                    "```",
+                    ""
+                )
+                .strip()
+            )
+
+            return (
+                MemoryCandidateResult
+                .model_validate_json(
+                    cleaned_response
+                )
+            )
+
+        except Exception as e:
+
+            print()
+            print("# --------------------------------")
+            print("# MEMORY PARSE ERROR")
+            print("# --------------------------------")
+            print(e)
+            print("# --------------------------------")
+            print()
+
+            return (
+                MemoryCandidateResult(
+                    memories=[]
+                )
+            )
+
+##################################################
+FILE: app/services/local_brain_llm_service.py
+##################################################
+from app.ai.models.request import AIRequest
+from app.ai.providers.ollama_provider import OllamaProvider
+from app.schemas.brain_result import BrainResult
+
+import json
+
+
+class LocalBrainLLMService:
+
+    def build_request(
+        self,
+        question,
+        user_profile,
+        project_context
+    ):
+
+        return AIRequest(
+            question=f"""
+사용자 질문:
+{question}
+
+사용자 성향:
+{user_profile}
+
+프로젝트 정보:
+{project_context}
+
+당신은 MyAI Brain 이다.
+
+사용자 성향과 프로젝트 상태를 분석하라.
+
+반드시 JSON만 반환하라.
+
+{{
+  "task_type":"",
+  "role":"",
+  "provider":"",
+  "reason":"",
+  "prompt":""
+}}
+"""
+        )
+
+    async def analyze(
+        self,
+        question,
+        user_profile,
+        project_context
+    ):
+
+        request = self.build_request(
+            question=question,
+            user_profile=user_profile,
+            project_context=project_context
+        )
+
+        request.think = True
+
+        response = await (
+            OllamaProvider().ask(
+                request
+            )
+        )
+
+        if not response.success:
+            raise Exception(
+                response.error
+            )
+
+        payload = json.loads(
+            response.answer.strip()
+        )
+
+        return BrainResult(
+            **payload
+        )
+
+##################################################
+FILE: app/services/local_brain_service.py
+##################################################
+from app.services.context_builder_service import ContextBuilderService
+from app.services.prompt_strategy_service import PromptStrategyService
+from app.services.provider_selection_service import ProviderSelectionService
+from app.services.local_brain_llm_service import LocalBrainLLMService
+
+class LocalBrainService:
+
+    def __init__(self):
+
+        self.context_builder = (
+            ContextBuilderService()
+        )
+
+        self.prompt_strategy = (
+            PromptStrategyService()
+        )
+
+        self.provider_selector = (
+            ProviderSelectionService()
+        )
+
+        self.llm_brain = (
+            LocalBrainLLMService()
+        )
+
+    async def analyze(
+        self,
+        question: str,
+        user_profile: str,
+        project_context: list[str]
+    ):
+
+        return await (
+            self.llm_brain.analyze(
+                question=question,
+                user_profile=user_profile,
+                project_context=project_context
+            )
+        )
+
+    def build_prompt(
+        self,
+        question: str,
+        user_profile: str,
+        project_context: list[str]
+    ):
+
+        context = (
+            self.context_builder.build(
+                user_profile=user_profile,
+                project_context=project_context
+            )
+        )
+
+        task_type = (
+            self.provider_selector
+            .classifier
+            .classify(question)
+        )
+
+        role = "MyAI Assistant"
+
+        if task_type == "ARCHITECTURE":
+            role = "MyAI Architecture Reviewer"
+
+        elif task_type == "CODING":
+            role = "MyAI Senior Software Engineer"
+
+        elif task_type == "DB":
+            role = "MyAI Database Architect"
+
+        prompt = (
+            self.prompt_strategy.build(
+                role=role,
+                user_context=context,
+                question=question
+            )
+        )
+
+        provider = (
+            self.provider_selector.select(
+                question
+            )
+        )
+
+        brain_request = (
+            self.llm_brain.build_request(
+                question=question,
+                user_profile=user_profile,
+                project_context=project_context
+            )
+        )
+
+        print()
+        print("# --------------------------------")
+        print("# LLM BRAIN REQUEST LENGTH")
+        print("# --------------------------------")
+        print(len(brain_request.question))
+        print("# --------------------------------")
+        print()
+
+        print("# --------------------------------")
+        print("# LLM BRAIN REQUEST CREATED")
+        print("# --------------------------------")
+        print()
+
+        return { 
+            "provider": provider, 
+            "task_type": task_type, 
+            "prompt": prompt , 
+            "brain_prompt": brain_request.question
+        }
+
+##################################################
+FILE: app/services/long_term_memory_pipeline.py
+##################################################
+from app.services.memory_candidate_pipeline import MemoryCandidatePipeline
+
+
+class LongTermMemoryPipeline:
+
+    def process(
+        self,
+        user_id: int,
+        candidate_result
+    ):
+
+        return (
+            MemoryCandidatePipeline()
+            .process(
+                user_id=user_id,
+                candidates=candidate_result.memories
+            )
+        )
+
+##################################################
+FILE: app/services/long_term_memory_service.py
+##################################################
+from app.models.memory_item import MemoryItem
+
+
+class LongTermMemoryService:
+
+    def extract(
+        self,
+        user_id: int,
+        summary: str
+    ):
+
+        memories = []
+
+        text = summary.lower()
+
+        if any(
+            keyword in text
+            for keyword in [ 
+                "정확도",
+                "정확한 답변",
+                "빠른 답변보다 정확",
+                "정확성을 선호"
+            ]
+        ):
+            memories.append(
+                MemoryItem(
+                    user_id=user_id,
+                    type="PREFERENCE",
+                    key="answer_quality_priority",
+                    content="사용자는 빠른 답변보다 정확한 답변을 선호한다.",
+                    importance=0.95,
+                    confidence=0.90,
+                    freshness=1.0,
+                    source_type="SUMMARY",
+                    scope="USER",
+                    status="CANDIDATE"
+                )
+            )
+
+        return memories
+
+##################################################
+FILE: app/services/markdown_memory_service.py
+##################################################
+from app.repositories.markdown_memory_repository import \
+    MarkdownMemoryRepository
+
+
+class MarkdownMemoryService:
+
+    def __init__(
+        self,
+        repository: MarkdownMemoryRepository
+    ):
+        self.repository = repository
+
+    def save_memory(
+        self,
+        file_name: str,
+        content: str
+    ):
+        return self.repository.write(
+            file_name,
+            content
+        )
+
+    def load_memory(
+        self,
+        file_name: str
+    ):
+        return self.repository.read(
+            file_name
+        )
+
+    def exists(
+        self,
+        file_name: str
+    ):
+        return self.repository.exists(
+            file_name
+        )
+
+##################################################
+FILE: app/services/memory_candidate_mapper.py
+##################################################
+from app.models.memory_item import \
+    MemoryItem
+
+
+class MemoryCandidateMapper:
+
+    def to_memory_item(
+        self,
+        user_id: int,
+        candidate
+    ):
+
+        return MemoryItem(
+            user_id=user_id,
+            type=candidate.type,
+            key=candidate.key,
+            content=candidate.content,
+            importance=candidate.importance,
+            confidence=candidate.confidence,
+            freshness=1.0,
+            source_type="LOCAL_LLM",
+            scope="USER",
+            status="CANDIDATE"
+        )
+
+##################################################
+FILE: app/services/memory_candidate_pipeline.py
+##################################################
+from app.services.memory_candidate_validator import \
+    MemoryCandidateValidator
+
+from app.services.memory_candidate_mapper import \
+    MemoryCandidateMapper
+
+
+class MemoryCandidatePipeline:
+
+    def __init__(self):
+
+        self.validator = (
+            MemoryCandidateValidator()
+        )
+
+        self.mapper = (
+            MemoryCandidateMapper()
+        )
+
+    def process(
+        self,
+        user_id: int,
+        candidates
+    ):
+
+        memories = []
+
+        for candidate in candidates:
+
+            if not self.validator.validate(
+                candidate
+            ):
+                continue
+
+            memories.append(
+                self.mapper.to_memory_item(
+                    user_id,
+                    candidate
+                )
+            )
+
+        return memories
+
+##################################################
+FILE: app/services/memory_candidate_service.py
+##################################################
+from app.memory_constants import \
+    MEMORY_STATUS_CANDIDATE
+
+
+class MemoryCandidateService:
+
+    def create_candidate(
+        self,
+        memory_item
+    ):
+
+        memory_item.status = (
+            MEMORY_STATUS_CANDIDATE
+        )
+
+        return memory_item
+
+##################################################
+FILE: app/services/memory_candidate_validator.py
+##################################################
+class MemoryCandidateValidator:
+
+    def validate(
+        self,
+        candidate
+    ):
+
+        if not candidate.content:
+            return False
+
+        if len(
+            candidate.content.strip()
+        ) < 10:
+            return False
+
+        if candidate.confidence < 0.5:
+            return False
+
+        return True
+
+##################################################
+FILE: app/services/memory_confidence_service.py
+##################################################
+class MemoryConfidenceService:
+
+    def reinforce(
+        self,
+        existing_memory,
+        increment: float = 0.05
+    ):
+
+        current = (
+            existing_memory.confidence
+            or 0.0
+        )
+
+        updated = min(
+            current + increment,
+            1.0
+        )
+
+        existing_memory.confidence = (
+            updated
+        )
+
+        return existing_memory
+
+##################################################
+FILE: app/services/memory_consolidation_service.py
+##################################################
+class MemoryConsolidationService:
+
+    def consolidate(
+        self,
+        memories
+    ):
+
+        consolidated = {}
+
+        for memory in memories:
+
+            if memory.key not in consolidated:
+
+                consolidated[
+                    memory.key
+                ] = memory
+
+                continue
+
+            existing = (
+                consolidated[
+                    memory.key
+                ]
+            )
+
+            if (
+                memory.confidence
+                > existing.confidence
+            ):
+                consolidated[
+                    memory.key
+                ] = memory
+
+        return list(
+            consolidated.values()
+        )
+
+##################################################
+FILE: app/services/memory_context_service.py
+##################################################
+from app.services.memory_consolidation_service import \
+    MemoryConsolidationService
+
+
+class MemoryContextService:
+
+    def __init__(self):
+
+        self.consolidator = (
+            MemoryConsolidationService()
+        )
+
+    def build_context(
+        self,
+        memories
+    ):
+
+        consolidated = (
+            self.consolidator.consolidate(
+                memories
+            )
+        )
+
+        return [
+            memory.content
+            for memory in consolidated
+        ]
+
+##################################################
+FILE: app/services/memory_extraction_orchestrator.py
+##################################################
+from app.services.memory_candidate_pipeline import MemoryCandidatePipeline
+
+class MemoryExtractionOrchestrator:
+
+    def __init__(
+        self,
+        extractor
+    ):
+        self.extractor = extractor
+
+    async def process(
+        self,
+        user_id: int,
+        summary: str
+    ):
+
+        candidate_result = (
+            await self.extractor.extract(
+                summary
+            )
+        )
+
+        memories = (
+            MemoryCandidatePipeline()
+            .process(
+                user_id=user_id,
+                candidates=candidate_result.memories
+            )
+        )
+
+        return memories
+
+##################################################
+FILE: app/services/memory_extraction_service.py
+##################################################
+from app.models.memory_item import MemoryItem
+
+
+class MemoryExtractionService:
+
+    def extract(
+        self,
+        user_id: int,
+        question: str,
+        answer: str
+    ):
+
+        memories = []
+
+        text = f"{question}\n{answer}"
+
+        keywords = [
+            "정확도",
+            "정확한",
+            "빠른 답변보다 정확"
+        ]
+
+        if any(
+            keyword in text
+            for keyword in keywords
+        ):
+            memories.append(
+                MemoryItem(
+                    user_id=user_id,
+                    type="PREFERENCE",
+                    key="answer_quality_priority",
+                    content="사용자는 빠른 답변보다 정확한 답변을 선호한다.",
+                    importance=0.95,
+                    confidence=0.85,
+                    freshness=1.0,
+                    source_type="LOCAL_LLM",
+                    scope="USER",
+                    status="CANDIDATE"
+                )
+            )
+
+        return memories
+
+##################################################
+FILE: app/services/memory_extractor_service.py
+##################################################
+from app.models.memory_item import MemoryItem
+
+
+class MemoryExtractorService:
+
+    def extract_preference_memory(
+        self,
+        user_id: int,
+        content: str
+    ):
+
+        return MemoryItem(
+            user_id=user_id,
+            type="PREFERENCE",
+            key="answer_quality_priority",
+            content=content,
+            importance=0.9,
+            confidence=0.8,
+            freshness=1.0,
+            source_type="LOCAL_LLM",
+            scope="USER",
+            status="CANDIDATE"
+        )
+
+##################################################
+FILE: app/services/memory_item_service.py
+##################################################
+from app.repositories.memory_item_repository import MemoryItemRepository
+from difflib import SequenceMatcher
+
+
+class MemoryItemService:
+
+    def __init__(
+        self,
+        repository: MemoryItemRepository
+    ):
+        self.repository = repository
+
+    def create(
+        self,
+        memory_item
+    ):
+        return self.repository.create(
+            memory_item
+        )
+
+    def get_by_user(
+        self,
+        user_id: int
+    ):
+        return self.repository.get_by_user(
+            user_id
+        )
+
+    def get_by_type(
+        self,
+        user_id: int,
+        memory_type: str
+    ):
+        return self.repository.get_by_type(
+            user_id,
+            memory_type
+        )
+
+    def get_active_memories(
+        self,
+        user_id: int
+    ):
+        return self.repository.get_active_memories(
+            user_id
+        )
+
+    def get_by_key(
+        self,
+        user_id: int,
+        memory_key: str
+    ):
+        return self.repository.get_by_key(
+            user_id,
+            memory_key
+        )
+
+    def exists_by_key(
+        self,
+        user_id: int,
+        memory_key: str
+    ):
+        return self.repository.exists_by_key(
+            user_id,
+            memory_key
+        )
+
+    def update(
+        self,
+        memory
+    ):
+        return self.repository.update(
+            memory
+        )
+
+    def exists_similar_content(
+        self,
+        user_id: int,
+        content: str,
+        threshold: float = 0.80
+    ):
+
+        memories = self.get_by_user(
+            user_id
+        )
+
+        target = (
+            content.strip()
+            .lower()
+        )
+
+        for memory in memories:
+            existing = (
+                memory.content
+                .strip()
+                .lower()
+            )
+
+            similarity = (
+                SequenceMatcher(
+                    None,
+                    target,
+                    existing
+                ).ratio()
+            )
+
+            print(
+                f"[SIMILARITY] "
+                f"{similarity:.2f}"
+            )
+
+            if similarity >= threshold:
+                return True
+
+        return False
+
+##################################################
+FILE: app/services/memory_policy_service.py
+##################################################
+class MemoryPolicyService:
+
+    def should_always_include(
+        self,
+        memory_type: str
+    ):
+
+        return memory_type in [
+            "PREFERENCE",
+            "GOAL"
+        ]
+
+    def should_relevance_search(
+        self,
+        memory_type: str
+    ):
+
+        return memory_type in [
+            "PROJECT",
+            "KNOWLEDGE"
+        ]
+
+##################################################
+FILE: app/services/memory_profile_service.py
+##################################################
+class MemoryProfileService:
+
+    def build_profile(
+        self,
+        preferences: list[str],
+        goals: list[str]
+    ):
+
+        profile = []
+
+        if preferences:
+
+            profile.extend(
+                preferences
+            )
+
+        if goals:
+
+            profile.extend(
+                goals
+            )
+
+        return "\n".join(
+            profile
+        )
+
+##################################################
+FILE: app/services/memory_prompt_service.py
+##################################################
+class MemoryPromptService:
+
+    def build(
+        self,
+        summary: str
+    ):
+
+        return f"""
+You are a memory extraction engine.
+
+Extract only durable memories.
+
+Return JSON.
+
+Memory Types:
+
+- PREFERENCE
+- GOAL
+- PROJECT
+- INTEREST
+
+Conversation Summary:
+
+{summary}
+
+Output Example:
+
+{{
+  "memories": [
+    {{
+      "type": "PREFERENCE",
+      "key": "answer_quality_priority",
+      "content": "사용자는 정확도를 우선한다.",
+      "importance": 0.9,
+      "confidence": 0.9
+    }}
+  ]
+}}
+"""
+
+##################################################
+FILE: app/services/memory_query_service.py
+##################################################
+from app.services.memory_retrieval_engine import \
+    MemoryRetrievalEngine
+
+
+class MemoryQueryService:
+
+    def __init__(
+        self,
+        memory_service
+    ):
+        self.memory_service = (
+            memory_service
+        )
+
+        self.engine = (
+            MemoryRetrievalEngine()
+        )
+
+    def query(
+        self,
+        user_id: int,
+        question: str
+    ):
+
+        preferences = (
+            self.memory_service.get_by_type(
+                user_id,
+                "PREFERENCE"
+            )
+        )
+
+        goals = (
+            self.memory_service.get_by_type(
+                user_id,
+                "GOAL"
+            )
+        )
+
+        projects = (
+            self.memory_service.get_by_type(
+                user_id,
+                "PROJECT"
+            )
+        )
+
+        consolidated_preferences = (
+            self.engine.consolidation_service
+            .consolidate(
+                preferences
+            )
+        )
+
+        consolidated_goals = (
+            self.engine.consolidation_service
+            .consolidate(
+                goals
+            )
+        )
+
+        consolidated_projects = (
+            self.engine.consolidation_service
+            .consolidate(
+                projects
+            )
+        )
+
+        return (
+            consolidated_preferences
+            + consolidated_goals
+            + consolidated_projects
+        )
+
+
+##################################################
+FILE: app/services/memory_retrieval_engine.py
+##################################################
+from app.services.relevant_memory_service import \
+    RelevantMemoryService
+
+from app.services.memory_consolidation_service import \
+    MemoryConsolidationService
+
+
+class MemoryRetrievalEngine:
+
+    def __init__(self):
+
+        self.relevant_service = (
+            RelevantMemoryService()
+        )
+
+        self.consolidation_service = (
+            MemoryConsolidationService()
+        )
+
+    def retrieve(
+        self,
+        question: str,
+        memories
+    ):
+
+        relevant_memories = (
+            self.relevant_service.filter(
+                question,
+                memories
+            )
+        )
+
+        consolidated_memories = (
+            self.consolidation_service
+            .consolidate(
+                relevant_memories
+            )
+        )
+
+        return consolidated_memories
+
+##################################################
+FILE: app/services/memory_retrieval_service.py
+##################################################
+from app.services.memory_context_service import \
+    MemoryContextService
+
+
+class MemoryRetrievalService:
+
+    def __init__(
+        self,
+        memory_service
+    ):
+        self.memory_service = (
+            memory_service
+        )
+
+    def retrieve(
+        self,
+        user_id: int
+    ):
+
+        preference_items = (
+            self.memory_service.get_by_type(
+                user_id,
+                "PREFERENCE"
+            )
+        )
+
+        project_items = (
+            self.memory_service.get_by_type(
+                user_id,
+                "PROJECT"
+            )
+        )
+
+        goal_items = (
+            self.memory_service.get_by_type(
+                user_id,
+                "GOAL"
+            )
+        )
+
+        context_service = (
+            MemoryContextService()
+        )
+
+        return {
+            "preferences": (
+                context_service.build_context(
+                    preference_items
+                )
+            ),
+            "projects": (
+                context_service.build_context(
+                    project_items
+                )
+            ),
+            "goals": (
+                context_service.build_context(
+                    goal_items
+                )
+            )
+        }
+
+##################################################
+FILE: app/services/memory_validator_service.py
+##################################################
+from app.memory_constants import \
+    MEMORY_STATUS_ACTIVE
+
+from app.memory_constants import \
+    MEMORY_STATUS_VALIDATED
+
+
+class MemoryValidatorService:
+
+    def validate(
+        self,
+        memory_item
+    ):
+
+        if memory_item.confidence >= 0.8:
+            memory_item.status = (
+                MEMORY_STATUS_VALIDATED
+            )
+        else:
+            memory_item.status = (
+                MEMORY_STATUS_ACTIVE
+            )
+
+        return memory_item
+
+##################################################
+FILE: app/services/project_context_service.py
+##################################################
+class ProjectContextService:
+
+    def build(
+        self,
+        projects: list[str]
+    ):
+
+        if not projects:
+            return ""
+
+        context = []
+
+        context.extend(
+            projects
+        )
+
+        return "\n".join(
+            context
+        )
+
+##################################################
+FILE: app/services/prompt_strategy_service.py
+##################################################
+class PromptStrategyService:
+
+    def build(
+        self,
+        role: str,
+        user_context: str,
+        question: str
+    ):
+
+        return f"""
+[Role]
+{role}
+
+{user_context}
+
+[Decision Criteria]
+- 정확도 우선
+- 유지보수성
+- 기존 코드 최소 변경
+
+[Task]
+{question}
+
+[Required Output]
+- 분석
+- 추천
+- 근거
+- 위험요소
+"""
+
+##################################################
+FILE: app/services/prompt_trace_service.py
+##################################################
+class PromptTraceService:
+
+    def build_trace(
+        self,
+        provider: str,
+        task_type: str,
+        preferences: list[str],
+        projects: list[str],
+        goals: list[str]
+    ):
+
+        return {
+            "provider": provider,
+            "task_type": task_type,
+            "preference_count": len(
+                preferences
+            ),
+            "project_count": len(
+                projects
+            ),
+            "goal_count": len(
+                goals
+            )
+        }
+
+##################################################
+FILE: app/services/provider_selection_service.py
+##################################################
+from app.services.task_classifier_service import \
+    TaskClassifierService
+
+
+class ProviderSelectionService:
+
+    def __init__(self):
+
+        self.classifier = (
+            TaskClassifierService()
+        )
+
+    def select(
+        self,
+        question: str
+    ):
+
+        task_type = (
+            self.classifier.classify(
+                question
+            )
+        )
+
+        if task_type == "ARCHITECTURE":
+            return "gemini"
+
+        if task_type == "CODE":
+            return "gemini"
+
+        return "gemini"
+
+##################################################
+FILE: app/services/relevant_memory_service.py
+##################################################
+class RelevantMemoryService:
+
+    def filter(
+        self,
+        question: str,
+        memories
+    ):
+
+        results = []
+
+        question_lower = (
+            question.lower()
+        )
+
+        for memory in memories:
+
+            content = (
+                memory.content.lower()
+            )
+
+            if (
+                "myai" in question_lower
+                and "myai" in content
+            ):
+                results.append(
+                    memory
+                )
+
+                continue
+
+            if (
+                "redis" in question_lower
+                and "redis" in content
+            ):
+                results.append(
+                    memory
+                )
+
+                continue
+
+        return results
+
+##################################################
+FILE: app/services/task_classifier_service.py
+##################################################
+class TaskClassifierService:
+
+    def classify(
+        self,
+        question: str
+    ):
+
+        text = question.lower()
+
+        if any(
+            keyword in text
+            for keyword in [
+                "설계",
+                "architecture",
+                "아키텍처",
+                "도입",
+                "검토"
+            ]
+        ):
+            return "ARCHITECTURE"
+
+        if any(
+            keyword in text
+            for keyword in [
+                "코드",
+                "python",
+                "fastapi",
+                "api",
+                "개발"
+            ]
+        ):
+            return "CODE"
+
+        return "GENERAL"
+
+##################################################
+FILE: app/services/user_profile_service.py
+##################################################
+from app.services.memory_profile_service import \
+    MemoryProfileService
+
+
+class UserProfileService:
+
+    def build(
+        self,
+        preferences: list[str],
+        goals: list[str]
+    ):
+
+        profile = (
+            MemoryProfileService()
+            .build_profile(
+                preferences=preferences,
+                goals=goals
+            )
+        )
+
+        return profile
+
+##################################################
+FILE: app/services/user_service.py
+##################################################
+from app.repositories.user_repository import UserRepository
+
+
+class UserService:
+
+    def __init__(
+        self,
+        repository: UserRepository
+    ):
+        self.repository = repository
+
+    def create_user(
+        self,
+        email: str,
+        name: str
+    ):
+        return self.repository.create(
+            email=email,
+            name=name
+        )
+
+    def get_user(
+        self,
+        email: str
+    ):
+        return self.repository.get_by_email(
+            email=email
+        )
+
+==================================================
+ALEMBIC
+==================================================
+
+##################################################
+FILE: alembic/env.py
+##################################################
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
+from alembic import context
+
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
+config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
+from app.db.base import Base
+
+import app.models.user
+import app.models.chat_history
+import app.models.conversation
+import app.models.conversation_memory
+import app.models.memory_item
+import app.models.ai_prompt_run
+
+target_metadata = Base.metadata
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+##################################################
+FILE: alembic/versions/0af6b876c297_add_conversation_id_to_chat_history.py
+##################################################
+"""add conversation_id to chat_history
+
+Revision ID: 0af6b876c297
+Revises: 72ba5f938cbf
+Create Date: 2026-08-26 14:11:30.446053
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '0af6b876c297'
+down_revision: Union[str, Sequence[str], None] = '72ba5f938cbf'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('chat_history', sa.Column('conversation_id', sa.Integer(), nullable=True))
+    op.create_foreign_key(None, 'chat_history', 'conversation', ['conversation_id'], ['id'])
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_constraint(None, 'chat_history', type_='foreignkey')
+    op.drop_column('chat_history', 'conversation_id')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/154d1238b937_add_token_columns.py
+##################################################
+"""add token columns
+
+Revision ID: 154d1238b937
+Revises: 7d9b63c3e613
+Create Date: 2026-08-25 14:28:09.744033
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '154d1238b937'
+down_revision: Union[str, Sequence[str], None] = '7d9b63c3e613'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('chat_history', sa.Column('input_tokens', sa.Integer(), nullable=True))
+    op.add_column('chat_history', sa.Column('output_tokens', sa.Integer(), nullable=True))
+    op.add_column('chat_history', sa.Column('success', sa.Boolean(), nullable=False,server_default=sa.true()))
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_column('chat_history', 'success')
+    op.drop_column('chat_history', 'output_tokens')
+    op.drop_column('chat_history', 'input_tokens')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/372e3481a7cb_add_chat_history_table.py
+##################################################
+"""add chat history table
+
+Revision ID: 372e3481a7cb
+Revises: e80d73d5462e
+Create Date: 2026-08-25 14:11:10.677557
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '372e3481a7cb'
+down_revision: Union[str, Sequence[str], None] = 'e80d73d5462e'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    pass
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    pass
+
+##################################################
+FILE: alembic/versions/41e7abf52e2a_add_conversation_memory_table.py
+##################################################
+"""add conversation_memory table
+
+Revision ID: 41e7abf52e2a
+Revises: 0af6b876c297
+Create Date: 2026-08-26 17:07:16.168854
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '41e7abf52e2a'
+down_revision: Union[str, Sequence[str], None] = '0af6b876c297'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('conversation_memory',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('conversation_id', sa.Integer(), nullable=False),
+    sa.Column('summary_md', sa.Text(), nullable=True),
+    sa.Column('current_goal', sa.Text(), nullable=True),
+    sa.Column('current_state', sa.Text(), nullable=True),
+    sa.Column('important_decisions', sa.Text(), nullable=True),
+    sa.Column('next_action', sa.Text(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['conversation_id'], ['conversation.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('conversation_id')
+    )
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('conversation_memory')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/72ba5f938cbf_add_conversation_table.py
+##################################################
+"""add conversation table
+
+Revision ID: 72ba5f938cbf
+Revises: 154d1238b937
+Create Date: 2026-08-25 15:25:35.696152
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '72ba5f938cbf'
+down_revision: Union[str, Sequence[str], None] = '154d1238b937'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('conversation',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('title', sa.String(length=200), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('conversation')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/7d9b63c3e613_create_chat_history.py
+##################################################
+"""create chat_history
+
+Revision ID: 7d9b63c3e613
+Revises: 372e3481a7cb
+Create Date: 2026-08-25 14:20:25.639794
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '7d9b63c3e613'
+down_revision: Union[str, Sequence[str], None] = '372e3481a7cb'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('chat_history',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('provider', sa.String(length=50), nullable=False),
+    sa.Column('model', sa.String(length=100), nullable=False),
+    sa.Column('question', sa.Text(), nullable=False),
+    sa.Column('answer', sa.Text(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('chat_history')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/8c9e43daa47c_add_ai_prompt_runs_table.py
+##################################################
+"""add ai_prompt_runs table
+
+Revision ID: 8c9e43daa47c
+Revises: 9a012048a79f
+Create Date: 2026-08-27 15:55:19.984291
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '8c9e43daa47c'
+down_revision: Union[str, Sequence[str], None] = '9a012048a79f'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('ai_prompt_runs',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('conversation_id', sa.Integer(), nullable=True),
+    sa.Column('selected_provider', sa.String(length=100), nullable=False),
+    sa.Column('selected_model', sa.String(length=100), nullable=True),
+    sa.Column('strategy_md', sa.Text(), nullable=True),
+    sa.Column('final_prompt', sa.Text(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['conversation_id'], ['conversation.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('ai_prompt_runs')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/9a012048a79f_add_memory_items_table.py
+##################################################
+"""add memory_items table
+
+Revision ID: 9a012048a79f
+Revises: 41e7abf52e2a
+Create Date: 2026-08-26 17:24:32.016862
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = '9a012048a79f'
+down_revision: Union[str, Sequence[str], None] = '41e7abf52e2a'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('memory_items',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('type', sa.String(length=50), nullable=False),
+    sa.Column('key', sa.String(length=200), nullable=False),
+    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('importance', sa.Float(), nullable=False),
+    sa.Column('confidence', sa.Float(), nullable=False),
+    sa.Column('freshness', sa.Float(), nullable=False),
+    sa.Column('source_type', sa.String(length=50), nullable=False),
+    sa.Column('source_conversation_id', sa.Integer(), nullable=True),
+    sa.Column('source_chat_history_id', sa.Integer(), nullable=True),
+    sa.Column('scope', sa.String(length=50), nullable=False),
+    sa.Column('status', sa.String(length=50), nullable=False),
+    sa.Column('first_seen_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('last_confirmed_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['source_chat_history_id'], ['chat_history.id'], ),
+    sa.ForeignKeyConstraint(['source_conversation_id'], ['conversation.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('memory_items')
+    # ### end Alembic commands ###
+
+##################################################
+FILE: alembic/versions/e80d73d5462e_initial_users_table.py
+##################################################
+"""initial users table
+
+Revision ID: e80d73d5462e
+Revises: 
+Create Date: 2026-08-24 16:04:37.346164
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'e80d73d5462e'
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    pass
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    pass

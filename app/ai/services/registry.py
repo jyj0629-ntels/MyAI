@@ -1,35 +1,87 @@
 from app.ai.providers.base import AIProvider
-
-from app.ai.providers.gemini_provider import GeminiProvider
-from app.ai.providers.groq_provider import GroqProvider
-
 from app.ai.services.provider_loader import ProviderLoader
+
 
 class AIProviderRegistry:
 
     def __init__(self):
+
         self.providers: dict[str, AIProvider] = {}
 
     def register(
         self,
         provider: AIProvider
     ):
-        self.providers[provider.name] = provider
+
+        provider_name = (
+            provider.name.strip().lower()
+        )
+
+        if provider_name in self.providers:
+
+            print()
+            print("# --------------------------------")
+            print("# PROVIDER ALREADY REGISTERED")
+            print("# --------------------------------")
+            print(provider_name)
+            print("# --------------------------------")
+            print()
+
+            return
+
+        self.providers[
+            provider_name
+        ] = provider
+
+        print()
+        print("# --------------------------------")
+        print("# PROVIDER REGISTERED")
+        print("# --------------------------------")
+        print(provider_name)
+        print("# --------------------------------")
+        print()
 
     def get(
         self,
         name: str
     ) -> AIProvider:
 
-        if name not in self.providers:
+        provider_name = (
+            name.strip().lower()
+        )
+
+        if provider_name not in self.providers:
+
+            print()
+            print("# --------------------------------")
+            print("# PROVIDER NOT FOUND")
+            print("# --------------------------------")
+            print(provider_name)
+            print("# --------------------------------")
+            print("# AVAILABLE PROVIDERS")
+            print("# --------------------------------")
+
+            for item in sorted(
+                self.providers.keys()
+            ):
+                print(item)
+
+            print("# --------------------------------")
+            print()
+
             raise ValueError(
-                f"AI Provider not registered: {name}"
+                f"AI Provider not registered: {provider_name}"
             )
 
-        return self.providers[name]
+        return self.providers[
+            provider_name
+        ]
 
     def list(self):
-        return list(self.providers.keys())
+
+        return sorted(
+            self.providers.keys()
+        )
 
 
 def create_orchestrator():
@@ -38,19 +90,29 @@ def create_orchestrator():
 
     registry = AIProviderRegistry()
 
-    for provider in (
+    loaded_providers = (
         ProviderLoader()
         .load_all()
-    ):
+    )
+
+    for provider in loaded_providers:
 
         registry.register(
             provider
         )
 
-        print(
-            f"[PROVIDER REGISTERED] "
-            f"{provider.name}"
-        )
+    print()
+    print("# --------------------------------")
+    print("# FINAL PROVIDER LIST")
+    print("# --------------------------------")
+
+    for provider_name in (
+        registry.list()
+    ):
+        print(provider_name)
+
+    print("# --------------------------------")
+    print()
 
     return AIOrchestrator(
         registry=registry

@@ -35,6 +35,10 @@ class Settings:
         "DEEPSEEK_MODEL"
     )
 
+    OPENAI_MODEL = os.getenv(
+        "OPENAI_MODEL"
+    )
+
     CONSENSUS_THRESHOLD = int(
         os.getenv(
             "CONSENSUS_THRESHOLD",
@@ -45,6 +49,11 @@ class Settings:
     PRIMARY_PROVIDER = os.getenv(
         "PRIMARY_PROVIDER",
         "gemini"
+    )
+
+    LOCAL_BRAIN_DEFAULT_PROVIDER = os.getenv(
+        "LOCAL_BRAIN_DEFAULT_PROVIDER",
+        PRIMARY_PROVIDER
     )
 
     FALLBACK_PROVIDERS = os.getenv(
@@ -117,6 +126,11 @@ class Settings:
             "ENABLE_LOCAL_LLM_JUDGE",
             "true"
         ).lower() == "true"
+    )
+
+    MULTI_PROVIDER_EXCLUDE = os.getenv(
+        "MULTI_PROVIDER_EXCLUDE",
+        "ollama"
     )
 
 settings = Settings()

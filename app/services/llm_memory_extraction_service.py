@@ -1,10 +1,13 @@
 import json
+import re
 
-from app.schemas.memory_candidate_result import \
+from app.schemas.memory_candidate_result import (
     MemoryCandidateResult
+)
 
-from app.services.memory_prompt_service import \
+from app.services.memory_prompt_service import (
     MemoryPromptService
+)
 
 
 class LLMMemoryExtractionService:
@@ -33,33 +36,51 @@ class LLMMemoryExtractionService:
             )
         )
 
-        print() 
-        print("# --------------------------------") 
-        print("# RAW MEMORY RESPONSE") 
-        print("# --------------------------------") 
-        print(response) 
-        print("# --------------------------------") 
+        print()
+        print("# --------------------------------")
+        print("# RAW MEMORY RESPONSE")
+        print("# --------------------------------")
+        print(response)
+        print("# --------------------------------")
         print()
 
         try:
 
             cleaned_response = (
                 response
-                .replace(
-                    "```json",
-                    ""
-                )
-                .replace(
-                    "```",
-                    ""
-                )
+                .replace("```json", "")
+                .replace("```", "")
                 .strip()
             )
+
+            match = re.search(
+                r"\{.*\}",
+                cleaned_response,
+                re.DOTALL
+            )
+
+            if not match:
+
+                raise ValueError(
+                    "JSON block not found"
+                )
+
+            json_text = (
+                match.group(0)
+            )
+
+            print()
+            print("# --------------------------------")
+            print("# MEMORY JSON")
+            print("# --------------------------------")
+            print(json_text)
+            print("# --------------------------------")
+            print()
 
             return (
                 MemoryCandidateResult
                 .model_validate_json(
-                    cleaned_response
+                    json_text
                 )
             )
 
@@ -69,7 +90,7 @@ class LLMMemoryExtractionService:
             print("# --------------------------------")
             print("# MEMORY PARSE ERROR")
             print("# --------------------------------")
-            print(e)
+            print(str(e))
             print("# --------------------------------")
             print()
 

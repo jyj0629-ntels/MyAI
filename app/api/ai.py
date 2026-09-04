@@ -19,8 +19,6 @@ from app.services.chat_service import ChatService
 from app.services.local_brain_service import LocalBrainService
 
 from app.services.memory_item_service import MemoryItemService
-from app.services.memory_context_service import MemoryContextService
-from app.services.memory_retrieval_service import MemoryRetrievalService
 from app.services.memory_query_service import MemoryQueryService
 
 from app.services.prompt_trace_service import PromptTraceService
@@ -57,11 +55,6 @@ async def chat(
     request: AIRequest,
     db: Session = Depends(get_db)
 ):
-
-    provider = (
-        request.provider
-        or "gemini"
-    )
 
     memory_service = MemoryItemService(
         MemoryItemRepository(db)
@@ -143,6 +136,7 @@ async def chat(
     print("# --------------------------------")
     print()
 
+
     print("# --------------------------------")
     print("# TASK TYPE")
     print("# --------------------------------")
@@ -156,6 +150,65 @@ async def chat(
         request.provider
         or brain_result.provider
     )
+
+    available_providers = (
+        orchestrator.registry.list()
+    )
+
+    available_providers = [
+        item.lower()
+        for item in available_providers
+    ]
+
+    if provider:
+
+        provider = (
+            provider.strip()
+            .lower()
+        )
+
+    if (
+        not provider
+        or provider not in available_providers
+    ):
+
+        print()
+        print("# --------------------------------")
+        print("# INVALID PROVIDER")
+        print("# --------------------------------")
+        print(provider)
+        print("# --------------------------------")
+        print()
+
+        provider = (
+            settings.PRIMARY_PROVIDER
+            .strip()
+            .lower()
+        )
+
+    print()
+    print("# --------------------------------")
+    print("# BRAIN PROVIDER")
+    print("# --------------------------------")
+    print(brain_result.provider)
+    print("# --------------------------------")
+    print()
+
+    print()
+    print("# --------------------------------")
+    print("# AVAILABLE PROVIDERS")
+    print("# --------------------------------")
+    print(available_providers)
+    print("# --------------------------------")
+    print()
+
+    print()
+    print("# --------------------------------")
+    print("# FINAL PROVIDER")
+    print("# --------------------------------")
+    print(provider)
+    print("# --------------------------------")
+    print()
 
     prompt = (
         brain_result.prompt
@@ -224,12 +277,13 @@ async def chat(
         )
     )
 
-    selected = (
-        multi_result[
+    selected = ( 
+        multi_result.get(
             "selected"
-        ]
+        )
     )
 
+    judge_result = None
     judge_response = None
 
     if (
@@ -254,10 +308,6 @@ async def chat(
         )
         print("# --------------------------------")
         print()
-
-
-
-        judge_result = None 
 
         if judge_response:
         
@@ -302,13 +352,31 @@ async def chat(
         )
 
     else:
-
-        response = AIResponse(
-            provider=multi_result["responses"][0]["provider"],
-            model=multi_result["responses"][0]["model"],
-            answer=multi_result["responses"][0]["answer"],
-            success=True
+    
+        responses = multi_result.get(
+            "responses",
+            []
         )
+
+        if not responses:
+
+            response = await (
+                orchestrator.ask(
+                    provider_name=provider,
+                    request=request
+                )
+            )
+
+        else:
+
+            best_response = responses[0]
+
+            response = AIResponse(
+                provider=best_response["provider"],
+                model=best_response["model"],
+                answer=best_response["answer"],
+                success=True
+            )
 
         if judge_result:
 
@@ -340,28 +408,57 @@ async def chat(
             print("# --------------------------------")
             print()
 
+            best_provider = (
+                judge_result.get(
+                    "best_provider"
+                )
+            )
+
             final_answer = (
                 judge_result.get(
                     "final_answer"
                 )
             )
 
+            if best_provider:
+
+                print()
+                print("# --------------------------------")
+                print("# JUDGE BEST PROVIDER")
+                print("# --------------------------------")
+                print(best_provider)
+                print("# --------------------------------")
+                print()
+
             if final_answer:
+                response.answer = (
+                    final_answer
+                ) 
+                
+                if best_provider: 
+                    for item in multi_result.get(
+                        "responses", 
+                        []
+                    ):
+                        if (
+                            item["provider"]
+                            .strip()
+                            .lower()
+                            ==
+                            best_provider
+                            .strip()
+                            .lower()
+                        ):
+                            
+                            response.provider = (
+                                item["provider"]
+                            )
 
-                if isinstance(
-                    response,
-                    dict
-                ):
+                            response.model = (
+                                item["model"]
+                            )
 
-                    response["answer"] = (
-                        final_answer
-                    )
-
-                else:
-
-                    response.answer = (
-                        final_answer
-                    )
+                            break
 
     await (
         ChatOrchestratorService()

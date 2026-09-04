@@ -1,5 +1,6 @@
-from app.services.memory_retrieval_engine import \
+from app.services.memory_retrieval_engine import (
     MemoryRetrievalEngine
+)
 
 
 class MemoryQueryService:
@@ -64,9 +65,35 @@ class MemoryQueryService:
             )
         )
 
-        return (
+        result = (
             consolidated_preferences
             + consolidated_goals
             + consolidated_projects
         )
 
+        print()
+        print("# --------------------------------")
+        print("# MEMORY QUERY")
+        print("# --------------------------------")
+        print(
+            f"user_id={user_id}"
+        )
+        print(
+            f"question={question}"
+        )
+        print(
+            f"preferences={len(consolidated_preferences)}"
+        )
+        print(
+            f"goals={len(consolidated_goals)}"
+        )
+        print(
+            f"projects={len(consolidated_projects)}"
+        )
+        print(
+            f"total={len(result)}"
+        )
+        print("# --------------------------------")
+        print()
+
+        return result

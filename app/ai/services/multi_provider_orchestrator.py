@@ -26,6 +26,13 @@ class MultiProviderOrchestrator:
             self.registry.list()
         )
 
+        excluded_providers = [
+            provider.strip()
+            for provider in
+            settings.MULTI_PROVIDER_EXCLUDE.split(",")
+            if provider.strip()
+        ]
+
         tasks = []
 
         for provider_name in providers:
@@ -36,7 +43,17 @@ class MultiProviderOrchestrator:
                 )
             )
 
-            if provider_name == "ollama": 
+            print(
+                f"[PROVIDER CHECK] "
+                f"{provider_name}"
+            )
+
+            if provider_name in excluded_providers: 
+                print(
+                    f"[PROVIDER SKIPPED] "
+                    f"{provider_name}"
+                )
+
                 continue
 
             print(
@@ -125,20 +142,6 @@ class MultiProviderOrchestrator:
             )
         )
 
-        summary_service = (
-            ResponseSummaryService()
-        )
-
-        for item in collected:
-
-            item["answer"] = (
-                summary_service.summarize(
-                    item["answer"]
-            )
-        )
-
-        consensus = []
-
         selected = (
             {
                 "mode": "multi",
@@ -147,8 +150,6 @@ class MultiProviderOrchestrator:
             if len(collected) >= 2
             else None
         )
-
-        required_responses = 2
 
         if len(collected) == 0:
 
@@ -184,10 +185,6 @@ class MultiProviderOrchestrator:
 
                 selected = None
 
-        provider_count = len(
-            collected
-        )
-        
         print()
         print("# --------------------------------")
         print("# PROVIDER SUMMARY")
@@ -200,6 +197,11 @@ class MultiProviderOrchestrator:
             f"selected="
             f"{selected}"
         )
+        print(
+            f"response_count="
+            f"{len(collected)}"
+        )
+
         print("# --------------------------------")
         print()
 
@@ -219,9 +221,20 @@ class MultiProviderOrchestrator:
             )
         )
 
+        judge_request = None
+
+        if len(collected) >= 2:
+
+            judge_request = (
+                LocalConsensusService()
+                .build_request(
+                    request.question,
+                    collected
+                )
+            )
+
         return {
             "responses": collected,
-            "consensus": consensus,
             "selected": selected,
             "judge_request": judge_request
         }

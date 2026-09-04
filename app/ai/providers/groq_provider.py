@@ -34,6 +34,20 @@ class GroqProvider(AIProvider):
 
         try:
 
+            print() 
+            print("# --------------------------------")
+
+            print("# GROQ REQUEST")
+
+            print("# --------------------------------")
+
+            print(
+                request.prompt
+                or request.question
+            )
+            print("# --------------------------------")
+            print()
+
             response = await (
                 self.client.chat.completions.create(
                     model=self.model,
@@ -55,6 +69,14 @@ class GroqProvider(AIProvider):
                 .message
                 .content
             )
+
+            print()
+            print("# --------------------------------")
+            print("# GROQ RESPONSE")
+            print("# --------------------------------")
+            print(answer)
+            print("# --------------------------------")
+            print()
 
             print(
                 f"[GROQ SUCCESS] "

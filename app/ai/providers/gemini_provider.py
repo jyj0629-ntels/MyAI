@@ -35,6 +35,14 @@ class GeminiProvider(AIProvider):
 
         try:
 
+            print()
+            print("# --------------------------------")
+            print("# GEMINI REQUEST")
+            print("# --------------------------------")
+            print(prompt)
+            print("# --------------------------------")
+            print()
+
             result = client.models.generate_content(
                 model=settings.GEMINI_MODEL,
                 contents=prompt
@@ -47,6 +55,14 @@ class GeminiProvider(AIProvider):
                 print(
                     result.usage_metadata
                 )
+
+            print()
+            print("# --------------------------------")
+            print("# GEMINI RESPONSE")
+            print("# --------------------------------")
+            print(result.text)
+            print("# --------------------------------")
+            print()
 
             return AIResponse(
                 provider=self.name,

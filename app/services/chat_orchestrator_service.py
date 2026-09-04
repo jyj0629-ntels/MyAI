@@ -75,6 +75,18 @@ class ChatOrchestratorService:
                 request.conversation_id
             )
         )
+
+        if not summary:
+
+            print()
+            print("# --------------------------------")
+            print("# EMPTY CONVERSATION SUMMARY")
+            print("# --------------------------------")
+            print("# MEMORY EXTRACTION SKIPPED")
+            print("# --------------------------------")
+            print()
+
+            return
         
         extractor = (
             LLMMemoryExtractionService(
@@ -106,26 +118,23 @@ class ChatOrchestratorService:
 
             return
 
-        memories = await (
-            MemoryExtractionOrchestrator(
-                extractor
-            )
-            .process(
-                user_id=request.user_id,
-                summary=summary
-            )
-        )
-
-        print()
-        print("# --------------------------------")
-        print("# MEMORY CANDIDATES")
-        print("# --------------------------------")
-
         for memory in memories:
 
-            print(memory.type)
-            print(memory.key)
-            print(memory.content)
+            print()
+            print("# --------------------------------") 
+            print("# MEMORY CANDIDATE")
+            print("# --------------------------------")
+            print(
+                f"type={memory.type}"
+            )
+            print(
+                f"key={memory.key}"
+            )
+            print(
+                f"content={memory.content}"
+            )
+            print("# --------------------------------")
+            print()
 
             existing_memory = (
                 memory_service.exists_by_key(
@@ -153,10 +162,7 @@ class ChatOrchestratorService:
                 )
             )
 
-            if (
-                existing_memory
-                or content_exists
-            ):
+            if existing_memory:
 
                 print(
                     f"[MEMORY EXISTS] "

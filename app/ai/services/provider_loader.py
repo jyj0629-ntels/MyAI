@@ -12,6 +12,7 @@ class ProviderLoader:
     def load_all(self):
 
         providers = []
+        loaded_provider_names = set()
 
         provider_path = (
             Path(__file__)
@@ -51,11 +52,14 @@ class ProviderLoader:
 
             except Exception as e:
 
-                print(
-                    f"[PROVIDER LOAD FAIL] "
-                    f"{module_name}"
-                )
-                print(e)
+                print()
+                print("# --------------------------------")
+                print("# PROVIDER IMPORT FAIL")
+                print("# --------------------------------")
+                print(module_name)
+                print(str(e))
+                print("# --------------------------------")
+                print()
 
                 continue
 
@@ -76,11 +80,62 @@ class ProviderLoader:
                         and obj is not AIProvider
                     ):
 
+                        instance = obj()
+
+                        if (
+                            instance.name
+                            in loaded_provider_names
+                        ):
+
+                            print()
+                            print("# --------------------------------")
+                            print("# PROVIDER DUPLICATED")
+                            print("# --------------------------------")
+                            print(instance.name)
+                            print("# --------------------------------")
+                            print()
+
+                            continue
+
                         providers.append(
-                            obj()
+                            instance
                         )
 
-                except Exception:
-                    pass
+                        loaded_provider_names.add(
+                            instance.name
+                        )
+
+                        print()
+                        print("# --------------------------------")
+                        print("# PROVIDER LOADED")
+                        print("# --------------------------------")
+                        print(instance.name)
+                        print("# --------------------------------")
+                        print()
+
+                except Exception as e:
+
+                    print()
+                    print("# --------------------------------")
+                    print("# PROVIDER CREATE FAIL")
+                    print("# --------------------------------")
+                    print(obj)
+                    print(str(e))
+                    print("# --------------------------------")
+                    print()
+
+        print()
+        print("# --------------------------------")
+        print("# REGISTERED PROVIDERS")
+        print("# --------------------------------")
+
+        for provider in providers:
+
+            print(
+                provider.name
+            )
+
+        print("# --------------------------------")
+        print()
 
         return providers
