@@ -1,0 +1,179 @@
+.
+├── DirectoryTree.txt
+├── Doc
+│   ├── MyAI_Architecture_Design_v1.0.md
+│   ├── MyAI_ChangeLog_v1.0.md
+│   ├── MyAI_ChangeLog_v1.1.md
+│   ├── MyAI_ChangeLog_v1.2.md
+│   ├── MyAI_Detailed_Design_v1.0.md
+│   ├── MyAI_Development_Log_v1.0.md
+│   ├── MyAI_Development_Log_v1.1.md
+│   ├── MyAI_Development_Log_v1.2.md
+│   ├── MyAI_Implementation_Roadmap_v1.0.md
+│   └── README.md
+├── Dockerfile
+├── MyAI_Architecture_Design.md
+├── MyAI_FullSourceDump.txt
+├── MyAI_ServerInfo.txt
+├── README.md
+├── SourceFullPrint.sh
+├── alembic
+│   ├── README
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions
+│       ├── 0af6b876c297_add_conversation_id_to_chat_history.py
+│       ├── 154d1238b937_add_token_columns.py
+│       ├── 372e3481a7cb_add_chat_history_table.py
+│       ├── 41e7abf52e2a_add_conversation_memory_table.py
+│       ├── 72ba5f938cbf_add_conversation_table.py
+│       ├── 7d9b63c3e613_create_chat_history.py
+│       ├── 8c9e43daa47c_add_ai_prompt_runs_table.py
+│       ├── 9a012048a79f_add_memory_items_table.py
+│       └── e80d73d5462e_initial_users_table.py
+├── alembic.ini
+├── app
+│   ├── ai
+│   │   ├── models
+│   │   │   ├── consensus_result.py
+│   │   │   ├── request.py
+│   │   │   └── response.py
+│   │   ├── providers
+│   │   │   ├── base.py
+│   │   │   ├── gemini_provider.py
+│   │   │   ├── groq_provider.py
+│   │   │   ├── mock.py
+│   │   │   ├── ollama_provider.py
+│   │   │   └── openai_provider.py
+│   │   └── services
+│   │       ├── claim_extractor.py
+│   │       ├── claim_matcher.py
+│   │       ├── consensus_engine.py
+│   │       ├── local_consensus_service.py
+│   │       ├── multi_provider_orchestrator.py
+│   │       ├── orchestrator.py
+│   │       ├── provider_loader.py
+│   │       ├── registry.py
+│   │       ├── response_collector.py
+│   │       └── response_summary_service.py
+│   ├── api
+│   │   ├── ai.py
+│   │   ├── conversations.py
+│   │   ├── markdown_memory.py
+│   │   ├── memory.py
+│   │   ├── memory_item.py
+│   │   └── users.py
+│   ├── core
+│   │   └── config.py
+│   ├── db
+│   │   ├── base.py
+│   │   ├── database.py
+│   │   └── dependencies.py
+│   ├── main.py
+│   ├── memory_constants.py
+│   ├── models
+│   │   ├── ai_prompt_run.py
+│   │   ├── chat_history.py
+│   │   ├── conversation.py
+│   │   ├── conversation_memory.py
+│   │   ├── memory_item.py
+│   │   └── user.py
+│   ├── personalization
+│   │   ├── models
+│   │   │   └── profile.py
+│   │   ├── repositories
+│   │   │   └── memory_repository.py
+│   │   └── services
+│   │       ├── personalization_service.py
+│   │       └── prompt_builder.py
+│   ├── repositories
+│   │   ├── ai_prompt_run_repository.py
+│   │   ├── chat_repository.py
+│   │   ├── conversation_memory_repository.py
+│   │   ├── conversation_repository.py
+│   │   ├── conversation_summary_repository.py
+│   │   ├── markdown_memory_repository.py
+│   │   ├── memory_item_repository.py
+│   │   └── user_repository.py
+│   ├── schemas
+│   │   ├── brain_result.py
+│   │   ├── chat_history.py
+│   │   ├── conversation.py
+│   │   ├── conversation_memory.py
+│   │   ├── memory_candidate.py
+│   │   ├── memory_candidate_result.py
+│   │   ├── memory_item.py
+│   │   ├── memory_item_create.py
+│   │   └── user.py
+│   └── services
+│       ├── ai_prompt_run_service.py
+│       ├── chat_orchestrator_service.py
+│       ├── chat_service.py
+│       ├── context_package_service.py
+│       ├── conversation_memory_service.py
+│       ├── conversation_memory_update_service.py
+│       ├── conversation_service.py
+│       ├── conversation_summary_service.py
+│       ├── gemini_memory_extraction_provider.py
+│       ├── llm_memory_extraction_service.py
+│       ├── local_brain_llm_service.py
+│       ├── local_brain_service.py
+│       ├── markdown_memory_service.py
+│       ├── memory_candidate_mapper.py
+│       ├── memory_candidate_pipeline.py
+│       ├── memory_candidate_service.py
+│       ├── memory_candidate_validator.py
+│       ├── memory_confidence_service.py
+│       ├── memory_consolidation_service.py
+│       ├── memory_extraction_orchestrator.py
+│       ├── memory_item_service.py
+│       ├── memory_profile_service.py
+│       ├── memory_prompt_service.py
+│       ├── memory_query_service.py
+│       ├── memory_retrieval_engine.py
+│       ├── memory_validator_service.py
+│       ├── performance_tracker.py
+│       ├── personal_profile_service.py
+│       ├── project_context_service.py
+│       ├── prompt_trace_service.py
+│       ├── provider_selector_service.py
+│       ├── question_classifier_service.py
+│       ├── relevant_memory_service.py
+│       ├── user_profile_service.py
+│       ├── user_service.py
+│       └── workflow_engine_service.py
+├── backup
+│   └── myai_20260901.dump
+├── create_tables.py
+├── db
+│   └── schema
+│       └── 001_initial.sql
+├── docker-compose.yml
+├── requirements.txt
+├── test_chat_save.py
+├── test_context_builder.py
+├── test_context_package.py
+├── test_conversation_summary.py
+├── test_dynamic_question_request.py
+├── test_gemini.py
+├── test_gemini_memory_provider.py
+├── test_llm_memory_extractor.py
+├── test_local_brain.py
+├── test_long_term_memory.py
+├── test_markdown_memory.py
+├── test_memory_candidate.py
+├── test_memory_confidence.py
+├── test_memory_consolidation.py
+├── test_memory_extraction.py
+├── test_memory_extraction_orchestrator.py
+├── test_memory_extractor.py
+├── test_memory_policy.py
+├── test_memory_profile.py
+├── test_memory_retrieval_engine.py
+├── test_memory_validator.py
+├── test_prompt_strategy.py
+├── test_provider_selection.py
+├── test_relevant_memory.py
+└── test_user_profile.py
+
+22 directories, 154 files

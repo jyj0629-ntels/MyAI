@@ -1,0 +1,348 @@
+==================================================
+MYAI SERVER INFORMATION
+==================================================
+
+GENERATED_AT
+2026. 09. 05. (토) 04:06:37 KST
+
+==================================================
+HOSTNAME
+==================================================
+UPM52
+
+==================================================
+OS RELEASE
+==================================================
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+
+==================================================
+KERNEL
+==================================================
+Linux UPM52 3.10.0-1062.el7.x86_64 #1 SMP Wed Aug 7 18:08:02 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
+
+==================================================
+HOST INFO
+==================================================
+   Static hostname: UPM52
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: e3b1c3ffa31bbfe4e24b7a558de26a9b
+           Boot ID: 3601c24da27446f7bcacc698ed460999
+    Virtualization: kvm
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+            Kernel: Linux 3.10.0-1062.el7.x86_64
+      Architecture: x86-64
+
+==================================================
+CPU
+==================================================
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                48
+On-line CPU(s) list:   0-47
+Thread(s) per core:    1
+Core(s) per socket:    1
+Socket(s):             48
+NUMA node(s):          1
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 61
+Model name:            Intel Core Processor (Broadwell)
+Stepping:              2
+CPU MHz:               2197.454
+BogoMIPS:              4394.90
+Hypervisor vendor:     KVM
+Virtualization type:   full
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              4096K
+NUMA node0 CPU(s):     0-47
+Flags:                 fpu de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 syscall nx rdtscp lm constant_tsc rep_good nopl eagerfpu pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx hypervisor lahf_lm 3dnowprefetch fsgsbase bmi1 hle avx2 smep bmi2 erms invpcid rtm rdseed adx smap xsaveopt
+
+==================================================
+MEMORY
+==================================================
+              total        used        free      shared  buff/cache   available
+Mem:           192G         13G        120G        4.0G         59G        174G
+Swap:           15G          0B         15G
+
+==================================================
+MEMINFO
+==================================================
+MemTotal:       202041056 kB
+MemFree:        126091124 kB
+MemAvailable:   182771216 kB
+Buffers:          856440 kB
+Cached:         57492096 kB
+SwapCached:            0 kB
+Active:         53461360 kB
+Inactive:       16866688 kB
+Active(anon):   14549168 kB
+Inactive(anon):  1639880 kB
+Active(file):   38912192 kB
+Inactive(file): 15226808 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:      16777212 kB
+SwapFree:       16777212 kB
+Dirty:               132 kB
+Writeback:             0 kB
+AnonPages:      11979520 kB
+Mapped:           367972 kB
+Shmem:           4209552 kB
+Slab:            3900840 kB
+SReclaimable:    3605176 kB
+SUnreclaim:       295664 kB
+KernelStack:       19024 kB
+PageTables:        58764 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    117797740 kB
+
+==================================================
+DISK
+==================================================
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda                 252:0    0   50G  0 disk 
+├─vda1              252:1    0    2G  0 part /boot
+└─vda2              252:2    0   48G  0 part 
+  ├─centos-root     253:0    0   32G  0 lvm  /
+  └─centos-swap     253:1    0   16G  0 lvm  [SWAP]
+vdb                 252:16   0  200G  0 disk 
+└─vdb1              252:17   0  200G  0 part 
+  ├─nvg1-APPDATA    253:2    0  150G  0 lvm  /APPDATA
+  └─nvg1-pm         253:3    0   50G  0 lvm  /pm
+vdc                 252:32   0  160G  0 disk 
+└─vdc1              252:33   0  160G  0 part 
+  ├─nvg2-MYSQL_DATA 253:4    0  150G  0 lvm  /MYSQL_DATA
+  └─nvg2-MYSQL      253:5    0   10G  0 lvm  /MYSQL
+vdd                 252:48   0  160G  0 disk 
+└─vdd1              252:49   0  160G  0 part 
+
+==================================================
+DISK USAGE
+==================================================
+Filesystem                   Size  Used Avail Use% Mounted on
+devtmpfs                      97G     0   97G   0% /dev
+tmpfs                         97G     0   97G   0% /dev/shm
+tmpfs                         97G  4.0G   93G   5% /run
+tmpfs                         97G     0   97G   0% /sys/fs/cgroup
+/dev/mapper/centos-root       32G   29G  3.5G  90% /
+/dev/vda1                    2.0G  158M  1.7G   9% /boot
+/dev/mapper/nvg1-APPDATA     148G   38G  103G  27% /APPDATA
+/dev/mapper/nvg2-MYSQL       9.8G  1.9G  7.4G  20% /MYSQL
+/dev/mapper/nvg2-MYSQL_DATA  148G   63G   78G  45% /MYSQL_DATA
+/dev/mapper/nvg1-pm           50G  4.6G   43G  10% /pm
+tmpfs                         20G   12K   20G   1% /run/user/42
+tmpfs                         20G     0   20G   0% /run/user/0
+tmpfs                         20G     0   20G   0% /run/user/1001
+tmpfs                         20G     0   20G   0% /run/user/1009
+
+==================================================
+NETWORK
+==================================================
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 52:54:00:67:dc:b5 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.10.86/24 brd 192.168.10.255 scope global noprefixroute eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::be3d:e156:15ee:78a4/64 scope link tentative noprefixroute dadfailed 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::40a:4d26:2790:48e3/64 scope link tentative noprefixroute dadfailed 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::ccc7:c772:3d57:41fa/64 scope link tentative noprefixroute dadfailed 
+       valid_lft forever preferred_lft forever
+3: virbr0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 52:54:00:fd:17:5d brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.1/24 brd 192.168.122.255 scope global virbr0
+       valid_lft forever preferred_lft forever
+4: virbr0-nic: <BROADCAST,MULTICAST> mtu 1500 qdisc pfifo_fast master virbr0 state DOWN group default qlen 1000
+    link/ether 52:54:00:fd:17:5d brd ff:ff:ff:ff:ff:ff
+5: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:d1:cd:25:0e brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:d1ff:fecd:250e/64 scope link 
+       valid_lft forever preferred_lft forever
+328: vethd67ace1@if327: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-e8a28b92b867 state UP group default 
+    link/ether 32:9d:fc:d5:cf:33 brd ff:ff:ff:ff:ff:ff link-netnsid 3
+    inet6 fe80::309d:fcff:fed5:cf33/64 scope link 
+       valid_lft forever preferred_lft forever
+210: br-e8a28b92b867: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:88:1d:60:55 brd ff:ff:ff:ff:ff:ff
+    inet 172.20.0.1/16 brd 172.20.255.255 scope global br-e8a28b92b867
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:88ff:fe1d:6055/64 scope link 
+       valid_lft forever preferred_lft forever
+230: veth8a9adaa@if229: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-e8a28b92b867 state UP group default 
+    link/ether 7a:5a:fe:9b:8e:be brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::785a:feff:fe9b:8ebe/64 scope link 
+       valid_lft forever preferred_lft forever
+232: veth5d82c8d@if231: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-e8a28b92b867 state UP group default 
+    link/ether a2:c2:a7:87:62:01 brd ff:ff:ff:ff:ff:ff link-netnsid 1
+    inet6 fe80::a0c2:a7ff:fe87:6201/64 scope link 
+       valid_lft forever preferred_lft forever
+244: vethfefac9a@if243: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-e8a28b92b867 state UP group default 
+    link/ether fe:08:56:81:23:77 brd ff:ff:ff:ff:ff:ff link-netnsid 2
+    inet6 fe80::fc08:56ff:fe81:2377/64 scope link 
+       valid_lft forever preferred_lft forever
+
+==================================================
+PORT
+==================================================
+Netid  State      Recv-Q Send-Q Local Address:Port               Peer Address:Port              
+udp    UNCONN     0      0         *:58512                 *:*                  
+udp    UNCONN     0      0      192.168.122.1:53                    *:*                  
+udp    UNCONN     0      0      *%virbr0:67                    *:*                  
+udp    UNCONN     0      0         *:111                   *:*                  
+udp    UNCONN     0      0      172.20.0.1:123                   *:*                  
+udp    UNCONN     0      0      172.17.0.1:123                   *:*                  
+udp    UNCONN     0      0      192.168.122.1:123                   *:*                  
+udp    UNCONN     0      0      192.168.10.86:123                   *:*                  
+udp    UNCONN     0      0      127.0.0.1:123                   *:*                  
+udp    UNCONN     0      0         *:123                   *:*                  
+udp    UNCONN     0      0         *:603                   *:*                  
+udp    UNCONN     0      0         *:5353                  *:*                  
+udp    UNCONN     0      0      [::]:111                [::]:*                  
+udp    UNCONN     0      0      [fe80::309d:fcff:fed5:cf33]%vethd67ace1:123                [::]:*                  
+udp    UNCONN     0      0      [fe80::fc08:56ff:fe81:2377]%vethfefac9a:123                [::]:*                  
+udp    UNCONN     0      0      [fe80::785a:feff:fe9b:8ebe]%veth8a9adaa:123                [::]:*                  
+udp    UNCONN     0      0      [fe80::a0c2:a7ff:fe87:6201]%veth5d82c8d:123                [::]:*                  
+udp    UNCONN     0      0      [fe80::42:88ff:fe1d:6055]%br-e8a28b92b867:123                [::]:*                  
+udp    UNCONN     0      0      [fe80::42:d1ff:fecd:250e]%docker0:123                [::]:*                  
+udp    UNCONN     0      0         [::1]:123                [::]:*                  
+udp    UNCONN     0      0      [::]:123                [::]:*                  
+udp    UNCONN     0      0      [::]:603                [::]:*                  
+tcp    LISTEN     0      128    127.0.0.1:631                   *:*                  
+tcp    LISTEN     0      128       *:5432                  *:*                  
+tcp    LISTEN     0      128       *:51000                 *:*                  
+tcp    LISTEN     0      128       *:51003                 *:*                  
+tcp    LISTEN     0      128       *:8000                  *:*                  
+tcp    LISTEN     0      50        *:11080                 *:*                  
+tcp    LISTEN     0      128       *:11434                 *:*                  
+tcp    LISTEN     0      50        *:3306                  *:*                  
+tcp    LISTEN     0      128       *:5678                  *:*                  
+tcp    LISTEN     0      128       *:111                   *:*                  
+tcp    LISTEN     0      100       *:10099                 *:*                  
+tcp    LISTEN     0      5      192.168.122.1:53                    *:*                  
+tcp    LISTEN     0      32        *:21                    *:*                  
+tcp    LISTEN     0      128       *:22                    *:*                  
+tcp    LISTEN     0      128       [::1]:631                [::]:*                  
+tcp    LISTEN     0      128    [::]:23                 [::]:*                  
+tcp    LISTEN     0      128    [::]:5432               [::]:*                  
+tcp    LISTEN     0      128    [::]:8000               [::]:*                  
+tcp    LISTEN     0      128    [::]:11434              [::]:*                  
+tcp    LISTEN     0      128    [::]:5678               [::]:*                  
+tcp    LISTEN     0      128    [::]:111                [::]:*                  
+tcp    LISTEN     0      128    [::]:22                 [::]:*                  
+
+==================================================
+HOST PYTHON
+==================================================
+Python 2.7.5
+Python 3.6.8
+
+/usr/bin/python
+/usr/bin/python3
+
+==================================================
+DOCKER VERSION
+==================================================
+Client: Docker Engine - Community
+ Version:           26.1.4
+ API version:       1.45
+ Go version:        go1.21.11
+ Git commit:        5650f9b
+ Built:             Wed Jun  5 11:32:04 2024
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          26.1.4
+  API version:      1.45 (minimum version 1.24)
+  Go version:       go1.21.11
+  Git commit:       de5c9cf
+  Built:            Wed Jun  5 11:31:02 2024
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          1.6.33
+  GitCommit:        d2d58213f83a351ca8f528a95fbd145f5654e957
+ runc:
+  Version:          1.1.12
+  GitCommit:        v1.1.12-0-g51d5e94
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+
+==================================================
+DOCKER COMPOSE
+==================================================
+Docker Compose version v2.27.1
+
+==================================================
+DOCKER CONTAINERS
+==================================================
+CONTAINER ID   IMAGE                    COMMAND                   CREATED          STATUS          PORTS                                           NAMES
+eca7f0fc1fb9   myai-myai                "uvicorn app.main:ap…"   19 minutes ago   Up 19 minutes   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp       myai-api
+cc332e5d752c   n8nio/n8n:latest         "tini -- /docker-ent…"   2 days ago       Up 40 hours     0.0.0.0:5678->5678/tcp, :::5678->5678/tcp       myai-n8n
+52d1a6573144   pgvector/pgvector:pg17   "docker-entrypoint.s…"   2 days ago       Up 40 hours     0.0.0.0:5432->5432/tcp, :::5432->5432/tcp       myai-postgres
+edf2762556e2   ollama/ollama            "/bin/ollama serve"       2 days ago       Up 37 hours     0.0.0.0:11434->11434/tcp, :::11434->11434/tcp   ollama
+
+==================================================
+CONTAINER PYTHON
+==================================================
+Python 3.12.14
+
+==================================================
+POSTGRES VERSION
+==================================================
+psql (PostgreSQL) 17.11 (Debian 17.11-1.pgdg12+2)
+
+==================================================
+OLLAMA MODELS
+==================================================
+NAME          ID              SIZE      MODIFIED   
+qwen3:14b     bdbd181c33f2    9.3 GB    2 days ago    
+qwen3:1.7b    8f68893c685c    1.4 GB    2 days ago    
+qwen3:8b      500a1f067a9f    5.2 GB    3 days ago    
+
+==================================================
+GIT REMOTE
+==================================================
+
+==================================================
+GIT BRANCH
+==================================================
+
+==================================================
+GIT STATUS
+==================================================
+
+==================================================
+LAST COMMITS
+==================================================

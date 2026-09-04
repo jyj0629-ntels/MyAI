@@ -158,6 +158,11 @@ PROJECT TREE
 │       └── workflow_engine_service.py
 ├── backup
 │   └── myai_20260901.dump
+├── backupfile
+│   ├── DirectoryTree.txt
+│   ├── DockerContainers.txt
+│   ├── MyAI_FullSourceDump.txt
+│   └── MyAI_ServerInfo.txt
 ├── create_tables.py
 ├── db
 │   └── schema
@@ -190,7 +195,7 @@ PROJECT TREE
 ├── test_relevant_memory.py
 └── test_user_profile.py
 
-22 directories, 165 files
+23 directories, 169 files
 
 ==================================================
 DOCKERFILE

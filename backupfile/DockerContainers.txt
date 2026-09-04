@@ -1,0 +1,5 @@
+CONTAINER ID   IMAGE                    COMMAND                   CREATED          STATUS          PORTS                                           NAMES
+eca7f0fc1fb9   myai-myai                "uvicorn app.main:ap…"   19 minutes ago   Up 19 minutes   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp       myai-api
+cc332e5d752c   n8nio/n8n:latest         "tini -- /docker-ent…"   2 days ago       Up 40 hours     0.0.0.0:5678->5678/tcp, :::5678->5678/tcp       myai-n8n
+52d1a6573144   pgvector/pgvector:pg17   "docker-entrypoint.s…"   2 days ago       Up 40 hours     0.0.0.0:5432->5432/tcp, :::5432->5432/tcp       myai-postgres
+edf2762556e2   ollama/ollama            "/bin/ollama serve"       2 days ago       Up 37 hours     0.0.0.0:11434->11434/tcp, :::11434->11434/tcp   ollama
