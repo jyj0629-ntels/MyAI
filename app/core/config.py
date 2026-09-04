@@ -106,7 +106,7 @@ class Settings:
 
     LOCAL_LLM_MODEL = os.getenv(
         "LOCAL_LLM_MODEL",
-        "qwen3:8b"
+        "qwen3:14b"
     )
 
     OLLAMA_HOST = os.getenv(
