@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
@@ -52,16 +52,48 @@ orchestrator = create_orchestrator()
 
 @router.post("/chat")
 async def chat(
-    payload: dict | None = Body(default=None),
+    http_request: Request,
     db: Session = Depends(get_db)
 ):
     tracker = PerformanceTracker()
     tracker.start("request_parse")
 
     try:
+        payload = None
+
+        content_type = (
+            http_request.headers.get("content-type", "")
+            .lower()
+        )
+
+        if "application/json" in content_type:
+            payload = await http_request.json()
+        elif "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+            form_data = await http_request.form()
+            payload = {
+                key: value
+                for key, value in form_data.items()
+            }
+        else:
+            raw_body = await http_request.body()
+            if raw_body:
+                try:
+                    payload = json.loads(raw_body)
+                except Exception:
+                    payload = None
+
+        if payload is None:
+            payload = {
+                key: value
+                for key, value in http_request.query_params.items()
+            }
+
         request = AIRequest.from_payload(payload or {})
+
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
     tracker.finish("request_parse")
 

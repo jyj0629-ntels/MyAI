@@ -1,4 +1,6 @@
-from fastapi import Body, FastAPI, HTTPException
+import json
+
+from fastapi import FastAPI, HTTPException, Request
 
 from sqlalchemy import text
 
@@ -73,21 +75,42 @@ def health_db():
     }
 
 @app.post("/ai/ask")
-async def ask_ai(payload: dict | None = Body(default=None)):
+async def ask_ai(http_request: Request):
 
     try:
-        request = AIRequest.from_payload(payload or {})
+        content_type = http_request.headers.get("content-type", "").lower()
+        payload = None
+
+        if "application/json" in content_type:
+            payload = await http_request.json()
+        elif "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+            form_data = await http_request.form()
+            payload = {key: value for key, value in form_data.items()}
+        else:
+            raw_body = await http_request.body()
+            if raw_body:
+                try:
+                    payload = json.loads(raw_body)
+                except Exception:
+                    payload = None
+
+        if payload is None:
+            payload = {key: value for key, value in http_request.query_params.items()}
+
+        request_obj = AIRequest.from_payload(payload or {})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
-    provider = request.provider or "mock"
+    provider = request_obj.provider or "mock"
 
     user_id = 1
 
     personalized_request = (
         prompt_builder.build(
             user_id=user_id,
-            question=request.question
+            question=request_obj.question
         )
     )
 
@@ -102,7 +125,7 @@ async def ask_ai(payload: dict | None = Body(default=None)):
 
         return {
             "request": {
-                "original_question": request.question,
+                "original_question": request_obj.question,
                 "provider": provider
             },
             "personalized_prompt": {
