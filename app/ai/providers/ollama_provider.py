@@ -58,7 +58,7 @@ class OllamaProvider(
                                 False
                             ),
                             "options": {
-                                "num_predict": 600
+                                "num_predict": 320
                             }
                         }
                     )

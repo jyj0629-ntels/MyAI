@@ -1,6 +1,7 @@
 from app.ai.models.request import AIRequest
 from app.ai.providers.ollama_provider import OllamaProvider
 from app.schemas.brain_result import BrainResult
+from app.core.config import settings
 
 import json
 import re
@@ -20,18 +21,13 @@ class LocalBrainLLMService:
 사용자 질문:
 {question}
 
-사용자 성향:
-{user_profile}
+사용자_성향:
+{user_profile or '없음'}
 
-프로젝트 정보:
-{project_context}
+프로젝트_정보:
+{project_context or '없음'}
 
-당신은 MyAI Brain 이다.
-
-사용자 성향과 프로젝트 상태를 분석하라.
-
-반드시 JSON만 반환하라.
-
+당신은 MyAI Brain이다. 사용자 질문을 분석해 다음 JSON만 반환하라.
 {{
   "task_type":"",
   "role":"",
@@ -56,6 +52,16 @@ class LocalBrainLLMService:
         )
 
         request.think = True
+
+        print()
+        print("# --------------------------------")
+        print("# LOCAL BRAIN INPUT")
+        print("# --------------------------------")
+        print(f"question={question[:200]}")
+        print(f"user_profile={str(user_profile)[:300]}")
+        print(f"project_context={str(project_context)[:300]}")
+        print("# --------------------------------")
+        print()
 
         response = await (
             OllamaProvider().ask(
@@ -119,10 +125,10 @@ class LocalBrainLLMService:
                 "assistant"
             )
 
-            payload.setdefault(
-                "provider",
-                ""
-            )
+            raw_provider = str(payload.get("provider", "")).strip()
+            if not raw_provider or raw_provider.lower() in {"unknown", "none", "null"}:
+                raw_provider = settings.PRIMARY_PROVIDER
+            payload["provider"] = raw_provider
 
             payload.setdefault(
                 "reason",

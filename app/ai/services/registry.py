@@ -1,6 +1,8 @@
 from app.ai.providers.base import AIProvider
 from app.ai.services.provider_loader import ProviderLoader
 
+_GLOBAL_ORCHESTRATOR = None
+
 
 class AIProviderRegistry:
 
@@ -86,6 +88,11 @@ class AIProviderRegistry:
 
 def create_orchestrator():
 
+    global _GLOBAL_ORCHESTRATOR
+
+    if _GLOBAL_ORCHESTRATOR is not None:
+        return _GLOBAL_ORCHESTRATOR
+
     from app.ai.services.orchestrator import AIOrchestrator
 
     registry = AIProviderRegistry()
@@ -114,6 +121,8 @@ def create_orchestrator():
     print("# --------------------------------")
     print()
 
-    return AIOrchestrator(
+    _GLOBAL_ORCHESTRATOR = AIOrchestrator(
         registry=registry
     )
+
+    return _GLOBAL_ORCHESTRATOR

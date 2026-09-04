@@ -51,6 +51,11 @@ class Settings:
         "gemini"
     )
 
+    PUBLIC_PROVIDERS = os.getenv(
+        "PUBLIC_PROVIDERS",
+        "gemini,groq,openai"
+    )
+
     LOCAL_BRAIN_DEFAULT_PROVIDER = os.getenv(
         "LOCAL_BRAIN_DEFAULT_PROVIDER",
         PRIMARY_PROVIDER

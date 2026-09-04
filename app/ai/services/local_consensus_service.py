@@ -49,11 +49,9 @@ ANSWER:
 질문:
 {question}
 
-아래 여러 AI 응답을 비교 분석하라.
+아래 응답을 비교해 가장 적절한 답변을 고르고 JSON만 반환하라.
 
 {responses_block}
-
-반드시 JSON만 반환하라.
 
 {{
   "mode":"consensus",

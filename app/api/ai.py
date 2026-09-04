@@ -33,6 +33,7 @@ from app.services.memory_extraction_orchestrator import MemoryExtractionOrchestr
 from app.services.llm_memory_extraction_service import LLMMemoryExtractionService
 from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
 from app.services.chat_orchestrator_service import ChatOrchestratorService
+from app.services.performance_tracker import PerformanceTracker
 
 from app.models.ai_prompt_run import AIPromptRun
 from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
@@ -54,10 +55,15 @@ async def chat(
     payload: dict | None = Body(default=None),
     db: Session = Depends(get_db)
 ):
+    tracker = PerformanceTracker()
+    tracker.start("request_parse")
+
     try:
         request = AIRequest.from_payload(payload or {})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    tracker.finish("request_parse")
 
     memory_service = MemoryItemService(
         MemoryItemRepository(db)
@@ -72,13 +78,23 @@ async def chat(
     retrieved_memories = []
 
     if request.user_id:
-
+        tracker.start("memory_retrieval")
         retrieved_memories = (
             memory_query_service.query(
                 user_id=request.user_id,
                 question=request.question
             )
         )
+        tracker.finish("memory_retrieval")
+
+    print()
+    print("# --------------------------------")
+    print("# RAW DB HISTORY")
+    print("# --------------------------------")
+    for memory in retrieved_memories:
+        print(f"type={memory.type} key={memory.key} content={memory.content}")
+    print("# --------------------------------")
+    print()
 
     preferences = [
         memory.content
@@ -102,7 +118,8 @@ async def chat(
         if memory.type == "GOAL"
     ]
 
-    context_package = ( 
+    tracker.start("context_package_build")
+    context_package = (
         ContextPackageService()
         .build(
             preferences=preferences,
@@ -110,9 +127,26 @@ async def chat(
             projects=projects
         )
     )
+    tracker.finish("context_package_build")
+
+    print()
+    print("# --------------------------------")
+    print("# LEARNED USER PROFILE (LOCAL LLM SYNTHESIZED)")
+    print("# --------------------------------")
+    print(context_package.get("user_profile") or "(no learned user profile)")
+    print("# --------------------------------")
+    print()
+
+    print()
+    print("# --------------------------------")
+    print("# PROJECT CONTEXT")
+    print("# --------------------------------")
+    print(context_package.get("project_context") or "(no project context)")
+    print("# --------------------------------")
+    print()
 
     brain = LocalBrainService()
-
+    tracker.start("local_brain_analysis")
     brain_result = await (
         brain.analyze(
             question=request.question,
@@ -128,6 +162,7 @@ async def chat(
             )
         )
     )
+    tracker.finish("local_brain_analysis")
 
     print()
     print("# --------------------------------")
@@ -265,6 +300,7 @@ async def chat(
     print("# --------------------------------")
     print()
     
+    tracker.start("provider_fanout")
     multi_result = await (
         MultiProviderOrchestrator(
             orchestrator.registry
@@ -273,6 +309,7 @@ async def chat(
             request
         )
     )
+    tracker.finish("provider_fanout")
 
     judge_request = (
         multi_result.get(
@@ -293,7 +330,7 @@ async def chat(
         judge_request
         and settings.ENABLE_LOCAL_CONSENSUS
     ):
-
+        tracker.start("local_consensus_judge")
         judge_response = await (
             orchestrator.ask(
                 provider_name=
@@ -301,6 +338,7 @@ async def chat(
                 request=judge_request
             )
         )
+        tracker.finish("local_consensus_judge")
 
         print()
         print("# --------------------------------")
@@ -463,6 +501,7 @@ async def chat(
 
                             break
 
+    tracker.start("post_process")
     await (
         ChatOrchestratorService()
         .post_process(
@@ -472,6 +511,8 @@ async def chat(
             memory_service=memory_service
         )
     )
+    tracker.finish("post_process")
+    tracker.print_summary()
 
     return response
 

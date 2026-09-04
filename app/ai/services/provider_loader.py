@@ -5,6 +5,7 @@ import importlib
 from pathlib import Path
 
 from app.ai.providers.base import AIProvider
+from app.core.config import settings
 
 
 class ProviderLoader:
@@ -13,6 +14,15 @@ class ProviderLoader:
 
         providers = []
         loaded_provider_names = set()
+
+        enabled_public_providers = {
+            name.strip().lower()
+            for name in (
+                (settings.PUBLIC_PROVIDERS or "")
+                .split(",")
+            )
+            if name.strip()
+        }
 
         provider_path = (
             Path(__file__)
@@ -38,7 +48,8 @@ class ProviderLoader:
             if module_name in (
                 "base",
                 "__pycache__",
-                "mock"
+                "mock",
+                "ollama_provider"
             ):
                 continue
 
@@ -81,9 +92,13 @@ class ProviderLoader:
                     ):
 
                         instance = obj()
+                        provider_name = str(instance.name).strip().lower()
+
+                        if provider_name not in enabled_public_providers:
+                            continue
 
                         if (
-                            instance.name
+                            provider_name
                             in loaded_provider_names
                         ):
 
@@ -91,7 +106,7 @@ class ProviderLoader:
                             print("# --------------------------------")
                             print("# PROVIDER DUPLICATED")
                             print("# --------------------------------")
-                            print(instance.name)
+                            print(provider_name)
                             print("# --------------------------------")
                             print()
 
@@ -102,14 +117,14 @@ class ProviderLoader:
                         )
 
                         loaded_provider_names.add(
-                            instance.name
+                            provider_name
                         )
 
                         print()
                         print("# --------------------------------")
                         print("# PROVIDER LOADED")
                         print("# --------------------------------")
-                        print(instance.name)
+                        print(provider_name)
                         print("# --------------------------------")
                         print()
 

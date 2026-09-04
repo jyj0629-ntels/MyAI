@@ -15,6 +15,15 @@ class AIOrchestrator:
         request: AIRequest
     ) -> AIResponse:
 
+        if provider_name:
+            normalized_name = provider_name.strip().lower()
+        else:
+            normalized_name = ""
+
+        if normalized_name in {"ollama", settings.LOCAL_LLM_PROVIDER.lower()}:
+            from app.ai.providers.ollama_provider import OllamaProvider
+            return await OllamaProvider().ask(request)
+
         available_providers = (
             self.registry.list()
         )

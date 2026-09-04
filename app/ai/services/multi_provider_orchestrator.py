@@ -8,6 +8,7 @@ from app.ai.services.response_collector import ResponseCollector
 from app.ai.services.consensus_engine import ConsensusEngine
 from app.ai.services.local_consensus_service import LocalConsensusService
 from app.ai.services.response_summary_service import ResponseSummaryService
+from app.services.performance_tracker import PerformanceTracker
 
 class MultiProviderOrchestrator:
 
@@ -21,6 +22,9 @@ class MultiProviderOrchestrator:
         self,
         request: AIRequest
     ):
+
+        tracker = PerformanceTracker()
+        tracker.start("provider_dispatch")
 
         providers = (
             self.registry.list()
@@ -213,17 +217,9 @@ class MultiProviderOrchestrator:
         print("# --------------------------------")
         print()
 
-        judge_request = ( 
-            LocalConsensusService() 
-            .build_request(
-                request.question,
-                collected
-            )
-        )
-
         judge_request = None
 
-        if len(collected) >= 2:
+        if len(collected) >= 2 and settings.ENABLE_LOCAL_CONSENSUS:
 
             judge_request = (
                 LocalConsensusService()
@@ -232,6 +228,13 @@ class MultiProviderOrchestrator:
                     collected
                 )
             )
+
+        tracker.finish("provider_dispatch")
+        tracker.add_log("provider_dispatch_summary", {
+            "response_count": len(collected),
+            "selected_mode": selected["mode"] if selected else "single_default",
+            "judge_enabled": judge_request is not None
+        })
 
         return {
             "responses": collected,
