@@ -9,6 +9,70 @@ import re
 
 class LocalBrainLLMService:
 
+    @staticmethod
+    def should_use_fast_path(question) -> bool:
+        if not settings.LOCAL_LLM_FAST_PATH_ENABLED:
+            return False
+
+        if question is None:
+            return False
+
+        text = str(question).strip()
+        if not text:
+            return True
+
+        normalized = text.lower()
+
+        if len(text) <= 32:
+            return True
+
+        if len(text) <= settings.LOCAL_LLM_FAST_PATH_MAX_CHARS and "?" in text:
+            return True
+
+        simple_patterns = (
+            "오늘",
+            "지금",
+            "어때",
+            "뭐야",
+            "뭐",
+            "추천",
+            "예상",
+            "얼마",
+            "언제",
+            "누구",
+            "어디",
+            "날씨",
+            "상태",
+            "비교",
+            "간단",
+            "요약",
+        )
+
+        if any(pattern in normalized for pattern in simple_patterns):
+            return True
+
+        return False
+
+    def build_fast_path_result(
+        self,
+        question,
+        user_profile,
+        project_context
+    ) -> BrainResult:
+        provider_name = (
+            settings.PRIMARY_PROVIDER
+            or settings.LOCAL_LLM_PROVIDER
+            or "gemini"
+        )
+
+        return BrainResult(
+            task_type="GENERAL",
+            role="assistant",
+            provider=provider_name,
+            reason="fast_path_simple_question",
+            prompt=question
+        )
+
     def build_request(
         self,
         question,
@@ -44,6 +108,35 @@ class LocalBrainLLMService:
         user_profile,
         project_context
     ):
+
+        if self.should_use_fast_path(question):
+            print()
+            print("# --------------------------------")
+            print("# LOCAL BRAIN FAST PATH")
+            print("# --------------------------------")
+            print(f"question={str(question)[:200]}")
+            print("reason=simple_question")
+            print("# --------------------------------")
+            print()
+            return self.build_fast_path_result(
+                question=question,
+                user_profile=user_profile,
+                project_context=project_context
+            )
+
+        if not settings.LOCAL_LLM_DEEP_ANALYSIS_ENABLED:
+            print()
+            print("# --------------------------------")
+            print("# LOCAL BRAIN DEEP ANALYSIS DISABLED")
+            print("# --------------------------------")
+            print("reason=deep_analysis_disabled")
+            print("# --------------------------------")
+            print()
+            return self.build_fast_path_result(
+                question=question,
+                user_profile=user_profile,
+                project_context=project_context
+            )
 
         request = self.build_request(
             question=question,

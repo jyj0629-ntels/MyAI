@@ -108,7 +108,7 @@ class OllamaProvider(
 
             print()
             print("# --------------------------------")
-            print("# OLLAMA ERROR")
+            print("[ERROR] OLLAMA ERROR")
             print("# --------------------------------")
             print(str(e))
             print(repr(e))

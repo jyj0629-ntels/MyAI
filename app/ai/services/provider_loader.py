@@ -65,7 +65,7 @@ class ProviderLoader:
 
                 print()
                 print("# --------------------------------")
-                print("# PROVIDER IMPORT FAIL")
+                print("[ERROR] PROVIDER IMPORT FAIL")
                 print("# --------------------------------")
                 print(module_name)
                 print(str(e))
@@ -132,7 +132,7 @@ class ProviderLoader:
 
                     print()
                     print("# --------------------------------")
-                    print("# PROVIDER CREATE FAIL")
+                    print("[ERROR] PROVIDER CREATE FAIL")
                     print("# --------------------------------")
                     print(obj)
                     print(str(e))

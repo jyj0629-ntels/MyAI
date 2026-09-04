@@ -129,8 +129,29 @@ class Settings:
     ENABLE_LOCAL_LLM_JUDGE = (
         os.getenv(
             "ENABLE_LOCAL_LLM_JUDGE",
+            "false"
+        ).lower() == "true"
+    )
+
+    LOCAL_LLM_FAST_PATH_ENABLED = (
+        os.getenv(
+            "LOCAL_LLM_FAST_PATH_ENABLED",
             "true"
         ).lower() == "true"
+    )
+
+    LOCAL_LLM_DEEP_ANALYSIS_ENABLED = (
+        os.getenv(
+            "LOCAL_LLM_DEEP_ANALYSIS_ENABLED",
+            "true"
+        ).lower() == "true"
+    )
+
+    LOCAL_LLM_FAST_PATH_MAX_CHARS = int(
+        os.getenv(
+            "LOCAL_LLM_FAST_PATH_MAX_CHARS",
+            "120"
+        )
     )
 
     MULTI_PROVIDER_EXCLUDE = os.getenv(
