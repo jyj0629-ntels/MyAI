@@ -4,7 +4,7 @@ from typing import Optional
 
 class AIRequest(BaseModel):
 
-    user_id: int | None = None
+    user_id: Optional[int] = None
 
     question: str
 
@@ -19,3 +19,5 @@ class AIRequest(BaseModel):
     conversation_id: Optional[int] = None
 
     prompt: Optional[str] = None
+
+    think: bool = False

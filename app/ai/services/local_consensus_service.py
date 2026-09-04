@@ -6,46 +6,38 @@ class LocalConsensusService:
 
     def build_prompt(
         self,
+        question,
         responses
     ):
 
-        prompt = """
-당신은 MyAI Consensus Judge 이다.
+        prompt = f"""
+질문:
+{question}
 
-여러 AI의 답변을 비교 분석하라.
+아래 AI 답변 요약을 비교하라.
 
-반드시 JSON 형식으로만 답변하라.
+JSON만 반환.
 
-{
-  "mode": "consensus",
-  "consensus_score": 95,
-  "consensus_reason": "",
-  "common_claims": [],
-  "conflicting_claims": [],
-  "final_answer": ""
-}
-
+{{
+  "mode":"consensus",
+  "consensus_score":0,
+  "common_claims":[],
+  "conflicting_claims":[],
+  "best_provider":"",
+  "final_answer":""
+}}
 """
-
-        for response in responses:
-
-            prompt += f"""
-
-[{response['provider']}]
-
-{response['answer']}
-
-"""
-
         return prompt
 
     def build_request(
         self,
+        question,
         responses
     ):
 
         prompt = (
             self.build_prompt(
+                question,
                 responses
             )
         )

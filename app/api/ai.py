@@ -2,7 +2,9 @@ from fastapi import APIRouter
 from fastapi import Depends
 
 from app.ai.models.request import AIRequest
+from app.ai.models.response import AIResponse
 from app.ai.services.registry import create_orchestrator
+from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
 
 from sqlalchemy.orm import Session
 
@@ -37,8 +39,6 @@ from app.services.chat_orchestrator_service import ChatOrchestratorService
 
 from app.models.ai_prompt_run import AIPromptRun
 from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
-
-from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
 
 from app.core.config import settings
 
@@ -117,27 +117,28 @@ async def chat(
 
     brain = LocalBrainService()
 
-    brain_result = brain.build_prompt(
-        question=request.question,
-        user_profile=(
-            context_package[
-                "user_profile"
-            ]
-        ),
-        project_context=(
-            context_package[
-                "project_context"
-            ]
+    brain_result = await (
+        brain.analyze(
+            question=request.question,
+            user_profile=(
+                context_package[
+                    "user_profile"
+                ]
+            ),
+            project_context=(
+                context_package[
+                    "project_context"
+                ]
+            )
         )
     )
 
     print()
-
     print("# --------------------------------")
     print("# SELECTED PROVIDER")
     print("# --------------------------------")
     print(
-        brain_result["provider"]
+        brain_result.provider
     )
     print("# --------------------------------")
     print()
@@ -146,25 +147,25 @@ async def chat(
     print("# TASK TYPE")
     print("# --------------------------------")
     print(
-        brain_result["task_type"]
+        brain_result.task_type
     )
     print("# --------------------------------")
     print()
 
     provider = (
         request.provider
-        or brain_result["provider"]
+        or brain_result.provider
     )
 
     prompt = (
-        brain_result["prompt"]
+        brain_result.prompt
     )
 
     trace = (
         PromptTraceService()
         .build_trace(
             provider=provider,
-            task_type=brain_result["task_type"],
+            task_type=brain_result.task_type,
             preferences=preferences,
             projects=projects,
             goals=goals
@@ -302,10 +303,11 @@ async def chat(
 
     else:
 
-        response = (
-            multi_result[
-                "responses"
-            ][0]
+        response = AIResponse(
+            provider=multi_result["responses"][0]["provider"],
+            model=multi_result["responses"][0]["model"],
+            answer=multi_result["responses"][0]["answer"],
+            success=True
         )
 
         if judge_result:
@@ -346,10 +348,20 @@ async def chat(
 
             if final_answer:
 
-                response.answer = (
-                    final_answer
-                )
+                if isinstance(
+                    response,
+                    dict
+                ):
 
+                    response["answer"] = (
+                        final_answer
+                    )
+
+                else:
+
+                    response.answer = (
+                        final_answer
+                    )
 
     await (
         ChatOrchestratorService()

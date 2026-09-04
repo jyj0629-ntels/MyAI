@@ -1,6 +1,6 @@
 from datetime import datetime
-
 from pydantic import BaseModel
+from typing import Optional
 
 
 class MemoryItemResponse(BaseModel):
@@ -23,9 +23,11 @@ class MemoryItemResponse(BaseModel):
 
     source_type: str
 
-    source_conversation_id: int | None = None
+    source_conversation_id: Optional[int] = None
 
-    source_chat_history_id: int | None = None
+    source_chat_history_id: Optional[int] = None
+
+    last_confirmed_at: Optional[datetime] = None
 
     scope: str
 
@@ -33,7 +35,6 @@ class MemoryItemResponse(BaseModel):
 
     first_seen_at: datetime
 
-    last_confirmed_at: datetime | None = None
 
     created_at: datetime
 

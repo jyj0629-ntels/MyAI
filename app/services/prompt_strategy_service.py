@@ -2,13 +2,14 @@ class PromptStrategyService:
 
     def build(
         self,
+        role: str,
         user_context: str,
         question: str
     ):
 
         return f"""
 [Role]
-MyAI Architecture Reviewer
+{role}
 
 {user_context}
 

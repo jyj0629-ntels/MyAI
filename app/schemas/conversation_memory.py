@@ -1,6 +1,6 @@
 from datetime import datetime
-
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ConversationMemoryCreate(BaseModel):
@@ -14,15 +14,15 @@ class ConversationMemoryResponse(BaseModel):
 
     conversation_id: int
 
-    summary_md: str | None = None
+    summary_md: Optional[str] = None
 
-    current_goal: str | None = None
+    current_goal: Optional[str] = None
 
-    current_state: str | None = None
+    current_state: Optional[str] = None
 
-    important_decisions: str | None = None
+    important_decisions: Optional[str] = None
 
-    next_action: str | None = None
+    next_action: Optional[str] = None
 
     updated_at: datetime
 

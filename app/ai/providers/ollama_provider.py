@@ -23,20 +23,43 @@ class OllamaProvider(
 
         try:
 
+            print()
+            print("# --------------------------------")
+            print("# OLLAMA REQUEST")
+            print("# --------------------------------")
+            print(
+                f"model={settings.LOCAL_LLM_MODEL}"
+            )
+            print(
+                f"timeout={settings.OLLAMA_TIMEOUT}"
+            )
+            print(
+                f"prompt_length="
+                f"{len(request.prompt or request.question)}"
+            )
+            print("# --------------------------------")
+            print()
+
+
             async with httpx.AsyncClient(
-		timeout=settings.OLLAMA_TIMEOUT
+		        timeout=settings.OLLAMA_TIMEOUT
             ) as client:
 
                 response = await (
                     client.post(
-			settings.OLLAMA_GENERATE_URL,
+			            settings.OLLAMA_GENERATE_URL,
                         json={
-                            "model":
-                            settings.LOCAL_LLM_MODEL,
-                            "prompt":
-                            request.prompt
-                            or request.question,
-                            "stream": False
+                            "model": settings.LOCAL_LLM_MODEL,
+                            "prompt": request.prompt or request.question,
+                            "stream": False,
+                            "think": getattr(
+                                request,
+                                "think",
+                                False
+                            ),
+                            "options": {
+                                "num_predict": 600
+                            }
                         }
                     )
                 )
@@ -74,6 +97,7 @@ class OllamaProvider(
             print("# OLLAMA ERROR")
             print("# --------------------------------")
             print(str(e))
+            print(repr(e))
             print("# --------------------------------")
             print()
 

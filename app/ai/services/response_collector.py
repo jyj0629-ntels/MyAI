@@ -1,4 +1,5 @@
 from collections import defaultdict
+from app.ai.services.response_summary_service import ResponseSummaryService
 
 
 class ResponseCollector:
@@ -15,11 +16,18 @@ class ResponseCollector:
             if not response.success:
                 continue
 
+            summary = (
+                ResponseSummaryService()
+                .summarize(
+                    response.answer
+                )
+            )
+
             result.append(
                 {
                     "provider": response.provider,
                     "model": response.model,
-                    "answer": response.answer
+                    "answer": summary
                 }
             )
 

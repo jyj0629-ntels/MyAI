@@ -15,6 +15,21 @@ class ClaimExtractor:
 
             line = line.strip()
 
+            if line.startswith("##"):
+                continue
+
+            if line.startswith("###"):
+                continue
+
+            if line.startswith("---"):
+                continue
+
+            if "`" in line:
+                continue
+
+            if line.startswith("|------"):
+                continue
+
             if not line:
                 continue
 
@@ -23,6 +38,10 @@ class ClaimExtractor:
 
             claims.append(
                 line
+            )
+
+            print( 
+                f"[CLAIM] {line}"
             )
 
         return claims

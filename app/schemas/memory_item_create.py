@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class MemoryItemCreate(BaseModel):
@@ -19,9 +20,9 @@ class MemoryItemCreate(BaseModel):
 
     source_type: str = "MANUAL"
 
-    source_conversation_id: int | None = None
-
-    source_chat_history_id: int | None = None
+    source_conversation_id: Optional[int] = None
+    
+    source_chat_history_id: Optional[int] = None
 
     scope: str = "USER"
 

@@ -2,8 +2,9 @@ import pkgutil
 import inspect
 import importlib
 
-from app.ai.providers.base import \
-    AIProvider
+from pathlib import Path
+
+from app.ai.providers.base import AIProvider
 
 
 class ProviderLoader:
@@ -12,15 +13,20 @@ class ProviderLoader:
 
         providers = []
 
+        provider_path = (
+            Path(__file__)
+            .parent
+            .parent
+            / "providers"
+        )
+
         package = (
             "app.ai.providers"
         )
 
         for module_info in (
             pkgutil.iter_modules(
-                [
-                    "/opt/MyAI/app/ai/providers"
-                ]
+                [str(provider_path)]
             )
         ):
 

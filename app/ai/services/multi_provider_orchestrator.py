@@ -7,6 +7,7 @@ from app.ai.models.request import AIRequest
 from app.ai.services.response_collector import ResponseCollector
 from app.ai.services.consensus_engine import ConsensusEngine
 from app.ai.services.local_consensus_service import LocalConsensusService
+from app.ai.services.response_summary_service import ResponseSummaryService
 
 class MultiProviderOrchestrator:
 
@@ -35,6 +36,9 @@ class MultiProviderOrchestrator:
                 )
             )
 
+            if provider_name == "ollama": 
+                continue
+
             print(
                 f"[PARALLEL START] "
                 f"{provider_name}"
@@ -61,11 +65,55 @@ class MultiProviderOrchestrator:
                 result,
                 Exception
             ):
+
+                print()
+                print("# --------------------------------")
+                print("# PROVIDER EXCEPTION")
+                print("# --------------------------------")
+                print(str(result))
+                print("# --------------------------------")
+                print()
+
+                continue
+
+            if not getattr(
+                result,
+                "success",
+                True
+            ):
+                print()
+                print("# --------------------------------")
+                print("# PROVIDER FAILED")
+                print("# --------------------------------")
+                print(result.provider)
+                print(result.error)
+                print("# --------------------------------")
+                print()
+
                 continue
 
             responses.append(
                 result
             )
+
+        print()
+        print("# --------------------------------")
+        print("# PROVIDER RESPONSES")
+        print("# --------------------------------")
+
+        for response in responses:
+
+            print()
+            print(
+                f"[{response.provider}]"
+            )
+
+            print(
+                response.answer[:300]
+            )
+
+            print("# --------------------------------")
+            print()
 
         collector = (
             ResponseCollector()
@@ -77,24 +125,27 @@ class MultiProviderOrchestrator:
             )
         )
 
-        grouped = (
-            collector.group_by_answer(
-                collected
+        summary_service = (
+            ResponseSummaryService()
+        )
+
+        for item in collected:
+
+            item["answer"] = (
+                summary_service.summarize(
+                    item["answer"]
             )
         )
 
-        consensus = (
-            ConsensusEngine()
-            .calculate(
-                grouped
-            )
-        )
+        consensus = []
 
         selected = (
-            ConsensusEngine()
-            .select(
-                consensus
-            )
+            {
+                "mode": "multi",
+                "response_count": len(collected)
+            }
+            if len(collected) >= 2
+            else None
         )
 
         required_responses = 2
@@ -133,15 +184,6 @@ class MultiProviderOrchestrator:
 
                 selected = None
 
-        else:
-
-            selected = (
-                ConsensusEngine()
-                .select(
-                    consensus
-                )
-            )
-
         provider_count = len(
             collected
         )
@@ -161,18 +203,18 @@ class MultiProviderOrchestrator:
         print("# --------------------------------")
         print()
 
-
         print()
         print("# --------------------------------")
         print("# CONSENSUS RESULT")
         print("# --------------------------------")
-        print(consensus)
+        print("Handled by Local LLM Judge")
         print("# --------------------------------")
         print()
 
         judge_request = ( 
             LocalConsensusService() 
             .build_request(
+                request.question,
                 collected
             )
         )

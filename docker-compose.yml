@@ -50,6 +50,10 @@ services:
 
     container_name: ollama
 
+    environment:
+        LANG: C.UTF-8
+        LC_ALL: C.UTF-8
+
     restart: unless-stopped
 
     ports:

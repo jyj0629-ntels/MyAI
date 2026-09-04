@@ -1,6 +1,6 @@
 from datetime import datetime
-
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ChatHistoryResponse(BaseModel):
@@ -12,8 +12,8 @@ class ChatHistoryResponse(BaseModel):
     question: str
     answer: str
 
-    input_tokens: int | None = None
-    output_tokens: int | None = None
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
 
     success: bool
 
