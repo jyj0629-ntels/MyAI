@@ -1,3 +1,6 @@
+import re
+from difflib import SequenceMatcher
+
 from app.services.memory_retrieval_engine import (
     MemoryRetrievalEngine
 )
@@ -16,6 +19,35 @@ class MemoryQueryService:
         self.engine = (
             MemoryRetrievalEngine()
         )
+
+    @staticmethod
+    def _normalize_memory_text(value: str) -> str:
+        text = (value or "").strip().lower()
+        text = re.sub(r"[^0-9a-z가-힣\s]", " ", text)
+        text = re.sub(r"\s+", " ", text)
+        return text.strip()
+
+    @classmethod
+    def deduplicate_memories(cls, memories: list):
+        unique = []
+        for memory in memories:
+            content = getattr(memory, "content", str(memory)) or ""
+            normalized = cls._normalize_memory_text(content)
+            if not normalized:
+                continue
+
+            duplicate = False
+            for existing in unique:
+                existing_norm = cls._normalize_memory_text(getattr(existing, "content", str(existing)) or "")
+                similarity = SequenceMatcher(None, normalized, existing_norm).ratio()
+                if similarity >= 0.82:
+                    duplicate = True
+                    break
+
+            if not duplicate:
+                unique.append(memory)
+
+        return unique
 
     def query(
         self,
@@ -66,9 +98,11 @@ class MemoryQueryService:
         )
 
         result = (
-            consolidated_preferences
-            + consolidated_goals
-            + consolidated_projects
+            self.deduplicate_memories(
+                consolidated_preferences
+                + consolidated_goals
+                + consolidated_projects
+            )
         )
 
         print()

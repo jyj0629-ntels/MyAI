@@ -93,15 +93,35 @@ class LocalBrainLLMService:
         user_profile: str,
         project_context,
         provider_name: str,
-        task_type: str = "GENERAL"
+        task_type: str = "GENERAL",
+        response_format: str | None = None
     ) -> str:
         profile_block = user_profile or "없음"
         project_block = str(project_context or "없음")
         provider_role = cls.get_provider_specialty(provider_name)
 
+        provider_style = {
+            "gemini": "전략적 분석, 장기 맥락 이해, 사용자 목적과 전체 그림을 종합해 답변한다. 과도한 세부 추론보다 구조적 판단을 우선한다.",
+            "groq": "응답은 간결하고 실용적이며, 표/목록/우선순위 중심으로 정리한다. 불필요한 장문과 난잡한 표는 피하고 핵심만 깔끔하게 요약한다.",
+            "openai": "정확한 문장 구조, 사용자 중심 설명, 문서형 서술을 우선한다. 충분한 근거와 제안사항을 포함하되 과장 없이 답한다.",
+            "deepseek": "추론은 최소화하고 사실 근거를 우선한다. 출처를 명시하고, 불확실한 주장에는 반드시 근거와 한계를 제시한다. 링크/출처 3개 이상을 포함한다.",
+            "ollama": "사용자의 과거 선호와 현재 맥락을 반영해 맞춤형 조언을 제공한다. 최종 답변은 실무적으로 바로 실행 가능한 형태로 구성한다.",
+        }.get((provider_name or "").strip().lower(), "사용자의 목적에 맞춰 실질적이고 구체적인 답변을 제공한다.")
+
+        response_instruction = response_format or """
+- 핵심 결론
+- 이유와 근거
+- 사용자 맞춤 추천
+- 잠재 리스크 또는 주의점
+- 다음 행동 제안
+"""
+
         return f"""
 [역할]
 {provider_role}
+
+[공급자별 특성]
+{provider_style}
 
 [업무 유형]
 {task_type}
@@ -115,20 +135,16 @@ class LocalBrainLLMService:
 [프로젝트 및 맥락]
 {project_block}
 
-[지시]
-1. 이 사용자의 질문을 본인의 전문 역량에 맞게 재구성하라.
-2. 사용자의 성향, 관심사, 목적, 과거 학습 내용을 반영해 답변하라.
-3. 답변은 친절하고 구체적이며, 사용자에게 실질적으로 도움이 되는 형식으로 작성하라.
-4. 필요한 경우 우선순위, 장단점, 추천 이유, 위험 요소, 다음 액션을 포함하라.
-5. 최종 답변은 3~7개의 핵심 포인트로 정리하고, 가장 중요한 결론을 첫 문장에 명확히 적어라.
-6. 사용자의 취향과 가치관을 고려해 가장 적합한 판단을 제시하라.
+[중요 규칙]
+1. 질문을 그대로 반복하지 말고, 사용자 정보와 DB 기억을 반영해 재구성하라.
+2. 중복된 내용은 제거하고 가장 중요한 사실만 남기도록 답변하라.
+3. 사용자 선호와 프로젝트 맥락을 반영한 맞춤형 결론을 제시하라.
+4. 가능하면 근거, 우선순위, 리스크, 다음 행동을 포함하라.
+5. 답변은 사실 기반이며, 불확실한 부분은 명시적으로 표시하라.
+6. 최종 응답은 제공된 출력 형식을 엄격히 준수하라.
 
 [출력 형식]
-- 핵심 결론
-- 이유와 근거
-- 사용자 맞춤 추천
-- 잠재 리스크 또는 주의점
-- 다음 행동 제안
+{response_instruction}
 """
 
     def build_request(

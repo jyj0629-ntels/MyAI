@@ -19,6 +19,8 @@ from app.api.conversations import router as conversation_router
 from app.api.memory import router as memory_router
 from app.api.memory_item import router as memory_item_router
 from app.api.markdown_memory import router as markdown_memory_router
+from app.api.response_format_templates import router as response_format_templates_router
+from app.models.response_format_template import ResponseFormatTemplate
 
 prompt_builder = PromptBuilder()
 
@@ -34,9 +36,8 @@ app.include_router(conversation_router)
 app.include_router(memory_router)
 app.include_router(memory_item_router)
 
-app.include_router(
-    markdown_memory_router
-)
+app.include_router(markdown_memory_router)
+app.include_router(response_format_templates_router)
 
 orchestrator = create_orchestrator()
 

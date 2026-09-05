@@ -1,4 +1,6 @@
 import asyncio
+import re
+from difflib import SequenceMatcher
 
 from app.core.config import settings
 
@@ -33,22 +35,64 @@ class MultiProviderOrchestrator:
         text = " ".join(text.split())
         return text
 
+    @staticmethod
+    def stopwords():
+        return {
+            "그리고", "하지만", "또한", "그래서", "그러므로", "이유", "문제", "정리", "결론", "대해",
+            "대한", "같다", "다음", "이상", "이하", "무엇", "어떤", "하는", "합니다", "있다", "없다",
+            "보다", "우리", "사용자", "질문", "답변", "것", "수", "중", "등", "때", "이", "그", "저",
+        }
+
+    @classmethod
+    def summarize_key_points(cls, value):
+        if value is None:
+            return ""
+        text = re.sub(r"```.*?```", " ", str(value), flags=re.S)
+        text = text.replace("\n", " ")
+        sentences = [segment.strip() for segment in re.split(r"(?<=[.!?])\s+", text) if segment.strip()]
+        if not sentences:
+            return text[:500].strip()
+
+        selected = []
+        for sentence in sentences:
+            lower = sentence.lower()
+            if len(sentence) < 20:
+                continue
+            if any(keyword in lower for keyword in ["결론", "추천", "중요", "근거", "원인", "해결", "우선", "리스크", "출처", "문제"]):
+                selected.append(sentence)
+            elif len(selected) < 2:
+                selected.append(sentence)
+
+        if not selected:
+            selected = sentences[:2]
+
+        summary = " ".join(selected[:3])
+        return summary[:600].strip()
+
     @classmethod
     def keyword_tokens(cls, value):
         text = cls.normalize_text(value)
-        return [token for token in text.split() if len(token) > 1]
+        tokens = [token for token in text.split() if len(token) > 1 and token not in cls.stopwords()]
+        return tokens
 
     @classmethod
     def semantic_similarity(cls, a, b):
-        left = set(cls.keyword_tokens(a))
-        right = set(cls.keyword_tokens(b))
+        left_summary = cls.summarize_key_points(a)
+        right_summary = cls.summarize_key_points(b)
+
+        left = set(cls.keyword_tokens(left_summary))
+        right = set(cls.keyword_tokens(right_summary))
         if not left and not right:
             return 1.0
         if not left or not right:
             return 0.0
+
         intersection = len(left & right)
         union = len(left | right)
-        return round((intersection / union) if union else 0.0, 4)
+        token_similarity = round((intersection / union) if union else 0.0, 4)
+
+        string_similarity = SequenceMatcher(None, left_summary, right_summary).ratio()
+        return round(max(token_similarity, string_similarity), 4)
 
     @classmethod
     def build_combined_summary(cls, responses):
@@ -82,7 +126,8 @@ class MultiProviderOrchestrator:
 
         items = []
         for response in responses:
-            summary = (response.get("summary") or response.get("answer") or "").strip()
+            raw_summary = (response.get("summary") or response.get("answer") or "").strip()
+            summary = cls.summarize_key_points(raw_summary)
             items.append({
                 "provider": response.get("provider"),
                 "summary": summary,

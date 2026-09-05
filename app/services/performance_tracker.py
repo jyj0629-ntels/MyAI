@@ -21,6 +21,13 @@ class PerformanceTracker:
 
     def finish(self, step_name: str, started_at: float | None = None, metadata: dict[str, Any] | None = None):
         end_at = time.perf_counter()
+
+        if started_at is None:
+            for step in reversed(self._steps):
+                if step["name"] == step_name and step["end"] is None:
+                    started_at = step["start"]
+                    break
+
         if started_at is None:
             started_at = end_at
 

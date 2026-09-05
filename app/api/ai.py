@@ -35,6 +35,8 @@ from app.services.llm_memory_extraction_service import LLMMemoryExtractionServic
 from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
 from app.services.chat_orchestrator_service import ChatOrchestratorService
 from app.services.performance_tracker import PerformanceTracker
+from app.services.response_format_template_service import ResponseFormatTemplateService
+from app.repositories.response_format_template_repository import ResponseFormatTemplateRepository
 
 from app.models.ai_prompt_run import AIPromptRun
 from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
@@ -220,12 +222,26 @@ async def chat(
         or brain_result.provider
     )
 
+    response_template = None
+    response_template_repo = ResponseFormatTemplateRepository(db)
+    if request.response_format_template_id:
+        response_template = ResponseFormatTemplateService(response_template_repo).get_by_id(request.response_format_template_id)
+    elif request.user_id:
+        response_template = ResponseFormatTemplateService(response_template_repo).get_default(request.user_id)
+
+    response_template_text = None
+    if response_template is not None:
+        response_template_text = response_template.template_text
+    elif request.response_format_text:
+        response_template_text = request.response_format_text
+
     provider_prompt = LocalBrainLLMService().build_provider_prompt(
         question=request.question,
         user_profile=context_package.get("user_profile") or "",
         project_context=context_package.get("project_context") or [],
         provider_name=provider or settings.PRIMARY_PROVIDER,
-        task_type=brain_result.task_type
+        task_type=brain_result.task_type,
+        response_format=response_template_text
     )
     request.prompt = provider_prompt
     request.system_prompt = provider_prompt
@@ -291,6 +307,12 @@ async def chat(
     print("# --------------------------------")
     print()
 
+    requested_format = request.response_format_text or (
+        ResponseFormatTemplateService(ResponseFormatTemplateRepository(db)).get_default(request.user_id).template_text
+        if request.user_id and ResponseFormatTemplateService(ResponseFormatTemplateRepository(db)).get_default(request.user_id)
+        else None
+    )
+
     prompt = (
         request.prompt
         or brain_result.prompt
@@ -352,6 +374,15 @@ async def chat(
     print(prompt)
     print("# --------------------------------")
     print()
+
+    if requested_format:
+        print()
+        print("# --------------------------------")
+        print("# RESPONSE FORMAT TEMPLATE")
+        print("# --------------------------------")
+        print(requested_format)
+        print("# --------------------------------")
+        print()
 
     tracker.start("provider_fanout")
     multi_result = await (

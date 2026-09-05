@@ -22,6 +22,10 @@ class AIRequest(BaseModel):
 
     prompt: Optional[str] = None
 
+    response_format_template_id: Optional[int] = None
+
+    response_format_text: Optional[str] = None
+
     think: bool = False
 
     @field_validator("question", mode="before")
