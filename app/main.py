@@ -78,7 +78,9 @@ def root():
 
 
 @app.get("/demo")
+@app.get("/demo/")
 @app.get("/ui")
+@app.get("/ui/")
 async def demo_ui():
     return FileResponse(STATIC_DIR / "index.html")
 
