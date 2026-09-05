@@ -71,6 +71,7 @@ async def chat(
         try:
             PreferenceExtractionService.persist_from_question(request.user_id, request.question, db)
         except Exception as exc:
+            db.rollback()
             print(f"[WARN] preference extraction failed: {exc}")
 
     try:

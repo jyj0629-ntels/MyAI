@@ -1,6 +1,7 @@
 import re
 
 from app.models.memory_item import MemoryItem
+from app.models.user import User
 
 
 class PreferenceExtractionService:
@@ -87,10 +88,34 @@ class PreferenceExtractionService:
             unique.append(item)
         return unique
 
+    @staticmethod
+    def ensure_user_exists(user_id: int, db):
+        if not user_id:
+            return None
+
+        user = db.query(User).filter(User.id == user_id).first()
+        if user is not None:
+            return user
+
+        base_email = f"demo_user_{user_id}@local.invalid"
+        email = base_email
+        suffix = 1
+        while db.query(User).filter(User.email == email).first() is not None:
+            email = f"demo_user_{user_id}_{suffix}@local.invalid"
+            suffix += 1
+
+        user = User(email=email, name=f"Demo User {user_id}")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+
     @classmethod
     def persist_from_question(cls, user_id: int, question: str, db):
         if not user_id or not question:
             return []
+
+        cls.ensure_user_exists(user_id, db)
 
         memories = cls.extract(question)
         saved = []
@@ -123,8 +148,12 @@ class PreferenceExtractionService:
             saved.append(memory)
 
         if saved:
-            db.commit()
-            for memory in saved:
-                db.refresh(memory)
+            try:
+                db.commit()
+                for memory in saved:
+                    db.refresh(memory)
+            except Exception:
+                db.rollback()
+                raise
 
         return saved
