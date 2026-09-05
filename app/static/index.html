@@ -485,6 +485,23 @@
         gap: 28px;
       }
 
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        background: rgba(148,163,184,0.05);
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .status-pill .dot {
+        width: 8px;
+        height: 8px;
+      }
+
       .mini-panel {
         padding: 22px;
       }
@@ -542,8 +559,8 @@
             </div>
 
             <div class="cta-row">
-              <button class="primary-btn">답변 시작</button>
-              <button class="secondary-btn">기록 관리</button>
+              <button class="primary-btn" id="startAnswerBtn">답변 시작</button>
+              <button class="secondary-btn" id="historyBtn">기록 관리</button>
             </div>
 
             <div class="stats">
@@ -642,10 +659,10 @@
             <div class="chat-box">
               <div class="chat-header">
                 <h3>대화 창</h3>
-                <div class="chat-state"><span class="dot"></span>AI 비서 연결 중</div>
+                <div class="chat-state"><span class="dot"></span><span id="chatStatus">AI 비서 연결 중</span></div>
               </div>
 
-              <div class="messages">
+              <div class="messages" id="messageList">
                 <div class="message">
                   <div class="avatar-mini">AI</div>
                   <div class="bubble">
@@ -669,8 +686,8 @@
               </div>
 
               <div class="composer">
-                <textarea placeholder="MyAI에게 질문을 입력하세요...">토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.</textarea>
-                <button class="send-btn">전송</button>
+                <textarea id="questionInput" placeholder="MyAI에게 질문을 입력하세요...">토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.</textarea>
+                <button class="send-btn" id="sendBtn">전송</button>
               </div>
             </div>
           </div>
@@ -709,5 +726,196 @@
         </section>
       </main>
     </div>
+
+    <script>
+      const state = {
+        userId: 1,
+        conversationId: null,
+      };
+
+      const questionInput = document.getElementById('questionInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const startAnswerBtn = document.getElementById('startAnswerBtn');
+      const historyBtn = document.getElementById('historyBtn');
+      const messageList = document.getElementById('messageList');
+      const chatStatus = document.getElementById('chatStatus');
+
+      function addMessage(role, content) {
+        const row = document.createElement('div');
+        row.className = `message ${role === 'user' ? 'user' : ''}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar-mini';
+        avatar.textContent = role === 'user' ? 'ME' : 'AI';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = content;
+
+        if (role === 'user') {
+          row.appendChild(bubble);
+        } else {
+          row.appendChild(avatar);
+          row.appendChild(bubble);
+        }
+
+        if (role === 'user') {
+          row.appendChild(avatar);
+        }
+
+        messageList.appendChild(row);
+        messageList.scrollTop = messageList.scrollHeight;
+      }
+
+      function setStatus(message) {
+        chatStatus.textContent = message;
+      }
+
+      async function ensureConversation() {
+        if (state.conversationId) {
+          return state.conversationId;
+        }
+
+        const res = await fetch('/conversations/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ title: 'Demo conversation' })
+        });
+
+        if (!res.ok) {
+          throw new Error('대화 생성 실패');
+        }
+
+        const data = await res.json();
+        state.conversationId = data.id;
+        return state.conversationId;
+      }
+
+      async function loadHistory() {
+        try {
+          const conversationId = await ensureConversation();
+          const res = await fetch(`/conversations/${conversationId}/history`);
+          if (!res.ok) {
+            throw new Error('이력 조회 실패');
+          }
+
+          const data = await res.json();
+          messageList.innerHTML = '';
+          if (!data.length) {
+            addMessage('ai', '대화 이력이 아직 없습니다. 첫 질문을 보내보세요.');
+            return;
+          }
+
+          data.forEach(item => {
+            addMessage('user', item.question);
+            addMessage('ai', item.answer || item.summary || '응답 내용이 비어 있습니다.');
+          });
+
+          setStatus('기록 로드 완료');
+        } catch (error) {
+          console.error(error);
+          setStatus('기록 로드 실패');
+          addMessage('ai', `기록 조회 중 오류: ${error.message}`);
+        }
+      }
+
+      async function loadPreferences() {
+        try {
+          const res = await fetch(`/memory-items/user/${state.userId}`);
+          if (!res.ok) {
+            throw new Error('선호도 조회 실패');
+          }
+
+          const data = await res.json();
+          const items = (data || []).slice(0, 5);
+          const profileTags = document.querySelectorAll('.role');
+          const infoBox = document.querySelector('.insight-box p');
+
+          if (items.length) {
+            const summaries = items.map(item => item.content).slice(0, 4);
+            const tagLabels = summaries.length ? summaries : ['가성비', '후기', 'Top3', '표 형식'];
+            profileTags.forEach((tag, index) => {
+              tag.textContent = tagLabels[index] || tag.textContent;
+            });
+            infoBox.textContent = summaries.join(' · ');
+          }
+
+          setStatus('선호도 로드 완료');
+        } catch (error) {
+          console.error(error);
+          setStatus('선호도 로드 실패');
+          addMessage('ai', `선호도 조회 중 오류: ${error.message}`);
+        }
+      }
+
+      async function sendQuestion() {
+        const text = questionInput.value.trim();
+        if (!text) {
+          setStatus('질문을 입력해 주세요');
+          return;
+        }
+
+        try {
+          setStatus('질문 전송 중');
+          addMessage('user', text);
+          const conversationId = await ensureConversation();
+
+          const payload = {
+            user_id: state.userId,
+            question: text,
+            conversation_id: conversationId,
+            provider: 'gemini',
+            response_format_text: '답변은 아래 형식으로 정리해줘\n- 핵심 요약\n- 비교표\n- 최종 추천\n- 이유'
+          };
+
+          const res = await fetch('/ai/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(errorText || '질문 전송 실패');
+          }
+
+          const data = await res.json();
+          const answer = data.answer || data.summary || '응답이 비어 있습니다.';
+          addMessage('ai', answer);
+          setStatus('AI 응답 완료');
+          if (questionInput) {
+            questionInput.value = '';
+          }
+        } catch (error) {
+          console.error(error);
+          setStatus('전송 실패');
+          addMessage('ai', `오류: ${error.message}`);
+        }
+      }
+
+      sendBtn.addEventListener('click', sendQuestion);
+      startAnswerBtn.addEventListener('click', () => {
+        const current = questionInput.value.trim();
+        if (current) {
+          sendQuestion();
+        } else {
+          questionInput.value = '토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.';
+          sendQuestion();
+        }
+      });
+      historyBtn.addEventListener('click', loadHistory);
+
+      window.addEventListener('load', async () => {
+        try {
+          await ensureConversation();
+          await loadPreferences();
+          setStatus('AI 비서 연결 완료');
+          addMessage('ai', '안녕하세요. 저는 MyAI입니다. 최근 구매 성향을 반영해서, 가성비와 후기 기반으로 비교를 선호하는 편이시군요. 필요한 정보를 가장 효율적으로 정리해 드릴게요.');
+        } catch (error) {
+          console.error(error);
+          setStatus('연결 실패');
+        }
+      });
+    </script>
   </body>
 </html>
