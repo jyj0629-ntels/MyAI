@@ -18,12 +18,14 @@ class ChatRepository:
         success
     ):
 
+        model_name = str(model or provider or "unknown").strip() or "unknown"
+
         chat = ChatHistory(
             conversation_id=conversation_id,
-            provider=provider,
-            model=model,
-            question=question,
-            answer=answer,
+            provider=str(provider or "unknown").strip() or "unknown",
+            model=model_name,
+            question=question or "",
+            answer=answer or "",
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             success=success

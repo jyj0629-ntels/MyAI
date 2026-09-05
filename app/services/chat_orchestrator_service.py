@@ -28,17 +28,21 @@ class ChatOrchestratorService:
             )
         )
 
-        chat_service.save_chat(
-            conversation_id=request.conversation_id,
-            provider=response.provider,
-            model=response.model,
-            question=request.question,
-            answer=response.answer,
-            input_tokens=response.input_tokens,
-            output_tokens=response.output_tokens,
-            success=response.success
-        )
-        tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success)})
+        try:
+            chat_service.save_chat(
+                conversation_id=request.conversation_id,
+                provider=response.provider,
+                model=response.model or response.provider or "unknown",
+                question=request.question,
+                answer=response.answer,
+                input_tokens=response.input_tokens,
+                output_tokens=response.output_tokens,
+                success=response.success
+            )
+            tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success)})
+        except Exception as exc:
+            tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": False, "error": str(exc)})
+            print(f"[WARN] chat history save failed: {exc}")
 
         if not request.conversation_id:
             return
