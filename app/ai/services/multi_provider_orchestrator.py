@@ -95,6 +95,21 @@ class MultiProviderOrchestrator:
         return round(max(token_similarity, string_similarity), 4)
 
     @classmethod
+    def format_final_answer(cls, text):
+        if not text:
+            return ""
+
+        cleaned = str(text).strip()
+        cleaned = re.sub(r"\[(?:gemini|groq|openai|chatgpt|deepseek|meta|ollama|provider)\]\s*", "\n\n", cleaned, flags=re.I)
+        cleaned = re.sub(r"\s*[-–—]\s*\*\*(핵심 요약|불확실성 명시|다음 행동|비교표|최종 추천|근거|결론|추천|리스크|주의점)\*\*", "\n\n- **\\1**", cleaned)
+        cleaned = re.sub(r"(?<!\n)\*\*(핵심 요약|불확실성 명시|다음 행동|비교표|최종 추천|근거|결론|추천|리스크|주의점)\*\*", "\n\n**\\1**", cleaned)
+        cleaned = re.sub(r"(?<!\n)\|\s*구분\s*\|", "\n\n| 구분 |", cleaned)
+        cleaned = re.sub(r"\s{2,}", " ", cleaned)
+        cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+        cleaned = cleaned.strip()
+        return cleaned
+
+    @classmethod
     def build_combined_summary(cls, responses):
         if not responses:
             return "공급자 응답이 없어 요약할 수 없습니다."
@@ -104,12 +119,13 @@ class MultiProviderOrchestrator:
             provider = item.get("provider", "provider")
             summary = (item.get("summary") or item.get("answer") or "").strip()
             if summary:
-                sections.append(f"[{provider}] {summary[:500]}")
+                provider_summary = cls.format_final_answer(f"[{provider}] {summary[:1200]}")
+                sections.append(provider_summary)
 
-        combined = "\n".join(sections)
+        combined = "\n\n".join(section for section in sections if section)
         if len(combined) > 1800:
             combined = combined[:1800] + "..."
-        return combined
+        return combined if combined else "공급자 응답이 없어 요약할 수 없습니다."
 
     @classmethod
     def compare_responses(cls, responses):
@@ -162,7 +178,7 @@ class MultiProviderOrchestrator:
 
         grouped_claims.sort(key=lambda item: item["score"], reverse=True)
         average_score = round(sum(item["score"] for item in grouped_claims) / len(grouped_claims), 2) if grouped_claims else 0
-        combined_summary = cls.build_combined_summary(responses)
+        combined_summary = cls.format_final_answer(cls.build_combined_summary(responses))
 
         return {
             "average_score": average_score,

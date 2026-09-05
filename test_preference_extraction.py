@@ -1,3 +1,4 @@
+from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
 from app.services.preference_extraction_service import PreferenceExtractionService
 from app.services.memory_query_service import MemoryQueryService
 from app.services.performance_tracker import PerformanceTracker
@@ -37,3 +38,14 @@ def test_performance_tracker_numbers_stage_names():
     tracker.finish("1. user_context_analysis")
 
     assert tracker.as_dict()["steps"][0]["name"].startswith("[STEP 1]")
+
+
+def test_combined_summary_is_human_readable():
+    raw = "[gemini] **핵심 요약** 제품A를 추천합니다.[groq] **핵심 요약** 제품B를 추천합니다."
+
+    formatted = MultiProviderOrchestrator.format_final_answer(raw)
+
+    assert "\n\n" in formatted
+    assert "**핵심 요약**" in formatted
+    assert "제품A" in formatted
+    assert "제품B" in formatted

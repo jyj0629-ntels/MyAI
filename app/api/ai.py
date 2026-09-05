@@ -603,7 +603,8 @@ async def chat(
                             break
 
     if comparison:
-        response.summary = comparison.get("combined_summary")
+        combined_summary = MultiProviderOrchestrator.format_final_answer(comparison.get("combined_summary"))
+        response.summary = combined_summary
         response.comparison = comparison
         response.sources = [{
             "provider": item["provider"],
@@ -612,7 +613,7 @@ async def chat(
             "score": comparison.get("consensus_score", 0)
         } for item in multi_result.get("responses", [])]
         response.requires_confirmation = comparison.get("consensus_score", 0) < 80
-        response.answer = comparison.get("combined_summary") or response.answer
+        response.answer = combined_summary or response.answer
 
     tracker.start("6. memory_persist_and_finalize")
     await (
