@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyAI (나를 아는 Real My AI)</title>
+    <style>
+      :root {
+        --bg: #09111f;
+        --panel: rgba(14, 24, 40, 0.92);
+        --panel-strong: #0d1d2d;
+        --panel-soft: #13233c;
+        --border: rgba(148, 163, 184, 0.18);
+        --primary: #6ee7f9;
+        --primary-2: #9a7bff;
+        --green: #6ee7b7;
+        --amber: #fbbf24;
+        --text: #edf6ff;
+        --muted: #9bb1c7;
+        --danger: #f87171;
+        --shadow: 0 20px 60px rgba(9, 17, 31, 0.6);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(110, 231, 249, 0.20), transparent 25%),
+          radial-gradient(circle at bottom right, rgba(154, 123, 255, 0.18), transparent 30%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(18px);
+        background: rgba(9, 17, 31, 0.78);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .topbar-inner {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 18px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .brand-name {
+        font-size: 1.1rem;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .pill {
+        border: 1px solid var(--border);
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+      }
+
+      .main {
+        max-width: 1440px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 30px 28px 50px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.35fr 0.95fr;
+        gap: 28px;
+        margin-bottom: 28px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero-copy {
+        padding: 30px 32px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(110, 231, 249, 0.08);
+        border: 1px solid rgba(110, 231, 249, 0.2);
+        color: var(--primary);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 5vw, 4.1rem);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+
+      .gradient-text {
+        background: linear-gradient(90deg, var(--primary), #c4a1ff 40%, #fff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .subtitle {
+        margin-top: 18px;
+        font-size: 1.06rem;
+        line-height: 1.7;
+        color: var(--muted);
+        max-width: 620px;
+      }
+
+      .cta-row {
+        margin-top: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .primary-btn, .secondary-btn {
+        padding: 14px 20px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 700;
+        transition: .2s ease;
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        color: #07111b;
+      }
+
+      .secondary-btn {
+        color: var(--text);
+        background: rgba(148,163,184,0.08);
+        border-color: var(--border);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 26px;
+      }
+
+      .stat {
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        background: rgba(148,163,184,0.04);
+        border-radius: 18px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 6px;
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .profile-card {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .avatar-box {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px;
+        border-radius: 22px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(110,231,249,0.08), rgba(154,123,255,0.04));
+      }
+
+      .avatar {
+        width: 74px;
+        height: 74px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--green), var(--primary));
+        color: #051217;
+        font-weight: 800;
+        font-size: 1.5rem;
+      }
+
+      .mini-title {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .user-name {
+        margin: 4px 0 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .role-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .role {
+        padding: 8px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(148,163,184,0.06);
+        font-size: 0.78rem;
+      }
+
+      .insight-box {
+        padding: 18px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: rgba(110,231,183,0.04);
+      }
+
+      .insight-box strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+      }
+
+      .insight-box p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 0.82fr 1.18fr;
+        gap: 28px;
+      }
+
+      .sidebar, .chat-panel {
+        padding: 22px;
+      }
+
+      .sidebar h3, .chat-panel h3 {
+        margin: 0 0 18px;
+        font-size: 1.1rem;
+      }
+
+      .provider-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .provider-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 14px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: rgba(148,163,184,0.04);
+      }
+
+      .provider-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .provider-logo {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        background: linear-gradient(135deg, rgba(110,231,249,0.18), rgba(154,123,255,0.12));
+      }
+
+      .provider-name {
+        font-weight: 600;
+      }
+
+      .provider-right {
+        color: var(--green);
+        font-size: 0.75rem;
+      }
+
+      .module-card {
+        margin-top: 18px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        background: rgba(148,163,184,0.03);
+      }
+
+      .module-card h4 {
+        margin: 0 0 12px;
+      }
+
+      .tag-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        background: rgba(110,231,249,0.08);
+        color: var(--primary);
+        border: 1px solid rgba(110,231,249,0.18);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+
+      .chat-box {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 640px;
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .chat-state {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--green);
+        display: inline-block;
+        box-shadow: 0 0 18px rgba(110,231,183,0.7);
+      }
+
+      .messages {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 20px 0;
+        overflow: auto;
+      }
+
+      .message {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .message.user .bubble {
+        background: linear-gradient(135deg, rgba(110,231,249,0.20), rgba(154,123,255,0.22));
+        border-color: rgba(110,231,249,0.22);
+      }
+
+      .bubble {
+        max-width: 75%;
+        padding: 14px 16px;
+        border-radius: 18px 18px 18px 6px;
+        border: 1px solid var(--border);
+        background: rgba(148,163,184,0.06);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .message.user .bubble {
+        border-radius: 18px 18px 6px 18px;
+      }
+
+      .avatar-mini {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: rgba(110, 231, 249, 0.1);
+      }
+
+      .composer {
+        display: flex;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 74px;
+        resize: vertical;
+        border: 1px solid var(--border);
+        background: rgba(9, 17, 31, 0.6);
+        border-radius: 18px;
+        color: var(--text);
+        padding: 14px 16px;
+        font: inherit;
+      }
+
+      .send-btn {
+        min-width: 120px;
+        border: none;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        color: #07111b;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .bottom-grid {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+
+      .mini-panel {
+        padding: 22px;
+      }
+
+      .mini-panel h4 {
+        margin: 0 0 12px;
+      }
+
+      .mini-panel ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.9;
+      }
+
+      @media (max-width: 980px) {
+        .hero, .workspace, .bottom-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <div class="brand-mark">M</div>
+            <div class="brand-name">MyAI (나를 아는 Real My AI)</div>
+          </div>
+          <div class="top-actions">
+            <span class="pill">AI 메모리 기반</span>
+            <span class="pill">멀티모델 비교</span>
+            <span class="pill">실시간 동작</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="hero">
+          <div class="panel hero-copy">
+            <div class="eyebrow">● 실시간 나만의 AI 비서</div>
+            <h1>
+              나를 이해하고<br />
+              <span class="gradient-text">상황에 맞는 답변</span>을 만드는 AI
+            </h1>
+            <div class="subtitle">
+              MyAI는 사용자의 과거 대화, 관심사, 선호도, 프로젝트 맥락을 기억하고,
+              ChatGPT, Gemini, Groq, Meta AI 같은 공개 AI에 맞춤형 프롬프트를 자동 생성해
+              더 정확하고 개인화된 답변을 만듭니다.
+            </div>
+
+            <div class="cta-row">
+              <button class="primary-btn">답변 시작</button>
+              <button class="secondary-btn">기록 관리</button>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <strong>7+</strong>
+                <span>연동 AI 모델</span>
+              </div>
+              <div class="stat">
+                <strong>3x</strong>
+                <span>비교 기반 응답</span>
+              </div>
+              <div class="stat">
+                <strong>120ms</strong>
+                <span>초기 응답 목표</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel profile-card">
+            <div class="avatar-box">
+              <div class="avatar">YO</div>
+              <div>
+                <p class="mini-title">현재 사용자 프로필</p>
+                <p class="user-name">Younghoon</p>
+              </div>
+            </div>
+
+            <div class="role-list">
+              <div class="role">개발 중심</div>
+              <div class="role">가성비 선호</div>
+              <div class="role">Top3 비교</div>
+              <div class="role">표 형식 응답</div>
+            </div>
+
+            <div class="insight-box">
+              <strong>AI 메모리 인사이트</strong>
+              <p>
+                최근 구매 관련 질문에서는 가격 대비 성능, 후기 기반 검토, 표 형식 비교를 선호하며,
+                개발 관련 질문에서는 구현 우선과 설계 관점을 중요하게 반영합니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <aside class="panel sidebar">
+            <h3>연결된 Public AI</h3>
+            <div class="provider-list">
+              <div class="provider-item">
+                <div class="provider-left">
+                  <div class="provider-logo">G</div>
+                  <div class="provider-name">Gemini</div>
+                </div>
+                <div class="provider-right">online</div>
+              </div>
+
+              <div class="provider-item">
+                <div class="provider-left">
+                  <div class="provider-logo">C</div>
+                  <div class="provider-name">ChatGPT</div>
+                </div>
+                <div class="provider-right">online</div>
+              </div>
+
+              <div class="provider-item">
+                <div class="provider-left">
+                  <div class="provider-logo">Q</div>
+                  <div class="provider-name">Groq</div>
+                </div>
+                <div class="provider-right">online</div>
+              </div>
+
+              <div class="provider-item">
+                <div class="provider-left">
+                  <div class="provider-logo">M</div>
+                  <div class="provider-name">Meta AI</div>
+                </div>
+                <div class="provider-right">online</div>
+              </div>
+            </div>
+
+            <div class="module-card">
+              <h4>현재 인지된 컨텍스트</h4>
+              <div class="tag-stack">
+                <span class="tag">구매 비교</span>
+                <span class="tag">가성비</span>
+                <span class="tag">후기 기반</span>
+                <span class="tag">TOP3 추천</span>
+                <span class="tag">표 형식</span>
+                <span class="tag">개발 설계</span>
+              </div>
+            </div>
+          </aside>
+
+          <div class="panel chat-panel">
+            <div class="chat-box">
+              <div class="chat-header">
+                <h3>대화 창</h3>
+                <div class="chat-state"><span class="dot"></span>AI 비서 연결 중</div>
+              </div>
+
+              <div class="messages">
+                <div class="message">
+                  <div class="avatar-mini">AI</div>
+                  <div class="bubble">
+                    안녕하세요. 저는 MyAI입니다. 최근 구매 성향을 반영해서, 가성비와 후기 기반으로
+                    비교를 선호하는 편이시군요. 필요한 정보를 가장 효율적으로 정리해 드릴게요.
+                  </div>
+                </div>
+
+                <div class="message user">
+                  <div class="bubble">
+                    토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기랑 Top3 제품을 표로 보여줘.
+                  </div>
+                </div>
+
+                <div class="message">
+                  <div class="avatar-mini">AI</div>
+                  <div class="bubble">
+                    구매 맥락을 인식했습니다. 예산 범위 10만원대, 후기 평판, Top3 비교, 표형 요약을 우선으로 정리해서 추천드립니다.
+                  </div>
+                </div>
+              </div>
+
+              <div class="composer">
+                <textarea placeholder="MyAI에게 질문을 입력하세요...">토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.</textarea>
+                <button class="send-btn">전송</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="bottom-grid">
+          <div class="panel mini-panel">
+            <h4>핵심 기능</h4>
+            <ul>
+              <li>사용자 선호도 기반 맞춤형 프롬프트 생성</li>
+              <li>다중 Public AI 동시 비교</li>
+              <li>DB 및 메모리 기반 개인화 학습</li>
+              <li>표/리스트/브리핑 응답 포맷 커스터마이징</li>
+            </ul>
+          </div>
+
+          <div class="panel mini-panel">
+            <h4>실험 시나리오</h4>
+            <ul>
+              <li>구매 추천 질문 테스트</li>
+              <li>개발 관련 설계 질문 테스트</li>
+              <li>메모리 재사용 검증</li>
+              <li>응답 요약/합치기 품질 검증</li>
+            </ul>
+          </div>
+
+          <div class="panel mini-panel">
+            <h4>기대 효과</h4>
+            <ul>
+              <li>단순 질문 전달이 아닌 개인화된 AI 비서</li>
+              <li>문맥 기반 응답 품질 향상</li>
+              <li>실제 서비스형 UX 제공</li>
+              <li>POC 시연용 데모 완성도 향상</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

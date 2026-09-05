@@ -1,6 +1,9 @@
 import json
+from pathlib import Path
 
 from fastapi import Body, FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from sqlalchemy import text
 
@@ -42,11 +45,15 @@ def ensure_database_schema():
 
 ensure_database_schema()
 prompt_builder = PromptBuilder()
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
     title="My AI Assistant",
     version="0.2.0",
 )
+
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 app.include_router(user_router)
@@ -68,6 +75,12 @@ def root():
         "version": "0.2.0",
         "status": "OK",
     }
+
+
+@app.get("/demo")
+@app.get("/ui")
+async def demo_ui():
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health")
