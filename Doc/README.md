@@ -9,15 +9,18 @@
 
 ## Current document set
 
+- [MyAI_Architecture_Design_v1.1.md](MyAI_Architecture_Design_v1.1.md)
 - [MyAI_Architecture_Design_v1.0.md](MyAI_Architecture_Design_v1.0.md)
+- [MyAI_Source_Analysis_v1.1.md](MyAI_Source_Analysis_v1.1.md)
 - [MyAI_Detailed_Design_v1.0.md](MyAI_Detailed_Design_v1.0.md)
 - [MyAI_Implementation_Roadmap_v1.0.md](MyAI_Implementation_Roadmap_v1.0.md)
-- [MyAI_Development_Log_v1.0.md](MyAI_Development_Log_v1.0.md)
-- [MyAI_Development_Log_v1.1.md](MyAI_Development_Log_v1.1.md)
+- [MyAI_Development_Log_v1.3.md](MyAI_Development_Log_v1.3.md)
 - [MyAI_Development_Log_v1.2.md](MyAI_Development_Log_v1.2.md)
-- [MyAI_ChangeLog_v1.0.md](MyAI_ChangeLog_v1.0.md)
-- [MyAI_ChangeLog_v1.1.md](MyAI_ChangeLog_v1.1.md)
+- [MyAI_Development_Log_v1.1.md](MyAI_Development_Log_v1.1.md)
+- [MyAI_Development_Log_v1.0.md](MyAI_Development_Log_v1.0.md)
 - [MyAI_ChangeLog_v1.2.md](MyAI_ChangeLog_v1.2.md)
+- [MyAI_ChangeLog_v1.1.md](MyAI_ChangeLog_v1.1.md)
+- [MyAI_ChangeLog_v1.0.md](MyAI_ChangeLog_v1.0.md)
 
 ## Base principle
 
