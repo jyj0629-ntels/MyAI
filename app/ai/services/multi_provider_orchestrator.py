@@ -182,6 +182,14 @@ class MultiProviderOrchestrator:
                 {"provider": provider_name, "question_length": len(str(request.question or ""))}
             )
 
+            print()
+            print("# --------------------------------")
+            print(f"# PUBLIC PROVIDER PROMPT: {provider_name}")
+            print("# --------------------------------")
+            print(request.prompt or request.question)
+            print("# --------------------------------")
+            print()
+
             async def _ask_with_timing(provider_instance, provider_name_value, request_payload, started_at):
                 try:
                     result = await provider_instance.ask(request_payload)

@@ -16,6 +16,7 @@ from app.schemas.chat_history import ChatHistoryResponse
 
 from app.services.chat_service import ChatService
 from app.services.local_brain_service import LocalBrainService
+from app.services.local_brain_llm_service import LocalBrainLLMService
 
 from app.services.memory_item_service import MemoryItemService
 from app.services.memory_query_service import MemoryQueryService
@@ -229,6 +230,7 @@ async def chat(
     request.prompt = provider_prompt
     request.system_prompt = provider_prompt
     request.user_context = context_package.get("user_profile") or ""
+    brain_result.prompt = provider_prompt
 
     available_providers = (
         orchestrator.registry.list()
@@ -290,7 +292,9 @@ async def chat(
     print()
 
     prompt = (
-        brain_result.prompt
+        request.prompt
+        or brain_result.prompt
+        or request.question
     )
 
     trace = (
@@ -340,7 +344,15 @@ async def chat(
     print(prompt)
     print("# --------------------------------")
     print()
-    
+
+    print()
+    print("# --------------------------------")
+    print("# PUBLIC PROVIDER FINAL PROMPT")
+    print("# --------------------------------")
+    print(prompt)
+    print("# --------------------------------")
+    print()
+
     tracker.start("provider_fanout")
     multi_result = await (
         MultiProviderOrchestrator(
