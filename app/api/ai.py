@@ -20,6 +20,7 @@ from app.services.local_brain_llm_service import LocalBrainLLMService
 
 from app.services.memory_item_service import MemoryItemService
 from app.services.memory_query_service import MemoryQueryService
+from app.services.preference_extraction_service import PreferenceExtractionService
 
 from app.services.prompt_trace_service import PromptTraceService
 
@@ -65,6 +66,12 @@ async def chat(
     tracker = PerformanceTracker()
     tracker.start("request_parse")
     tracker.add_log("request_input", {"question_length": len(str(request.question or "")), "user_id": request.user_id, "conversation_id": request.conversation_id})
+
+    if request.user_id:
+        try:
+            PreferenceExtractionService.persist_from_question(request.user_id, request.question, db)
+        except Exception as exc:
+            print(f"[WARN] preference extraction failed: {exc}")
 
     try:
         if http_request is not None:
@@ -224,10 +231,14 @@ async def chat(
 
     response_template = None
     response_template_repo = ResponseFormatTemplateRepository(db)
-    if request.response_format_template_id:
-        response_template = ResponseFormatTemplateService(response_template_repo).get_by_id(request.response_format_template_id)
-    elif request.user_id:
-        response_template = ResponseFormatTemplateService(response_template_repo).get_default(request.user_id)
+    try:
+        if request.response_format_template_id:
+            response_template = ResponseFormatTemplateService(response_template_repo).get_by_id(request.response_format_template_id)
+        elif request.user_id:
+            response_template = ResponseFormatTemplateService(response_template_repo).get_default(request.user_id)
+    except Exception as exc:
+        print(f"[WARN] response template lookup failed: {exc}")
+        response_template = None
 
     response_template_text = None
     if response_template is not None:
@@ -307,11 +318,15 @@ async def chat(
     print("# --------------------------------")
     print()
 
-    requested_format = request.response_format_text or (
-        ResponseFormatTemplateService(ResponseFormatTemplateRepository(db)).get_default(request.user_id).template_text
-        if request.user_id and ResponseFormatTemplateService(ResponseFormatTemplateRepository(db)).get_default(request.user_id)
-        else None
-    )
+    requested_format = request.response_format_text
+    if requested_format is None and request.user_id:
+        try:
+            default_template = ResponseFormatTemplateService(ResponseFormatTemplateRepository(db)).get_default(request.user_id)
+            if default_template is not None:
+                requested_format = default_template.template_text
+        except Exception as exc:
+            print(f"[WARN] default response template lookup failed: {exc}")
+            requested_format = None
 
     prompt = (
         request.prompt

@@ -20,8 +20,27 @@ from app.api.memory import router as memory_router
 from app.api.memory_item import router as memory_item_router
 from app.api.markdown_memory import router as markdown_memory_router
 from app.api.response_format_templates import router as response_format_templates_router
+from app.db.base import Base
+from app.db.database import engine
+from app.models.ai_prompt_run import AIPromptRun
+from app.models.chat_history import ChatHistory
+from app.models.conversation import Conversation
+from app.models.conversation_memory import ConversationMemory
+from app.models.memory_item import MemoryItem
 from app.models.response_format_template import ResponseFormatTemplate
+from app.models.user import User
 
+
+def ensure_database_schema():
+    try:
+        Base.metadata.create_all(bind=engine)
+        return True
+    except Exception as exc:
+        print(f"[WARN] DB schema bootstrap failed: {exc}")
+        return False
+
+
+ensure_database_schema()
 prompt_builder = PromptBuilder()
 
 app = FastAPI(
