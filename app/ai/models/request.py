@@ -18,6 +18,8 @@ class AIRequest(BaseModel):
 
     provider: Optional[str] = None
 
+    selected_providers: Optional[list[str]] = None
+
     conversation_id: Optional[int] = None
 
     prompt: Optional[str] = None
@@ -75,5 +77,13 @@ class AIRequest(BaseModel):
                 normalized["conversation_id"] = int(normalized["conversation_id"])
             except (TypeError, ValueError):
                 normalized["conversation_id"] = None
+
+        if "selected_providers" in normalized and normalized["selected_providers"] not in (None, ""):
+            providers = normalized["selected_providers"]
+            if isinstance(providers, str):
+                providers = [item.strip() for item in providers.split(",") if item.strip()]
+            normalized["selected_providers"] = [
+                str(item).strip().lower() for item in providers if str(item).strip()
+            ]
 
         return cls(**normalized)

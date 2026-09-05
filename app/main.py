@@ -85,6 +85,29 @@ async def demo_ui():
     return FileResponse(STATIC_DIR / "index.html")
 
 
+from app.services.provider_quota_service import ProviderQuotaService
+
+
+@app.get("/ai/providers/status")
+async def provider_status():
+    try:
+        providers = await ProviderQuotaService.get_status()
+        return {
+            "providers": providers,
+            "note": "Public AI vendors do not provide a common quota API. Remaining quota is displayed only when the provider exposes it; otherwise the value is shown as unknown.",
+        }
+    except Exception as exc:
+        return {
+            "providers": [
+                {"key": "gemini", "label": "Gemini", "quota": "unknown", "status": "unknown", "enabled": True},
+                {"key": "openai", "label": "OpenAI", "quota": "unknown", "status": "unknown", "enabled": True},
+                {"key": "groq", "label": "Groq", "quota": "unknown", "status": "unknown", "enabled": True},
+                {"key": "meta", "label": "Meta AI", "quota": "unknown", "status": "unsupported", "enabled": False},
+            ],
+            "note": f"Provider quota lookup failed: {exc}",
+        }
+
+
 @app.get("/health")
 def health():
 

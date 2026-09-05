@@ -205,6 +205,18 @@ class MultiProviderOrchestrator:
             self.registry.list()
         )
 
+        if getattr(request, "selected_providers", None):
+            selected_providers = [
+                str(item).strip().lower()
+                for item in request.selected_providers
+                if str(item).strip()
+            ]
+            if selected_providers:
+                providers = [
+                    provider_name for provider_name in providers
+                    if provider_name.lower() in selected_providers
+                ]
+
         excluded_providers = [
             provider.strip()
             for provider in

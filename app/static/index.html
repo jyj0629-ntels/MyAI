@@ -307,17 +307,25 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 14px;
-        padding: 14px 14px;
+        gap: 10px;
+        padding: 12px 12px;
         border-radius: 16px;
         border: 1px solid var(--border);
         background: rgba(148,163,184,0.04);
+      }
+
+      .provider-checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
       }
 
       .provider-left {
         display: flex;
         align-items: center;
         gap: 12px;
+        flex: 1;
       }
 
       .provider-logo {
@@ -608,39 +616,7 @@
         <section class="workspace">
           <aside class="panel sidebar">
             <h3>연결된 Public AI</h3>
-            <div class="provider-list">
-              <div class="provider-item">
-                <div class="provider-left">
-                  <div class="provider-logo">G</div>
-                  <div class="provider-name">Gemini</div>
-                </div>
-                <div class="provider-right">online</div>
-              </div>
-
-              <div class="provider-item">
-                <div class="provider-left">
-                  <div class="provider-logo">C</div>
-                  <div class="provider-name">ChatGPT</div>
-                </div>
-                <div class="provider-right">online</div>
-              </div>
-
-              <div class="provider-item">
-                <div class="provider-left">
-                  <div class="provider-logo">Q</div>
-                  <div class="provider-name">Groq</div>
-                </div>
-                <div class="provider-right">online</div>
-              </div>
-
-              <div class="provider-item">
-                <div class="provider-left">
-                  <div class="provider-logo">M</div>
-                  <div class="provider-name">Meta AI</div>
-                </div>
-                <div class="provider-right">online</div>
-              </div>
-            </div>
+            <div class="provider-list" id="providerList"></div>
 
             <div class="module-card">
               <h4>현재 인지된 컨텍스트</h4>
@@ -731,6 +707,12 @@
       const state = {
         userId: 1,
         conversationId: null,
+        providers: [
+          { key: 'gemini', label: 'Gemini', quota: 'unknown', status: 'unknown', enabled: true },
+          { key: 'openai', label: 'OpenAI', quota: 'unknown', status: 'unknown', enabled: true },
+          { key: 'groq', label: 'Groq', quota: 'unknown', status: 'unknown', enabled: true },
+          { key: 'meta', label: 'Meta AI', quota: 'unknown', status: 'unsupported', enabled: false }
+        ]
       };
 
       const questionInput = document.getElementById('questionInput');
@@ -739,6 +721,7 @@
       const historyBtn = document.getElementById('historyBtn');
       const messageList = document.getElementById('messageList');
       const chatStatus = document.getElementById('chatStatus');
+      const providerList = document.getElementById('providerList');
 
       function addMessage(role, content) {
         const row = document.createElement('div');
@@ -771,9 +754,105 @@
         chatStatus.textContent = message;
       }
 
+      function getQuotaLabel(provider) {
+        const quota = provider.quota || 'unknown';
+        if (quota === 'unknown' || quota === 'unsupported') {
+          return 'quota unknown';
+        }
+        return `${quota} left`;
+      }
+
+      function renderProviderList() {
+        providerList.innerHTML = '';
+
+        state.providers.forEach((provider) => {
+          const item = document.createElement('label');
+          item.className = 'provider-item';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'provider-checkbox';
+          checkbox.checked = provider.enabled;
+          checkbox.disabled = provider.status === 'unsupported';
+          checkbox.addEventListener('change', () => {
+            provider.enabled = checkbox.checked;
+            renderProviderList();
+          });
+
+          const left = document.createElement('div');
+          left.className = 'provider-left';
+
+          const logo = document.createElement('div');
+          logo.className = 'provider-logo';
+          logo.textContent = provider.label.charAt(0).toUpperCase();
+
+          const info = document.createElement('div');
+          info.className = 'provider-name';
+          info.textContent = provider.label;
+
+          left.appendChild(logo);
+          left.appendChild(info);
+
+          const right = document.createElement('div');
+          right.className = 'provider-right';
+          const quotaText = getQuotaLabel(provider);
+          const stateText = provider.status === 'unsupported' ? 'unsupported' : (provider.enabled ? 'selected' : 'disabled');
+          right.textContent = `${quotaText} / ${stateText}`;
+          right.style.color = provider.status === 'unsupported' ? '#fbbf24' : (provider.enabled ? '#6ee7b7' : '#fbbf24');
+
+          item.appendChild(checkbox);
+          item.appendChild(left);
+          item.appendChild(right);
+          providerList.appendChild(item);
+        });
+      }
+
+      async function loadProviderStatus() {
+        try {
+          const res = await fetch('/ai/providers/status');
+          if (!res.ok) {
+            throw new Error('provider status unavailable');
+          }
+
+          const data = await res.json();
+          const providers = Array.isArray(data.providers) ? data.providers : state.providers;
+          state.providers = providers.map((provider) => ({
+            ...provider,
+            key: String(provider.key || provider.label || '').toLowerCase(),
+            enabled: Boolean(provider.enabled),
+            quota: provider.quota || 'unknown',
+            status: provider.status || 'unknown',
+          }));
+          renderProviderList();
+        } catch (error) {
+          console.warn('provider status fetch failed, using fallback state', error);
+          renderProviderList();
+        }
+      }
+
+      function getSelectedProviders() {
+        return state.providers
+          .filter((provider) => provider.enabled)
+          .map((provider) => provider.key);
+      }
+
       async function ensureConversation() {
         if (state.conversationId) {
           return state.conversationId;
+        }
+
+        try {
+          const listRes = await fetch('/conversations/');
+          if (listRes.ok) {
+            const conversations = await listRes.json();
+            if (Array.isArray(conversations) && conversations.length) {
+              const latest = conversations.sort((a, b) => Number(b.id) - Number(a.id))[0];
+              state.conversationId = latest.id;
+              return state.conversationId;
+            }
+          }
+        } catch (error) {
+          console.warn('최근 대화 조회 실패, 새 대화를 생성합니다.', error);
         }
 
         const res = await fetch('/conversations/', {
@@ -862,11 +941,13 @@
           addMessage('user', text);
           const conversationId = await ensureConversation();
 
+          const selectedProviders = getSelectedProviders();
           const payload = {
             user_id: state.userId,
             question: text,
             conversation_id: conversationId,
-            provider: 'gemini',
+            provider: selectedProviders[0] || 'gemini',
+            selected_providers: selectedProviders,
             response_format_text: '답변은 아래 형식으로 정리해줘\n- 핵심 요약\n- 비교표\n- 최종 추천\n- 이유'
           };
 
@@ -906,10 +987,11 @@
 
       window.addEventListener('load', async () => {
         try {
+          await loadProviderStatus();
           await ensureConversation();
+          await loadHistory();
           await loadPreferences();
           setStatus('AI 비서 연결 완료');
-          addMessage('ai', '안녕하세요. 저는 MyAI입니다. 최근 구매 성향을 반영해서, 가성비와 후기 기반으로 비교를 선호하는 편이시군요. 필요한 정보를 가장 효율적으로 정리해 드릴게요.');
         } catch (error) {
           console.error(error);
           setStatus('연결 실패');

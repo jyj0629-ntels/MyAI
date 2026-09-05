@@ -2,6 +2,7 @@ import os
 
 from openai import AsyncOpenAI
 
+from app.core.config import settings
 from app.ai.providers.base import AIProvider
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
@@ -73,11 +74,16 @@ class OpenAIProvider(AIProvider):
             )
 
             answer = response.choices[0].message.content or ""
+            usage = getattr(response, "usage", None)
+            input_tokens = getattr(usage, "prompt_tokens", None)
+            output_tokens = getattr(usage, "completion_tokens", None)
 
             return AIResponse(
                 provider=self.name,
                 model=self.model,
                 answer=answer,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
                 success=True
             )
 

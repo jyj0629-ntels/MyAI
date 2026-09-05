@@ -78,6 +78,10 @@ class GroqProvider(AIProvider):
             print("# --------------------------------")
             print()
 
+            usage = getattr(response, "usage", None)
+            input_tokens = getattr(usage, "prompt_tokens", None)
+            output_tokens = getattr(usage, "completion_tokens", None)
+
             print(
                 f"[GROQ SUCCESS] "
                 f"{self.model}"
@@ -87,6 +91,8 @@ class GroqProvider(AIProvider):
                 provider=self.name,
                 model=self.model,
                 answer=answer,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
                 success=True
             )
 

@@ -48,13 +48,14 @@ class GeminiProvider(AIProvider):
                 contents=prompt
             )
 
-            if hasattr(
-                result,
-                "usage_metadata"
-            ):
-                print(
-                    result.usage_metadata
-                )
+            usage_metadata = getattr(result, "usage_metadata", None)
+            input_tokens = None
+            output_tokens = None
+
+            if usage_metadata is not None:
+                print(usage_metadata)
+                input_tokens = getattr(usage_metadata, "prompt_token_count", None)
+                output_tokens = getattr(usage_metadata, "candidates_token_count", None)
 
             print()
             print("# --------------------------------")
@@ -68,6 +69,8 @@ class GeminiProvider(AIProvider):
                 provider=self.name,
                 model=settings.GEMINI_MODEL,
                 answer=result.text,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
                 success=True
             )
 
