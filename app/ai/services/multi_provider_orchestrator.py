@@ -24,7 +24,7 @@ class MultiProviderOrchestrator:
     ):
 
         tracker = PerformanceTracker()
-        tracker.start("provider_dispatch")
+        tracker.start("provider_dispatch", {"question_length": len(str(request.question or ""))})
 
         providers = (
             self.registry.list()
@@ -65,9 +65,34 @@ class MultiProviderOrchestrator:
                 f"{provider_name}"
             )
 
+            provider_started_at = tracker.start(
+                f"provider_call:{provider_name}",
+                {"provider": provider_name, "question_length": len(str(request.question or ""))}
+            )
+
+            async def _ask_with_timing(provider_instance, provider_name_value, request_payload, started_at):
+                try:
+                    result = await provider_instance.ask(request_payload)
+                    tracker.finish(
+                        f"provider_call:{provider_name_value}",
+                        started_at,
+                        {"provider": provider_name_value, "status": "completed" if getattr(result, "success", False) else "failed"}
+                    )
+                    return result
+                except Exception as exc:
+                    tracker.finish(
+                        f"provider_call:{provider_name_value}",
+                        started_at,
+                        {"provider": provider_name_value, "status": "error", "error": str(exc)}
+                    )
+                    raise
+
             tasks.append(
-                provider.ask(
-                    request
+                _ask_with_timing(
+                    provider,
+                    provider_name,
+                    request,
+                    provider_started_at
                 )
             )
 
@@ -136,6 +161,7 @@ class MultiProviderOrchestrator:
             print("# --------------------------------")
             print()
 
+        tracker.start("public_response_summary")
         collector = (
             ResponseCollector()
         )
@@ -145,6 +171,7 @@ class MultiProviderOrchestrator:
                 responses
             )
         )
+        tracker.finish("public_response_summary", metadata={"response_count": len(collected)})
 
         selected = (
             {

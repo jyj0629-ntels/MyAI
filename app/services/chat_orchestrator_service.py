@@ -18,6 +18,9 @@ class ChatOrchestratorService:
         memory_service
     ):
 
+        tracker = __import__("app.services.performance_tracker", fromlist=["PerformanceTracker"]).PerformanceTracker()
+        tracker.start("conversation_save")
+
         chat_service = (
             ChatService(
                 ChatRepository(db)
@@ -34,10 +37,12 @@ class ChatOrchestratorService:
             output_tokens=response.output_tokens,
             success=response.success
         )
+        tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success)})
 
         if not request.conversation_id:
             return
 
+        tracker.start("conversation_summary_build")
         history = (
             chat_service
             .get_recent_by_conversation(
@@ -45,6 +50,7 @@ class ChatOrchestratorService:
                 limit=20
             )
         )
+        tracker.finish("conversation_summary_build", metadata={"conversation_id": request.conversation_id, "history_count": len(history)})
 
         messages = []
 
@@ -68,6 +74,7 @@ class ChatOrchestratorService:
         if not request.user_id:
             return
 
+        tracker.start("memory_extraction")
         summary = (
             ConversationMemoryService(
                 db
@@ -77,6 +84,7 @@ class ChatOrchestratorService:
         )
 
         if not summary:
+            tracker.finish("memory_extraction", metadata={"status": "skipped_empty_summary"})
 
             print()
             print("# --------------------------------")
@@ -105,8 +113,10 @@ class ChatOrchestratorService:
                     summary=summary
                 )
             )
+            tracker.finish("memory_extraction", metadata={"status": "completed", "memory_count": len(memories)})
 
         except Exception as e:
+            tracker.finish("memory_extraction", metadata={"status": "error", "error": str(e)})
 
             print()
             print("# --------------------------------")
@@ -118,6 +128,7 @@ class ChatOrchestratorService:
 
             return
 
+        tracker.start("memory_persist")
         for memory in memories:
 
             print()
@@ -180,5 +191,6 @@ class ChatOrchestratorService:
                 f"{memory.key}"
             )
 
+        tracker.finish("memory_persist", metadata={"saved_memory_count": len(memories)})
         print("# --------------------------------")
         print()

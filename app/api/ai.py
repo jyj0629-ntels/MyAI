@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
@@ -50,45 +50,39 @@ router = APIRouter(
 orchestrator = create_orchestrator()
 
 
-@router.post("/chat")
+@router.post("/chat", response_model=AIResponse)
 async def chat(
-    http_request: Request,
+    request: AIRequest = Body(
+        ..., 
+        description="Question and optional context for the AI assistant."
+    ),
+    http_request: Request | None = None,
     db: Session = Depends(get_db)
 ):
     tracker = PerformanceTracker()
     tracker.start("request_parse")
+    tracker.add_log("request_input", {"question_length": len(str(request.question or "")), "user_id": request.user_id, "conversation_id": request.conversation_id})
 
     try:
-        payload = None
+        if http_request is not None:
+            content_type = (
+                http_request.headers.get("content-type", "")
+                .lower()
+            )
 
-        content_type = (
-            http_request.headers.get("content-type", "")
-            .lower()
-        )
+            if "application/json" not in content_type and (
+                "application/x-www-form-urlencoded" in content_type
+                or "multipart/form-data" in content_type
+            ):
+                form_data = await http_request.form()
+                payload = {
+                    key: value
+                    for key, value in form_data.items()
+                }
+                request = AIRequest.from_payload(payload or {})
 
-        if "application/json" in content_type:
-            payload = await http_request.json()
-        elif "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
-            form_data = await http_request.form()
-            payload = {
-                key: value
-                for key, value in form_data.items()
-            }
-        else:
-            raw_body = await http_request.body()
-            if raw_body:
-                try:
-                    payload = json.loads(raw_body)
-                except Exception:
-                    payload = None
-
-        if payload is None:
-            payload = {
-                key: value
-                for key, value in http_request.query_params.items()
-            }
-
-        request = AIRequest.from_payload(payload or {})
+        if not request.question or not str(request.question).strip():
+            raise ValueError("question is required and must be a non-empty string.")
 
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -96,6 +90,8 @@ async def chat(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
     tracker.finish("request_parse")
+
+    tracker.start("context_build")
 
     memory_service = MemoryItemService(
         MemoryItemRepository(db)
@@ -160,6 +156,7 @@ async def chat(
         )
     )
     tracker.finish("context_package_build")
+    tracker.finish("context_build", metadata={"preferences": len(preferences), "projects": len(projects), "goals": len(goals)})
 
     print()
     print("# --------------------------------")
@@ -194,7 +191,7 @@ async def chat(
             )
         )
     )
-    tracker.finish("local_brain_analysis")
+    tracker.finish("local_brain_analysis", metadata={"task_type": getattr(brain_result, "task_type", None), "provider": getattr(brain_result, "provider", None)})
 
     print()
     print("# --------------------------------")
@@ -341,7 +338,7 @@ async def chat(
             request
         )
     )
-    tracker.finish("provider_fanout")
+    tracker.finish("provider_fanout", metadata={"response_count": len(multi_result.get("responses", []))})
 
     judge_request = (
         multi_result.get(
@@ -543,9 +540,10 @@ async def chat(
             memory_service=memory_service
         )
     )
-    tracker.finish("post_process")
+    tracker.finish("post_process", metadata={"provider": response.provider, "success": bool(response.success)})
     tracker.print_summary()
 
+    response.performance = tracker.as_dict()
     return response
 
 @router.get(

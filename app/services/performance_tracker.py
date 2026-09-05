@@ -6,18 +6,20 @@ class PerformanceTracker:
     def __init__(self):
         self._steps: list[dict[str, Any]] = []
 
-    def start(self, step_name: str):
+    def start(self, step_name: str, metadata: dict[str, Any] | None = None):
         started_at = time.perf_counter()
-        self._steps.append({
+        step = {
             "name": step_name,
             "start": started_at,
             "end": None,
             "elapsed": None,
-        })
-        print(f"[STEP START] {step_name}")
+            "metadata": metadata or {},
+        }
+        self._steps.append(step)
+        print(f"[STEP START] {step_name} metadata={metadata or {}}")
         return started_at
 
-    def finish(self, step_name: str, started_at: float | None = None):
+    def finish(self, step_name: str, started_at: float | None = None, metadata: dict[str, Any] | None = None):
         end_at = time.perf_counter()
         if started_at is None:
             started_at = end_at
@@ -26,17 +28,21 @@ class PerformanceTracker:
             if step["name"] == step_name and step["end"] is None:
                 step["end"] = end_at
                 step["elapsed"] = round(end_at - started_at, 4)
-                print(f"[STEP END] {step_name} elapsed={step['elapsed']}s")
+                if metadata:
+                    step["metadata"].update(metadata)
+                print(f"[STEP END] {step_name} elapsed={step['elapsed']}s metadata={step['metadata']}")
                 return step["elapsed"]
 
         elapsed = round(end_at - started_at, 4)
-        print(f"[STEP END] {step_name} elapsed={elapsed}s")
-        self._steps.append({
+        step = {
             "name": step_name,
             "start": started_at,
             "end": end_at,
             "elapsed": elapsed,
-        })
+            "metadata": metadata or {},
+        }
+        self._steps.append(step)
+        print(f"[STEP END] {step_name} elapsed={elapsed}s metadata={step['metadata']}")
         return elapsed
 
     def print_summary(self):
@@ -51,9 +57,22 @@ class PerformanceTracker:
                 elapsed = "incomplete"
             else:
                 elapsed = f"{elapsed}s"
-            print(f"[{name}] {elapsed}")
+            metadata = step.get("metadata") or {}
+            print(f"[{name}] {elapsed} metadata={metadata}")
         print("# --------------------------------")
         print()
+
+    def as_dict(self):
+        return {
+            "steps": [
+                {
+                    "name": step["name"],
+                    "elapsed": step["elapsed"],
+                    "metadata": step.get("metadata") or {},
+                }
+                for step in self._steps
+            ]
+        }
 
     def add_log(self, label: str, payload: Any):
         print(f"[TRACE] {label}: {payload}")

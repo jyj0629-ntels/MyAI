@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Any, Optional
 
 
 class AIResponse(BaseModel):
@@ -16,3 +16,5 @@ class AIResponse(BaseModel):
     success: bool = True
 
     error: Optional[str] = None
+
+    performance: Optional[dict[str, Any]] = None

@@ -1,6 +1,6 @@
 import json
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Body, FastAPI, HTTPException, Request
 
 from sqlalchemy import text
 
@@ -74,8 +74,14 @@ def health_db():
         "result": value
     }
 
-@app.post("/ai/ask")
-async def ask_ai(http_request: Request):
+@app.post("/ai/ask", response_model=dict)
+async def ask_ai(
+    request: AIRequest = Body(
+        ..., 
+        description="Request payload for the AI assistant."
+    ),
+    http_request: Request | None = None
+):
 
     try:
         content_type = http_request.headers.get("content-type", "").lower()
@@ -103,6 +109,7 @@ async def ask_ai(http_request: Request):
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
+    request_obj = request
     provider = request_obj.provider or "mock"
 
     user_id = 1

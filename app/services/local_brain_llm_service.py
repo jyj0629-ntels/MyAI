@@ -2,6 +2,7 @@ from app.ai.models.request import AIRequest
 from app.ai.providers.ollama_provider import OllamaProvider
 from app.schemas.brain_result import BrainResult
 from app.core.config import settings
+from app.services.performance_tracker import PerformanceTracker
 
 import json
 import re
@@ -109,6 +110,9 @@ class LocalBrainLLMService:
         project_context
     ):
 
+        tracker = PerformanceTracker()
+        tracker.start("local_llm_context_learning", {"question_length": len(str(question or ""))})
+
         if self.should_use_fast_path(question):
             print()
             print("# --------------------------------")
@@ -132,11 +136,13 @@ class LocalBrainLLMService:
             print("reason=deep_analysis_disabled")
             print("# --------------------------------")
             print()
-            return self.build_fast_path_result(
+            result = self.build_fast_path_result(
                 question=question,
                 user_profile=user_profile,
                 project_context=project_context
             )
+            tracker.finish("local_llm_context_learning", metadata={"path": "disabled", "task_type": result.task_type})
+            return result
 
         request = self.build_request(
             question=question,
@@ -156,11 +162,13 @@ class LocalBrainLLMService:
         print("# --------------------------------")
         print()
 
+        tracker.start("local_llm_provider_call", {"provider": "ollama"})
         response = await (
             OllamaProvider().ask(
                 request
             )
         )
+        tracker.finish("local_llm_provider_call", metadata={"provider": "ollama", "success": bool(getattr(response, "success", False))})
 
         print()
         print("# --------------------------------")
@@ -207,6 +215,8 @@ class LocalBrainLLMService:
             payload = json.loads(
                 json_text
             )
+
+            tracker.add_log("local_llm_decision_payload", payload)
 
             payload.setdefault(
                 "task_type",
