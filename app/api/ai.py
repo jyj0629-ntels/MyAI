@@ -56,7 +56,7 @@ async def chat(
         ..., 
         description="Question and optional context for the AI assistant."
     ),
-    http_request: Request | None = None,
+    http_request: Request = None,
     db: Session = Depends(get_db)
 ):
     tracker = PerformanceTracker()

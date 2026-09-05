@@ -80,7 +80,7 @@ async def ask_ai(
         ..., 
         description="Request payload for the AI assistant."
     ),
-    http_request: Request | None = None
+    http_request: Request = None
 ):
 
     try:
