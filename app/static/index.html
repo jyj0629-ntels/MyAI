@@ -686,7 +686,7 @@
               </div>
 
               <div class="composer">
-                <textarea id="questionInput" placeholder="MyAI에게 질문을 입력하세요...">토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.</textarea>
+                <textarea id="questionInput" placeholder="MyAI에게 질문을 입력하세요..."></textarea>
                 <button class="send-btn" id="sendBtn">전송</button>
               </div>
             </div>
@@ -855,6 +855,8 @@
           return;
         }
 
+        questionInput.value = '';
+
         try {
           setStatus('질문 전송 중');
           addMessage('user', text);
@@ -883,9 +885,6 @@
           const answer = data.answer || data.summary || '응답이 비어 있습니다.';
           addMessage('ai', answer);
           setStatus('AI 응답 완료');
-          if (questionInput) {
-            questionInput.value = '';
-          }
         } catch (error) {
           console.error(error);
           setStatus('전송 실패');
