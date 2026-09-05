@@ -1,3 +1,4 @@
+from app.models.memory_item import MemoryItem
 from app.repositories.chat_repository import ChatRepository
 
 from app.services.chat_service import ChatService
@@ -190,6 +191,28 @@ class ChatOrchestratorService:
                 f"[MEMORY SAVED] "
                 f"{memory.key}"
             )
+
+        if getattr(response, "comparison", None) and request.user_id:
+            score = float((response.comparison or {}).get("consensus_score", 0.0)) / 100.0
+            if score >= 0.75:
+                theme_key = f"theme_{abs(hash(request.question[:120]))}"
+                memory = MemoryItem(
+                    user_id=request.user_id,
+                    type="PREFERENCE",
+                    key=theme_key,
+                    content=f"질문: {request.question[:180]} | 결론: {response.summary or response.answer[:300]} | 신뢰도: {score:.2f}",
+                    importance=0.8,
+                    confidence=score,
+                    freshness=1.0,
+                    source_type="conversation",
+                    source_conversation_id=request.conversation_id,
+                    source_chat_history_id=None,
+                    scope="USER",
+                    status="CANDIDATE"
+                )
+                if not memory_service.exists_by_key(request.user_id, memory.key):
+                    memory_service.create(memory)
+                    print(f"[MEMORY SAVED FROM COMPARISON] {memory.key} confidence={score:.2f}")
 
         tracker.finish("memory_persist", metadata={"saved_memory_count": len(memories)})
         print("# --------------------------------")

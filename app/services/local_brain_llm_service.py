@@ -74,6 +74,63 @@ class LocalBrainLLMService:
             prompt=question
         )
 
+    @staticmethod
+    def get_provider_specialty(provider_name: str) -> str:
+        provider_name = (provider_name or "").strip().lower()
+        specialties = {
+            "gemini": "당신은 전략적 분석, 긴 맥락 이해, 질문의 본질을 파악하고 종합적인 비교를 잘하는 역할을 수행합니다.",
+            "groq": "당신은 빠른 응답과 실용적 요약, 구조화된 결론 작성에 강합니다.",
+            "openai": "당신은 명확하고 정교한 답변, 문서형 설명, 사용자 맞춤형 판단을 잘합니다.",
+            "deepseek": "당신은 실무적이고 간결한 결론과 우선순위 정렬에 강합니다.",
+            "ollama": "당신은 로컬 추론과 장기 사용자 맥락을 반영해 맞춤형 요약을 제공합니다.",
+        }
+        return specialties.get(provider_name, "당신은 사용자의 질문을 분석해 가장 정확하고 개인화된 결론을 전달하는 AI입니다.")
+
+    @classmethod
+    def build_provider_prompt(
+        cls,
+        question: str,
+        user_profile: str,
+        project_context,
+        provider_name: str,
+        task_type: str = "GENERAL"
+    ) -> str:
+        profile_block = user_profile or "없음"
+        project_block = str(project_context or "없음")
+        provider_role = cls.get_provider_specialty(provider_name)
+
+        return f"""
+[역할]
+{provider_role}
+
+[업무 유형]
+{task_type}
+
+[사용자 질문]
+{question}
+
+[사용자 성향 및 선호]
+{profile_block}
+
+[프로젝트 및 맥락]
+{project_block}
+
+[지시]
+1. 이 사용자의 질문을 본인의 전문 역량에 맞게 재구성하라.
+2. 사용자의 성향, 관심사, 목적, 과거 학습 내용을 반영해 답변하라.
+3. 답변은 친절하고 구체적이며, 사용자에게 실질적으로 도움이 되는 형식으로 작성하라.
+4. 필요한 경우 우선순위, 장단점, 추천 이유, 위험 요소, 다음 액션을 포함하라.
+5. 최종 답변은 3~7개의 핵심 포인트로 정리하고, 가장 중요한 결론을 첫 문장에 명확히 적어라.
+6. 사용자의 취향과 가치관을 고려해 가장 적합한 판단을 제시하라.
+
+[출력 형식]
+- 핵심 결론
+- 이유와 근거
+- 사용자 맞춤 추천
+- 잠재 리스크 또는 주의점
+- 다음 행동 제안
+"""
+
     def build_request(
         self,
         question,

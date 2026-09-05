@@ -62,6 +62,23 @@ class PerformanceTracker:
         print("# --------------------------------")
         print()
 
+    def final_report(self):
+        report = self.as_dict()
+        print()
+        print("# --------------------------------")
+        print("# FINAL PERFORMANCE REPORT")
+        print("# --------------------------------")
+        for step in report["steps"]:
+            elapsed = step["elapsed"]
+            if elapsed is None:
+                elapsed = "incomplete"
+            else:
+                elapsed = f"{elapsed}s"
+            print(f"[{step['name']}] {elapsed} metadata={step['metadata']}")
+        print("# --------------------------------")
+        print()
+        return report
+
     def as_dict(self):
         return {
             "steps": [

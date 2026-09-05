@@ -9,6 +9,12 @@ class AIResponse(BaseModel):
 
     answer: str
 
+    summary: Optional[str] = None
+
+    comparison: Optional[dict[str, Any]] = None
+
+    sources: Optional[list[dict[str, Any]]] = None
+
     input_tokens: Optional[int] = None
 
     output_tokens: Optional[int] = None
@@ -18,3 +24,5 @@ class AIResponse(BaseModel):
     error: Optional[str] = None
 
     performance: Optional[dict[str, Any]] = None
+
+    requires_confirmation: bool = False

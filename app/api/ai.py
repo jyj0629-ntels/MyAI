@@ -90,6 +90,7 @@ async def chat(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
     tracker.finish("request_parse")
+    tracker.add_log("request_parse_report", tracker.as_dict())
 
     tracker.start("context_build")
 
@@ -218,6 +219,17 @@ async def chat(
         or brain_result.provider
     )
 
+    provider_prompt = LocalBrainLLMService().build_provider_prompt(
+        question=request.question,
+        user_profile=context_package.get("user_profile") or "",
+        project_context=context_package.get("project_context") or [],
+        provider_name=provider or settings.PRIMARY_PROVIDER,
+        task_type=brain_result.task_type
+    )
+    request.prompt = provider_prompt
+    request.system_prompt = provider_prompt
+    request.user_context = context_package.get("user_profile") or ""
+
     available_providers = (
         orchestrator.registry.list()
     )
@@ -339,6 +351,7 @@ async def chat(
         )
     )
     tracker.finish("provider_fanout", metadata={"response_count": len(multi_result.get("responses", []))})
+    comparison = multi_result.get("comparison")
 
     judge_request = (
         multi_result.get(
@@ -530,6 +543,18 @@ async def chat(
 
                             break
 
+    if comparison:
+        response.summary = comparison.get("combined_summary")
+        response.comparison = comparison
+        response.sources = [{
+            "provider": item["provider"],
+            "model": item.get("model"),
+            "summary": (item.get("summary") or item.get("answer") or "")[:500],
+            "score": comparison.get("consensus_score", 0)
+        } for item in multi_result.get("responses", [])]
+        response.requires_confirmation = comparison.get("consensus_score", 0) < 80
+        response.answer = comparison.get("combined_summary") or response.answer
+
     tracker.start("post_process")
     await (
         ChatOrchestratorService()
@@ -542,8 +567,9 @@ async def chat(
     )
     tracker.finish("post_process", metadata={"provider": response.provider, "success": bool(response.success)})
     tracker.print_summary()
-
-    response.performance = tracker.as_dict()
+    final_report = tracker.final_report()
+    tracker.add_log("final_performance_report", final_report)
+    response.performance = final_report
     return response
 
 @router.get(
