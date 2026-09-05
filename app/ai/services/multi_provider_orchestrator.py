@@ -181,7 +181,7 @@ class MultiProviderOrchestrator:
     ):
 
         tracker = PerformanceTracker()
-        tracker.start("provider_dispatch", {"question_length": len(str(request.question or ""))})
+        tracker.start("4.1 provider_dispatch", {"question_length": len(str(request.question or ""))})
 
         providers = (
             self.registry.list()
@@ -223,7 +223,7 @@ class MultiProviderOrchestrator:
             )
 
             provider_started_at = tracker.start(
-                f"provider_call:{provider_name}",
+                f"4.2 provider_call:{provider_name}",
                 {"provider": provider_name, "question_length": len(str(request.question or ""))}
             )
 
@@ -239,14 +239,14 @@ class MultiProviderOrchestrator:
                 try:
                     result = await provider_instance.ask(request_payload)
                     tracker.finish(
-                        f"provider_call:{provider_name_value}",
+                        f"4.2 provider_call:{provider_name_value}",
                         started_at,
                         {"provider": provider_name_value, "status": "completed" if getattr(result, "success", False) else "failed"}
                     )
                     return result
                 except Exception as exc:
                     tracker.finish(
-                        f"provider_call:{provider_name_value}",
+                        f"4.2 provider_call:{provider_name_value}",
                         started_at,
                         {"provider": provider_name_value, "status": "error", "error": str(exc)}
                     )
@@ -326,7 +326,7 @@ class MultiProviderOrchestrator:
             print("# --------------------------------")
             print()
 
-        tracker.start("public_response_summary")
+        tracker.start("4.3 public_response_summary")
         collector = (
             ResponseCollector()
         )
@@ -336,7 +336,7 @@ class MultiProviderOrchestrator:
                 responses
             )
         )
-        tracker.finish("public_response_summary", metadata={"response_count": len(collected)})
+        tracker.finish("4.3 public_response_summary", metadata={"response_count": len(collected)})
 
         comparison = self.compare_responses(collected)
         tracker.add_log("provider_comparison_summary", comparison)
@@ -425,7 +425,7 @@ class MultiProviderOrchestrator:
                 )
             )
 
-        tracker.finish("provider_dispatch")
+        tracker.finish("4.1 provider_dispatch")
         tracker.add_log("provider_dispatch_summary", {
             "response_count": len(collected),
             "selected_mode": selected["mode"] if selected else "single_default",

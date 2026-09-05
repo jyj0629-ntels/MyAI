@@ -64,7 +64,7 @@ async def chat(
     db: Session = Depends(get_db)
 ):
     tracker = PerformanceTracker()
-    tracker.start("request_parse")
+    tracker.start("1. request_parse")
     tracker.add_log("request_input", {"question_length": len(str(request.question or "")), "user_id": request.user_id, "conversation_id": request.conversation_id})
 
     if request.user_id:
@@ -99,10 +99,10 @@ async def chat(
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
-    tracker.finish("request_parse")
+    tracker.finish("1. request_parse")
     tracker.add_log("request_parse_report", tracker.as_dict())
 
-    tracker.start("context_build")
+    tracker.start("2. context_build")
 
     memory_service = MemoryItemService(
         MemoryItemRepository(db)
@@ -117,14 +117,14 @@ async def chat(
     retrieved_memories = []
 
     if request.user_id:
-        tracker.start("memory_retrieval")
+        tracker.start("2.1 memory_retrieval")
         retrieved_memories = (
             memory_query_service.query(
                 user_id=request.user_id,
                 question=request.question
             )
         )
-        tracker.finish("memory_retrieval")
+        tracker.finish("2.1 memory_retrieval")
 
     print()
     print("# --------------------------------")
@@ -157,7 +157,7 @@ async def chat(
         if memory.type == "GOAL"
     ]
 
-    tracker.start("context_package_build")
+    tracker.start("2.2 context_package_build")
     context_package = (
         ContextPackageService()
         .build(
@@ -166,8 +166,8 @@ async def chat(
             projects=projects
         )
     )
-    tracker.finish("context_package_build")
-    tracker.finish("context_build", metadata={"preferences": len(preferences), "projects": len(projects), "goals": len(goals)})
+    tracker.finish("2.2 context_package_build")
+    tracker.finish("2. context_build", metadata={"preferences": len(preferences), "projects": len(projects), "goals": len(goals)})
 
     print()
     print("# --------------------------------")
@@ -186,7 +186,7 @@ async def chat(
     print()
 
     brain = LocalBrainService()
-    tracker.start("local_brain_analysis")
+    tracker.start("3. local_llm_prompt_generation")
     brain_result = await (
         brain.analyze(
             question=request.question,
@@ -202,7 +202,7 @@ async def chat(
             )
         )
     )
-    tracker.finish("local_brain_analysis", metadata={"task_type": getattr(brain_result, "task_type", None), "provider": getattr(brain_result, "provider", None)})
+    tracker.finish("3. local_llm_prompt_generation", metadata={"task_type": getattr(brain_result, "task_type", None), "provider": getattr(brain_result, "provider", None)})
 
     print()
     print("# --------------------------------")
@@ -399,7 +399,7 @@ async def chat(
         print("# --------------------------------")
         print()
 
-    tracker.start("provider_fanout")
+    tracker.start("4. provider_fanout")
     multi_result = await (
         MultiProviderOrchestrator(
             orchestrator.registry
@@ -408,7 +408,7 @@ async def chat(
             request
         )
     )
-    tracker.finish("provider_fanout", metadata={"response_count": len(multi_result.get("responses", []))})
+    tracker.finish("4. provider_fanout", metadata={"response_count": len(multi_result.get("responses", []))})
     comparison = multi_result.get("comparison")
 
     judge_request = (
@@ -430,7 +430,7 @@ async def chat(
         judge_request
         and settings.ENABLE_LOCAL_CONSENSUS
     ):
-        tracker.start("local_consensus_judge")
+        tracker.start("5. consensus_judge")
         judge_response = await (
             orchestrator.ask(
                 provider_name=
@@ -438,7 +438,7 @@ async def chat(
                 request=judge_request
             )
         )
-        tracker.finish("local_consensus_judge")
+        tracker.finish("5. consensus_judge")
 
         print()
         print("# --------------------------------")
@@ -613,7 +613,7 @@ async def chat(
         response.requires_confirmation = comparison.get("consensus_score", 0) < 80
         response.answer = comparison.get("combined_summary") or response.answer
 
-    tracker.start("post_process")
+    tracker.start("6. memory_persist_and_finalize")
     await (
         ChatOrchestratorService()
         .post_process(
@@ -623,7 +623,7 @@ async def chat(
             memory_service=memory_service
         )
     )
-    tracker.finish("post_process", metadata={"provider": response.provider, "success": bool(response.success)})
+    tracker.finish("6. memory_persist_and_finalize", metadata={"provider": response.provider, "success": bool(response.success)})
     tracker.print_summary()
     final_report = tracker.final_report()
     tracker.add_log("final_performance_report", final_report)
