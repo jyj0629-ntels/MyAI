@@ -573,13 +573,11 @@ async def chat(
                 print()
 
             if final_answer:
-                response.answer = (
-                    final_answer
-                ) 
-                
-                if best_provider: 
+                response.answer = MultiProviderOrchestrator.format_final_answer(final_answer)
+
+                if best_provider:
                     for item in multi_result.get(
-                        "responses", 
+                        "responses",
                         []
                     ):
                         if (
@@ -591,7 +589,7 @@ async def chat(
                             .strip()
                             .lower()
                         ):
-                            
+
                             response.provider = (
                                 item["provider"]
                             )
@@ -614,6 +612,10 @@ async def chat(
         } for item in multi_result.get("responses", [])]
         response.requires_confirmation = comparison.get("consensus_score", 0) < 80
         response.answer = combined_summary or response.answer
+
+    response.answer = MultiProviderOrchestrator.format_final_answer(response.answer or "")
+    if response.summary:
+        response.summary = MultiProviderOrchestrator.format_final_answer(response.summary)
 
     tracker.start("6. memory_persist_and_finalize")
     await (
