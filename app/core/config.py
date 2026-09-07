@@ -27,6 +27,15 @@ class Settings:
         "GROQ_MODEL"
     )
 
+    MISTRAL_API_KEY = os.getenv(
+        "MISTRAL_API_KEY"
+    )
+
+    MISTRAL_MODEL = os.getenv(
+        "MISTRAL_MODEL",
+        "mistral-small-latest"
+    )
+
     DEEPSEEK_API_KEY = os.getenv(
         "DEEPSEEK_API_KEY"
     )
@@ -53,7 +62,7 @@ class Settings:
 
     PUBLIC_PROVIDERS = os.getenv(
         "PUBLIC_PROVIDERS",
-        "gemini,groq,openai"
+        "gemini,groq,openai,mistral"
     )
 
     LOCAL_BRAIN_DEFAULT_PROVIDER = os.getenv(
@@ -122,7 +131,7 @@ class Settings:
     OLLAMA_TIMEOUT = int(
         os.getenv(
             "OLLAMA_TIMEOUT",
-            "300"
+            "600"
         )
     )
 

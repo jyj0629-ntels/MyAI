@@ -102,6 +102,7 @@ async def provider_status():
                 {"key": "gemini", "label": "Gemini", "quota": "unknown", "status": "unknown", "enabled": True},
                 {"key": "openai", "label": "OpenAI", "quota": "unknown", "status": "unknown", "enabled": True},
                 {"key": "groq", "label": "Groq", "quota": "unknown", "status": "unknown", "enabled": True},
+                {"key": "mistral", "label": "Mistral", "quota": "unknown", "status": "unknown", "enabled": True},
                 {"key": "meta", "label": "Meta AI", "quota": "unknown", "status": "unsupported", "enabled": False},
             ],
             "note": f"Provider quota lookup failed: {exc}",

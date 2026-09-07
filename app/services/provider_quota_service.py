@@ -34,6 +34,12 @@ class ProviderQuotaService:
                 "quota": "unknown",
                 "enabled": bool(os.getenv("GROQ_API_KEY")),
             },
+            "mistral": {
+                "label": "Mistral",
+                "status": "unknown",
+                "quota": "unknown",
+                "enabled": bool(os.getenv("MISTRAL_API_KEY")),
+            },
             "meta": {
                 "label": "Meta AI",
                 "status": "unsupported",
@@ -103,6 +109,19 @@ class ProviderQuotaService:
         return {"status": "configured", "quota": "unknown"}
 
     @staticmethod
+    async def _get_mistral_status() -> dict[str, Any]:
+        api_key = os.getenv("MISTRAL_API_KEY")
+        if not api_key:
+            return {"status": "not_configured", "quota": "unknown"}
+
+        url = "https://api.mistral.ai/v1/models"
+        headers = {"Authorization": f"Bearer {api_key}"}
+        ok, payload = await ProviderQuotaService._safe_get(url, headers=headers)
+        if ok:
+            return {"status": "configured", "quota": "unknown"}
+        return {"status": "configured", "quota": "unknown"}
+
+    @staticmethod
     async def get_status() -> list[dict[str, Any]]:
         cfg = ProviderQuotaService._provider_config()
 
@@ -110,6 +129,7 @@ class ProviderQuotaService:
             "openai": ProviderQuotaService._get_openai_status,
             "groq": ProviderQuotaService._get_groq_status,
             "gemini": ProviderQuotaService._get_gemini_status,
+            "mistral": ProviderQuotaService._get_mistral_status,
         }
 
         results = await asyncio.gather(
@@ -137,4 +157,4 @@ class ProviderQuotaService:
             "enabled": False,
         }
 
-        return [cfg[name] for name in ["gemini", "openai", "groq", "meta"]]
+        return [cfg[name] for name in ["gemini", "openai", "groq", "mistral", "meta"]]
