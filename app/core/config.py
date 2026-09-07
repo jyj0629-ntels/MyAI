@@ -8,7 +8,8 @@ load_dotenv()
 class Settings:
 
     DATABASE_URL = os.getenv(
-        "DATABASE_URL"
+        "DATABASE_URL",
+        "postgresql+psycopg://myai:wjddudwns.123@postgres:5432/myai"
     )
 
     GEMINI_API_KEY = os.getenv(
