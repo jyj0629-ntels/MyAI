@@ -7,9 +7,34 @@ load_dotenv()
 
 class Settings:
 
+    POSTGRES_HOST = os.getenv(
+        "POSTGRES_HOST",
+        "postgres"
+    )
+
+    POSTGRES_PORT = os.getenv(
+        "POSTGRES_PORT",
+        "5432"
+    )
+
+    POSTGRES_DB = os.getenv(
+        "POSTGRES_DB",
+        "myai"
+    )
+
+    POSTGRES_USER = os.getenv(
+        "POSTGRES_USER",
+        "myai"
+    )
+
+    POSTGRES_PASSWORD = os.getenv(
+        "POSTGRES_PASSWORD",
+        "wjddudwns.123"
+    )
+
     DATABASE_URL = os.getenv(
         "DATABASE_URL",
-        "postgresql+psycopg://myai:wjddudwns.123@postgres:5432/myai"
+        f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     )
 
     GEMINI_API_KEY = os.getenv(

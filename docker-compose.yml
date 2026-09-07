@@ -6,9 +6,9 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: myai
-      POSTGRES_USER: myai
-      POSTGRES_PASSWORD: wjddudwns.123
+      POSTGRES_DB: ${POSTGRES_DB:-myai}
+      POSTGRES_USER: ${POSTGRES_USER:-myai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wjddudwns.123}
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
