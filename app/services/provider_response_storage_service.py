@@ -29,14 +29,24 @@ class ProviderResponseStorageService:
         for index, item in enumerate(provider_responses or [], start=1):
             provider = str(item.get("provider") or "unknown").strip() or "unknown"
             model = str(item.get("model") or item.get("provider") or "unknown").strip() or "unknown"
-            answer = str(item.get("answer") or item.get("summary") or "").strip()
+            summary = str(item.get("summary") or item.get("answer") or "").strip()
+            answer = str(item.get("answer") or "").strip()
+            main_text = summary or answer
+            response_time_ms = item.get("response_time_ms")
             lines.append(f"## {index}. {provider} ({model})")
             lines.append("")
             lines.append(f"**provider:** {provider}")
             lines.append(f"**model:** {model}")
+            if response_time_ms is not None:
+                try:
+                    response_time_ms_value = float(response_time_ms)
+                    time_text = f"{response_time_ms_value:g}ms"
+                    lines.append(f"**응답 시간:** {time_text}")
+                except (TypeError, ValueError):
+                    lines.append(f"**응답 시간:** {response_time_ms}")
             lines.append("")
             lines.append("```text")
-            lines.append(answer if answer else "(empty response)")
+            lines.append(main_text if main_text else "(empty response)")
             lines.append("```")
             lines.append("")
 
@@ -68,6 +78,7 @@ class ProviderResponseStorageService:
             heading = raw_lines[0].strip()
             provider = "unknown"
             model = "unknown"
+            response_time_ms = None
             if "(" in heading and heading.endswith(")"):
                 base = heading.rsplit("(", 1)
                 provider = base[0].strip().split(".", 1)[-1].strip()
@@ -78,6 +89,13 @@ class ProviderResponseStorageService:
             answer_lines: list[str] = []
             capture = False
             for line in raw_lines[1:]:
+                if line.startswith("**응답 시간:**"):
+                    value = line.split(":", 1)[1].strip().replace("ms", "").strip()
+                    try:
+                        response_time_ms = float(value)
+                    except ValueError:
+                        response_time_ms = None
+                    continue
                 if line.strip() == "```text":
                     capture = True
                     continue
@@ -87,10 +105,13 @@ class ProviderResponseStorageService:
                 if capture:
                     answer_lines.append(line)
 
+            answer_text = "\n".join(answer_lines).strip() or "(empty response)"
             result.append({
                 "provider": provider,
                 "model": model,
-                "answer": "\n".join(answer_lines).strip() or "(empty response)"
+                "answer": answer_text,
+                "summary": answer_text,
+                "response_time_ms": response_time_ms,
             })
 
         return result

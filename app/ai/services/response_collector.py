@@ -23,12 +23,18 @@ class ResponseCollector:
                 )
             )
 
+            response_time_ms = getattr(response, "response_time_ms", None)
+            if response_time_ms is None:
+                perf = getattr(response, "performance", None) or {}
+                response_time_ms = perf.get("response_time_ms")
+
             result.append(
                 {
                     "provider": response.provider,
                     "model": response.model,
                     "answer": response.answer,
-                    "summary": summary
+                    "summary": summary,
+                    "response_time_ms": response_time_ms,
                 }
             )
 

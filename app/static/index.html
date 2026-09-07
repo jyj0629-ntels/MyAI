@@ -541,6 +541,10 @@
       line-height: 1.9;
     }
 
+    body.modal-open {
+      overflow: hidden;
+    }
+
     .response-modal {
       position: fixed;
       inset: 0;
@@ -550,6 +554,7 @@
       justify-content: center;
       padding: 24px;
       z-index: 90;
+      overscroll-behavior: contain;
     }
 
     .response-modal.visible {
@@ -566,6 +571,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      overscroll-behavior: contain;
     }
 
     .response-modal-header {
@@ -579,6 +585,7 @@
     .response-modal-body {
       overflow: auto;
       padding: 18px 20px 22px;
+      overscroll-behavior: contain;
     }
 
     .response-grid {
@@ -603,6 +610,12 @@
       border-bottom: 1px solid var(--border);
       font-weight: 700;
       color: var(--primary);
+    }
+
+    .provider-response-meta {
+      padding: 10px 14px 0;
+      color: var(--muted);
+      font-size: 0.8rem;
     }
 
     .provider-response-text {
@@ -833,6 +846,19 @@
     const providerResponseGrid = document.getElementById('providerResponseGrid');
     const closeResponseModalBtn = document.getElementById('closeResponseModalBtn');
 
+    function formatProviderResponseText(item) {
+      const rawText = item.summary || item.answer || '';
+      if (!rawText || !String(rawText).trim()) {
+        return '응답 내용이 비어 있습니다.';
+      }
+
+      return String(rawText)
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .replace(/\[\s*(gemini|groq|openai|meta|ollama|chatgpt|deepseek)\s*\]/gi, '')
+        .trim();
+    }
+
     function openProviderResponsesModal(providerResponses) {
       providerResponseGrid.innerHTML = '';
 
@@ -840,6 +866,7 @@
         providerResponseGrid.innerHTML = '<div class="provider-response-box"><div class="provider-response-label">응답 정보</div><pre class="provider-response-text">저장된 Public AI 응답이 없습니다.</pre></div>';
         responseModal.classList.add('visible');
         responseModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
         return;
       }
 
@@ -851,22 +878,32 @@
         label.className = 'provider-response-label';
         label.textContent = `${item.provider || 'Unknown'}${item.model ? ` · ${item.model}` : ''}`;
 
+        const meta = document.createElement('div');
+        meta.className = 'provider-response-meta';
+        const timingValue = Number(item.response_time_ms ?? item.responseTimeMs ?? 0);
+        meta.textContent = Number.isFinite(timingValue) && timingValue > 0
+          ? `응답 시간: ${timingValue.toFixed(2)}ms`
+          : '응답 시간: 미기록';
+
         const text = document.createElement('pre');
         text.className = 'provider-response-text';
-        text.textContent = item.answer || item.summary || '응답 내용이 비어 있습니다.';
+        text.textContent = formatProviderResponseText(item);
 
         box.appendChild(label);
+        box.appendChild(meta);
         box.appendChild(text);
         providerResponseGrid.appendChild(box);
       });
 
       responseModal.classList.add('visible');
       responseModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
     }
 
     function closeProviderResponsesModal() {
       responseModal.classList.remove('visible');
       responseModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
     }
 
     function addMessage(role, content, meta = null) {
@@ -1144,6 +1181,11 @@
     closeResponseModalBtn.addEventListener('click', closeProviderResponsesModal);
     responseModal.addEventListener('click', (event) => {
       if (event.target === responseModal) {
+        closeProviderResponsesModal();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && responseModal.classList.contains('visible')) {
         closeProviderResponsesModal();
       }
     });

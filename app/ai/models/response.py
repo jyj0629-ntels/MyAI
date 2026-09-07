@@ -19,6 +19,10 @@ class AIResponse(BaseModel):
 
     provider_response_path: Optional[str] = None
 
+    request_time_ms: Optional[float] = None
+
+    response_time_ms: Optional[float] = None
+
     input_tokens: Optional[int] = None
 
     output_tokens: Optional[int] = None

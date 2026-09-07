@@ -1,5 +1,6 @@
 import asyncio
 import re
+import time
 from difflib import SequenceMatcher
 
 from app.core.config import settings
@@ -266,19 +267,23 @@ class MultiProviderOrchestrator:
             print()
 
             async def _ask_with_timing(provider_instance, provider_name_value, request_payload, started_at):
+                call_started_at = time.perf_counter()
                 try:
                     result = await provider_instance.ask(request_payload)
+                    elapsed_ms = round((time.perf_counter() - call_started_at) * 1000.0, 2)
+                    result.response_time_ms = getattr(result, "response_time_ms", None) or elapsed_ms
                     tracker.finish(
                         f"4.2 provider_call:{provider_name_value}",
                         started_at,
-                        {"provider": provider_name_value, "status": "completed" if getattr(result, "success", False) else "failed"}
+                        {"provider": provider_name_value, "status": "completed" if getattr(result, "success", False) else "failed", "response_time_ms": elapsed_ms}
                     )
                     return result
                 except Exception as exc:
+                    elapsed_ms = round((time.perf_counter() - call_started_at) * 1000.0, 2)
                     tracker.finish(
                         f"4.2 provider_call:{provider_name_value}",
                         started_at,
-                        {"provider": provider_name_value, "status": "error", "error": str(exc)}
+                        {"provider": provider_name_value, "status": "error", "error": str(exc), "response_time_ms": elapsed_ms}
                     )
                     raise
 
