@@ -15,6 +15,10 @@ class AIResponse(BaseModel):
 
     sources: Optional[list[dict[str, Any]]] = None
 
+    provider_responses: Optional[list[dict[str, Any]]] = None
+
+    provider_response_path: Optional[str] = None
+
     input_tokens: Optional[int] = None
 
     output_tokens: Optional[int] = None

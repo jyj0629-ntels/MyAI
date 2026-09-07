@@ -604,14 +604,37 @@ async def chat(
         combined_summary = MultiProviderOrchestrator.format_final_answer(comparison.get("combined_summary"))
         response.summary = combined_summary
         response.comparison = comparison
+        raw_provider_responses = [
+            {
+                "provider": item["provider"],
+                "model": item.get("model"),
+                "answer": item.get("answer") or "",
+                "summary": (item.get("summary") or item.get("answer") or "")[:500],
+                "score": comparison.get("consensus_score", 0)
+            }
+            for item in multi_result.get("responses", [])
+        ]
         response.sources = [{
             "provider": item["provider"],
             "model": item.get("model"),
             "summary": (item.get("summary") or item.get("answer") or "")[:500],
             "score": comparison.get("consensus_score", 0)
         } for item in multi_result.get("responses", [])]
+        response.provider_responses = raw_provider_responses
         response.requires_confirmation = comparison.get("consensus_score", 0) < 80
         response.answer = combined_summary or response.answer
+
+    if not getattr(response, "provider_responses", None) and multi_result.get("responses"):
+        response.provider_responses = [
+            {
+                "provider": item["provider"],
+                "model": item.get("model"),
+                "answer": item.get("answer") or "",
+                "summary": (item.get("summary") or item.get("answer") or "")[:500],
+                "score": 0
+            }
+            for item in multi_result.get("responses", [])
+        ]
 
     response.answer = MultiProviderOrchestrator.format_final_answer(response.answer or "")
     if response.summary:

@@ -1,1002 +1,1178 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MyAI (나를 아는 Real My AI)</title>
-    <style>
-      :root {
-        --bg: #09111f;
-        --panel: rgba(14, 24, 40, 0.92);
-        --panel-strong: #0d1d2d;
-        --panel-soft: #13233c;
-        --border: rgba(148, 163, 184, 0.18);
-        --primary: #6ee7f9;
-        --primary-2: #9a7bff;
-        --green: #6ee7b7;
-        --amber: #fbbf24;
-        --text: #edf6ff;
-        --muted: #9bb1c7;
-        --danger: #f87171;
-        --shadow: 0 20px 60px rgba(9, 17, 31, 0.6);
-      }
 
-      * { box-sizing: border-box; }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyAI (나를 아는 Real My AI)</title>
+  <style>
+    :root {
+      --bg: #09111f;
+      --panel: rgba(14, 24, 40, 0.92);
+      --panel-strong: #0d1d2d;
+      --panel-soft: #13233c;
+      --border: rgba(148, 163, 184, 0.18);
+      --primary: #6ee7f9;
+      --primary-2: #9a7bff;
+      --green: #6ee7b7;
+      --amber: #fbbf24;
+      --text: #edf6ff;
+      --muted: #9bb1c7;
+      --danger: #f87171;
+      --shadow: 0 20px 60px rgba(9, 17, 31, 0.6);
+    }
 
-      body {
-        margin: 0;
-        font-family: "Segoe UI", "Noto Sans KR", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(110, 231, 249, 0.20), transparent 25%),
-          radial-gradient(circle at bottom right, rgba(154, 123, 255, 0.18), transparent 30%),
-          var(--bg);
-        color: var(--text);
-      }
+    * {
+      box-sizing: border-box;
+    }
 
-      .app-shell {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(110, 231, 249, 0.20), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(154, 123, 255, 0.18), transparent 30%),
+        var(--bg);
+      color: var(--text);
+    }
 
-      .topbar {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        backdrop-filter: blur(18px);
-        background: rgba(9, 17, 31, 0.78);
-        border-bottom: 1px solid var(--border);
-      }
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-      .topbar-inner {
-        max-width: 1440px;
-        margin: 0 auto;
-        padding: 18px 28px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-      }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(9, 17, 31, 0.78);
+      border-bottom: 1px solid var(--border);
+    }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-      }
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
 
-      .brand-mark {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-2));
-        display: grid;
-        place-items: center;
-        font-size: 18px;
-        box-shadow: var(--shadow);
-      }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
 
-      .brand-name {
-        font-size: 1.1rem;
-      }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      box-shadow: var(--shadow);
+    }
 
-      .top-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
+    .brand-name {
+      font-size: 1.1rem;
+    }
 
-      .pill {
-        border: 1px solid var(--border);
-        background: rgba(148, 163, 184, 0.08);
-        color: var(--text);
-        border-radius: 999px;
-        padding: 8px 14px;
-        font-size: 0.85rem;
-      }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-      .main {
-        max-width: 1440px;
-        width: 100%;
-        margin: 0 auto;
-        padding: 30px 28px 50px;
-      }
+    .pill {
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.08);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+    }
 
-      .hero {
-        display: grid;
-        grid-template-columns: 1.35fr 0.95fr;
-        gap: 28px;
-        margin-bottom: 28px;
-      }
+    .main {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 30px 28px 50px;
+    }
 
-      .panel {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 28px;
-        box-shadow: var(--shadow);
-      }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap: 28px;
+      margin-bottom: 28px;
+    }
 
-      .hero-copy {
-        padding: 30px 32px;
-      }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
 
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(110, 231, 249, 0.08);
-        border: 1px solid rgba(110, 231, 249, 0.2);
-        color: var(--primary);
-        border-radius: 999px;
-        padding: 8px 12px;
-        font-size: 0.8rem;
-        margin-bottom: 18px;
-      }
+    .hero-copy {
+      padding: 30px 32px;
+    }
 
-      h1 {
-        margin: 0;
-        font-size: clamp(2.2rem, 5vw, 4.1rem);
-        line-height: 1.02;
-        letter-spacing: -0.04em;
-      }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(110, 231, 249, 0.08);
+      border: 1px solid rgba(110, 231, 249, 0.2);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      margin-bottom: 18px;
+    }
 
-      .gradient-text {
-        background: linear-gradient(90deg, var(--primary), #c4a1ff 40%, #fff 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4.1rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
 
-      .subtitle {
-        margin-top: 18px;
-        font-size: 1.06rem;
-        line-height: 1.7;
-        color: var(--muted);
-        max-width: 620px;
-      }
+    .gradient-text {
+      background: linear-gradient(90deg, var(--primary), #c4a1ff 40%, #fff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
-      .cta-row {
-        margin-top: 24px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
+    .subtitle {
+      margin-top: 18px;
+      font-size: 1.06rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 620px;
+    }
 
-      .primary-btn, .secondary-btn {
-        padding: 14px 20px;
-        border-radius: 14px;
-        border: 1px solid transparent;
-        cursor: pointer;
-        font-weight: 700;
-        transition: .2s ease;
-      }
+    .cta-row {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-      .primary-btn {
-        background: linear-gradient(135deg, var(--primary), var(--primary-2));
-        color: #07111b;
-      }
+    .primary-btn,
+    .secondary-btn {
+      padding: 14px 20px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-weight: 700;
+      transition: .2s ease;
+    }
 
-      .secondary-btn {
-        color: var(--text);
-        background: rgba(148,163,184,0.08);
-        border-color: var(--border);
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #07111b;
+    }
+
+    .secondary-btn {
+      color: var(--text);
+      background: rgba(148, 163, 184, 0.08);
+      border-color: var(--border);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .stat {
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.04);
+      border-radius: 18px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .profile-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .avatar-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(110, 231, 249, 0.08), rgba(154, 123, 255, 0.04));
+    }
+
+    .avatar {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--green), var(--primary));
+      color: #051217;
+      font-weight: 800;
+      font-size: 1.5rem;
+    }
+
+    .mini-title {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .user-name {
+      margin: 4px 0 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .role-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .role {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.06);
+      font-size: 0.78rem;
+    }
+
+    .insight-box {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(110, 231, 183, 0.04);
+    }
+
+    .insight-box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .insight-box p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 28px;
+    }
+
+    .sidebar,
+    .chat-panel {
+      padding: 22px;
+    }
+
+    .sidebar h3,
+    .chat-panel h3 {
+      margin: 0 0 18px;
+      font-size: 1.1rem;
+    }
+
+    .provider-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .provider-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.04);
+    }
+
+    .provider-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .provider-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .provider-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      background: linear-gradient(135deg, rgba(110, 231, 249, 0.18), rgba(154, 123, 255, 0.12));
+    }
+
+    .provider-name {
+      font-weight: 600;
+    }
+
+    .provider-right {
+      color: var(--green);
+      font-size: 0.75rem;
+    }
+
+    .module-card {
+      margin-top: 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(148, 163, 184, 0.03);
+    }
+
+    .module-card h4 {
+      margin: 0 0 12px;
+    }
+
+    .tag-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      background: rgba(110, 231, 249, 0.08);
+      color: var(--primary);
+      border: 1px solid rgba(110, 231, 249, 0.18);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 640px;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chat-state {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      box-shadow: 0 0 18px rgba(110, 231, 183, 0.7);
+    }
+
+    .messages {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 20px 0;
+      overflow: auto;
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, rgba(110, 231, 249, 0.20), rgba(154, 123, 255, 0.22));
+      border-color: rgba(110, 231, 249, 0.22);
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 14px 16px;
+      border-radius: 18px 18px 18px 6px;
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.06);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .bubble.ai-summary {
+      cursor: pointer;
+      border-color: rgba(110, 231, 249, 0.32);
+      box-shadow: inset 0 0 0 1px rgba(110, 231, 249, 0.12);
+    }
+
+    .bubble.ai-summary:hover {
+      background: rgba(110, 231, 249, 0.08);
+    }
+
+    .message.user .bubble {
+      border-radius: 18px 18px 6px 18px;
+    }
+
+    .avatar-mini {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(110, 231, 249, 0.1);
+    }
+
+    .composer {
+      display: flex;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 74px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      background: rgba(9, 17, 31, 0.6);
+      border-radius: 18px;
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+    }
+
+    .send-btn {
+      min-width: 120px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #07111b;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .bottom-grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 28px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.05);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .status-pill .dot {
+      width: 8px;
+      height: 8px;
+    }
+
+    .mini-panel {
+      padding: 22px;
+    }
+
+    .mini-panel h4 {
+      margin: 0 0 12px;
+    }
+
+    .mini-panel ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    .response-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 12, 20, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 90;
+    }
+
+    .response-modal.visible {
+      display: flex;
+    }
+
+    .response-modal-card {
+      width: min(1100px, 92vw);
+      max-height: 88vh;
+      background: rgba(11, 19, 31, 0.97);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .response-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .response-modal-body {
+      overflow: auto;
+      padding: 18px 20px 22px;
+    }
+
+    .response-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .provider-response-box {
+      display: flex;
+      flex-direction: column;
+      min-height: 360px;
+      background: rgba(148, 163, 184, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .provider-response-label {
+      padding: 12px 14px;
+      background: rgba(110, 231, 249, 0.08);
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .provider-response-text {
+      flex: 1;
+      margin: 0;
+      padding: 14px;
+      color: var(--text);
+      white-space: pre-wrap;
+      overflow: auto;
+      line-height: 1.7;
+      font-size: 0.96rem;
+    }
+
+    @media (max-width: 980px) {
+
+      .hero,
+      .workspace,
+      .bottom-grid {
+        grid-template-columns: 1fr;
       }
 
       .stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-        margin-top: 26px;
+        grid-template-columns: 1fr;
       }
+    }
+  </style>
+</head>
 
-      .stat {
-        padding: 16px 18px;
-        border: 1px solid var(--border);
-        background: rgba(148,163,184,0.04);
-        border-radius: 18px;
-      }
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div class="brand-name">MyAI (나를 아는 Real My AI)</div>
+        </div>
+        <div class="top-actions">
+          <span class="pill">AI 메모리 기반</span>
+          <span class="pill">멀티모델 비교</span>
+          <span class="pill">실시간 동작</span>
+        </div>
+      </div>
+    </header>
 
-      .stat strong {
-        display: block;
-        font-size: 1.5rem;
-        margin-bottom: 6px;
-      }
-
-      .stat span {
-        color: var(--muted);
-        font-size: 0.82rem;
-      }
-
-      .profile-card {
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
-
-      .avatar-box {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 18px;
-        border-radius: 22px;
-        border: 1px solid var(--border);
-        background: linear-gradient(180deg, rgba(110,231,249,0.08), rgba(154,123,255,0.04));
-      }
-
-      .avatar {
-        width: 74px;
-        height: 74px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, var(--green), var(--primary));
-        color: #051217;
-        font-weight: 800;
-        font-size: 1.5rem;
-      }
-
-      .mini-title {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      .user-name {
-        margin: 4px 0 0;
-        font-size: 1.4rem;
-        font-weight: 700;
-      }
-
-      .role-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .role {
-        padding: 8px 10px;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: rgba(148,163,184,0.06);
-        font-size: 0.78rem;
-      }
-
-      .insight-box {
-        padding: 18px;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        background: rgba(110,231,183,0.04);
-      }
-
-      .insight-box strong {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 0.9rem;
-      }
-
-      .insight-box p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.7;
-      }
-
-      .workspace {
-        display: grid;
-        grid-template-columns: 0.82fr 1.18fr;
-        gap: 28px;
-      }
-
-      .sidebar, .chat-panel {
-        padding: 22px;
-      }
-
-      .sidebar h3, .chat-panel h3 {
-        margin: 0 0 18px;
-        font-size: 1.1rem;
-      }
-
-      .provider-list {
-        display: grid;
-        gap: 12px;
-      }
-
-      .provider-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 12px 12px;
-        border-radius: 16px;
-        border: 1px solid var(--border);
-        background: rgba(148,163,184,0.04);
-      }
-
-      .provider-checkbox {
-        width: 16px;
-        height: 16px;
-        accent-color: var(--primary);
-        cursor: pointer;
-      }
-
-      .provider-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-      }
-
-      .provider-logo {
-        width: 30px;
-        height: 30px;
-        border-radius: 10px;
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        font-size: 0.8rem;
-        background: linear-gradient(135deg, rgba(110,231,249,0.18), rgba(154,123,255,0.12));
-      }
-
-      .provider-name {
-        font-weight: 600;
-      }
-
-      .provider-right {
-        color: var(--green);
-        font-size: 0.75rem;
-      }
-
-      .module-card {
-        margin-top: 18px;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 18px;
-        background: rgba(148,163,184,0.03);
-      }
-
-      .module-card h4 {
-        margin: 0 0 12px;
-      }
-
-      .tag-stack {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .tag {
-        background: rgba(110,231,249,0.08);
-        color: var(--primary);
-        border: 1px solid rgba(110,231,249,0.18);
-        border-radius: 999px;
-        padding: 6px 10px;
-        font-size: 0.75rem;
-      }
-
-      .chat-box {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        min-height: 640px;
-      }
-
-      .chat-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .chat-state {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--green);
-        display: inline-block;
-        box-shadow: 0 0 18px rgba(110,231,183,0.7);
-      }
-
-      .messages {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        padding: 20px 0;
-        overflow: auto;
-      }
-
-      .message {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-      }
-
-      .message.user {
-        justify-content: flex-end;
-      }
-
-      .message.user .bubble {
-        background: linear-gradient(135deg, rgba(110,231,249,0.20), rgba(154,123,255,0.22));
-        border-color: rgba(110,231,249,0.22);
-      }
-
-      .bubble {
-        max-width: 75%;
-        padding: 14px 16px;
-        border-radius: 18px 18px 18px 6px;
-        border: 1px solid var(--border);
-        background: rgba(148,163,184,0.06);
-        color: var(--text);
-        line-height: 1.6;
-      }
-
-      .message.user .bubble {
-        border-radius: 18px 18px 6px 18px;
-      }
-
-      .avatar-mini {
-        width: 34px;
-        height: 34px;
-        border-radius: 12px;
-        display: grid;
-        place-items: center;
-        font-size: 0.7rem;
-        font-weight: 700;
-        background: rgba(110, 231, 249, 0.1);
-      }
-
-      .composer {
-        display: flex;
-        gap: 12px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border);
-      }
-
-      textarea {
-        width: 100%;
-        min-height: 74px;
-        resize: vertical;
-        border: 1px solid var(--border);
-        background: rgba(9, 17, 31, 0.6);
-        border-radius: 18px;
-        color: var(--text);
-        padding: 14px 16px;
-        font: inherit;
-      }
-
-      .send-btn {
-        min-width: 120px;
-        border: none;
-        border-radius: 18px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-2));
-        color: #07111b;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      .bottom-grid {
-        margin-top: 28px;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 28px;
-      }
-
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border-radius: 999px;
-        padding: 8px 12px;
-        border: 1px solid var(--border);
-        background: rgba(148,163,184,0.05);
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      .status-pill .dot {
-        width: 8px;
-        height: 8px;
-      }
-
-      .mini-panel {
-        padding: 22px;
-      }
-
-      .mini-panel h4 {
-        margin: 0 0 12px;
-      }
-
-      .mini-panel ul {
-        margin: 0;
-        padding-left: 18px;
-        color: var(--muted);
-        line-height: 1.9;
-      }
-
-      @media (max-width: 980px) {
-        .hero, .workspace, .bottom-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .stats {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div class="topbar-inner">
-          <div class="brand">
-            <div class="brand-mark">M</div>
-            <div class="brand-name">MyAI (나를 아는 Real My AI)</div>
+    <main class="main">
+      <section class="hero">
+        <div class="panel hero-copy">
+          <div class="eyebrow">● 실시간 나만의 AI 비서</div>
+          <h1>
+            나를 이해하고<br />
+            <span class="gradient-text">상황에 맞는 답변</span>을 만드는 AI
+          </h1>
+          <div class="subtitle">
+            MyAI는 사용자의 과거 대화, 관심사, 선호도, 프로젝트 맥락을 기억하고,
+            ChatGPT, Gemini, Groq, Meta AI 같은 공개 AI에 맞춤형 프롬프트를 자동 생성해
+            더 정확하고 개인화된 답변을 만듭니다.
           </div>
-          <div class="top-actions">
-            <span class="pill">AI 메모리 기반</span>
-            <span class="pill">멀티모델 비교</span>
-            <span class="pill">실시간 동작</span>
+
+          <div class="cta-row">
+            <button class="primary-btn" id="startAnswerBtn">답변 시작</button>
+            <button class="secondary-btn" id="historyBtn">기록 관리</button>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <strong>7+</strong>
+              <span>연동 AI 모델</span>
+            </div>
+            <div class="stat">
+              <strong>3x</strong>
+              <span>비교 기반 응답</span>
+            </div>
+            <div class="stat">
+              <strong>120ms</strong>
+              <span>초기 응답 목표</span>
+            </div>
           </div>
         </div>
-      </header>
 
-      <main class="main">
-        <section class="hero">
-          <div class="panel hero-copy">
-            <div class="eyebrow">● 실시간 나만의 AI 비서</div>
-            <h1>
-              나를 이해하고<br />
-              <span class="gradient-text">상황에 맞는 답변</span>을 만드는 AI
-            </h1>
-            <div class="subtitle">
-              MyAI는 사용자의 과거 대화, 관심사, 선호도, 프로젝트 맥락을 기억하고,
-              ChatGPT, Gemini, Groq, Meta AI 같은 공개 AI에 맞춤형 프롬프트를 자동 생성해
-              더 정확하고 개인화된 답변을 만듭니다.
-            </div>
-
-            <div class="cta-row">
-              <button class="primary-btn" id="startAnswerBtn">답변 시작</button>
-              <button class="secondary-btn" id="historyBtn">기록 관리</button>
-            </div>
-
-            <div class="stats">
-              <div class="stat">
-                <strong>7+</strong>
-                <span>연동 AI 모델</span>
-              </div>
-              <div class="stat">
-                <strong>3x</strong>
-                <span>비교 기반 응답</span>
-              </div>
-              <div class="stat">
-                <strong>120ms</strong>
-                <span>초기 응답 목표</span>
-              </div>
+        <div class="panel profile-card">
+          <div class="avatar-box">
+            <div class="avatar">YO</div>
+            <div>
+              <p class="mini-title">현재 사용자 프로필</p>
+              <p class="user-name">Younghoon</p>
             </div>
           </div>
 
-          <div class="panel profile-card">
-            <div class="avatar-box">
-              <div class="avatar">YO</div>
-              <div>
-                <p class="mini-title">현재 사용자 프로필</p>
-                <p class="user-name">Younghoon</p>
-              </div>
-            </div>
+          <div class="role-list">
+            <div class="role">개발 중심</div>
+            <div class="role">가성비 선호</div>
+            <div class="role">Top3 비교</div>
+            <div class="role">표 형식 응답</div>
+          </div>
 
-            <div class="role-list">
-              <div class="role">개발 중심</div>
-              <div class="role">가성비 선호</div>
-              <div class="role">Top3 비교</div>
-              <div class="role">표 형식 응답</div>
-            </div>
+          <div class="insight-box">
+            <strong>AI 메모리 인사이트</strong>
+            <p>
+              최근 구매 관련 질문에서는 가격 대비 성능, 후기 기반 검토, 표 형식 비교를 선호하며,
+              개발 관련 질문에서는 구현 우선과 설계 관점을 중요하게 반영합니다.
+            </p>
+          </div>
+        </div>
+      </section>
 
-            <div class="insight-box">
-              <strong>AI 메모리 인사이트</strong>
-              <p>
-                최근 구매 관련 질문에서는 가격 대비 성능, 후기 기반 검토, 표 형식 비교를 선호하며,
-                개발 관련 질문에서는 구현 우선과 설계 관점을 중요하게 반영합니다.
-              </p>
+      <section class="workspace">
+        <aside class="panel sidebar">
+          <h3>연결된 Public AI</h3>
+          <div class="provider-list" id="providerList"></div>
+
+          <div class="module-card">
+            <h4>현재 인지된 컨텍스트</h4>
+            <div class="tag-stack">
+              <span class="tag">구매 비교</span>
+              <span class="tag">가성비</span>
+              <span class="tag">후기 기반</span>
+              <span class="tag">TOP3 추천</span>
+              <span class="tag">표 형식</span>
+              <span class="tag">개발 설계</span>
             </div>
           </div>
-        </section>
+        </aside>
 
-        <section class="workspace">
-          <aside class="panel sidebar">
-            <h3>연결된 Public AI</h3>
-            <div class="provider-list" id="providerList"></div>
-
-            <div class="module-card">
-              <h4>현재 인지된 컨텍스트</h4>
-              <div class="tag-stack">
-                <span class="tag">구매 비교</span>
-                <span class="tag">가성비</span>
-                <span class="tag">후기 기반</span>
-                <span class="tag">TOP3 추천</span>
-                <span class="tag">표 형식</span>
-                <span class="tag">개발 설계</span>
-              </div>
+        <div class="panel chat-panel">
+          <div class="chat-box">
+            <div class="chat-header">
+              <h3>대화 창</h3>
+              <div class="chat-state"><span class="dot"></span><span id="chatStatus">AI 비서 연결 중</span></div>
             </div>
-          </aside>
 
-          <div class="panel chat-panel">
-            <div class="chat-box">
-              <div class="chat-header">
-                <h3>대화 창</h3>
-                <div class="chat-state"><span class="dot"></span><span id="chatStatus">AI 비서 연결 중</span></div>
-              </div>
-
-              <div class="messages" id="messageList">
-                <div class="message">
-                  <div class="avatar-mini">AI</div>
-                  <div class="bubble">
-                    안녕하세요. 저는 MyAI입니다. 최근 구매 성향을 반영해서, 가성비와 후기 기반으로
-                    비교를 선호하는 편이시군요. 필요한 정보를 가장 효율적으로 정리해 드릴게요.
-                  </div>
-                </div>
-
-                <div class="message user">
-                  <div class="bubble">
-                    토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기랑 Top3 제품을 표로 보여줘.
-                  </div>
-                </div>
-
-                <div class="message">
-                  <div class="avatar-mini">AI</div>
-                  <div class="bubble">
-                    구매 맥락을 인식했습니다. 예산 범위 10만원대, 후기 평판, Top3 비교, 표형 요약을 우선으로 정리해서 추천드립니다.
-                  </div>
+            <div class="messages" id="messageList">
+              <div class="message">
+                <div class="avatar-mini">AI</div>
+                <div class="bubble">
+                  안녕하세요. 저는 MyAI입니다. 최근 구매 성향을 반영해서, 가성비와 후기 기반으로
+                  비교를 선호하는 편이시군요. 필요한 정보를 가장 효율적으로 정리해 드릴게요.
                 </div>
               </div>
 
-              <div class="composer">
-                <textarea id="questionInput" placeholder="MyAI에게 질문을 입력하세요..."></textarea>
-                <button class="send-btn" id="sendBtn">전송</button>
+              <div class="message user">
+                <div class="bubble">
+                  토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기랑 Top3 제품을 표로 보여줘.
+                </div>
+              </div>
+
+              <div class="message">
+                <div class="avatar-mini">AI</div>
+                <div class="bubble">
+                  구매 맥락을 인식했습니다. 예산 범위 10만원대, 후기 평판, Top3 비교, 표형 요약을 우선으로 정리해서 추천드립니다.
+                </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        <section class="bottom-grid">
-          <div class="panel mini-panel">
-            <h4>핵심 기능</h4>
-            <ul>
-              <li>사용자 선호도 기반 맞춤형 프롬프트 생성</li>
-              <li>다중 Public AI 동시 비교</li>
-              <li>DB 및 메모리 기반 개인화 학습</li>
-              <li>표/리스트/브리핑 응답 포맷 커스터마이징</li>
-            </ul>
+            <div class="composer">
+              <textarea id="questionInput" placeholder="MyAI에게 질문을 입력하세요..."></textarea>
+              <button class="send-btn" id="sendBtn">전송</button>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <div class="panel mini-panel">
-            <h4>실험 시나리오</h4>
-            <ul>
-              <li>구매 추천 질문 테스트</li>
-              <li>개발 관련 설계 질문 테스트</li>
-              <li>메모리 재사용 검증</li>
-              <li>응답 요약/합치기 품질 검증</li>
-            </ul>
-          </div>
+      <section class="bottom-grid">
+        <div class="panel mini-panel">
+          <h4>핵심 기능</h4>
+          <ul>
+            <li>사용자 선호도 기반 맞춤형 프롬프트 생성</li>
+            <li>다중 Public AI 동시 비교</li>
+            <li>DB 및 메모리 기반 개인화 학습</li>
+            <li>표/리스트/브리핑 응답 포맷 커스터마이징</li>
+          </ul>
+        </div>
 
-          <div class="panel mini-panel">
-            <h4>기대 효과</h4>
-            <ul>
-              <li>단순 질문 전달이 아닌 개인화된 AI 비서</li>
-              <li>문맥 기반 응답 품질 향상</li>
-              <li>실제 서비스형 UX 제공</li>
-              <li>POC 시연용 데모 완성도 향상</li>
-            </ul>
-          </div>
-        </section>
-      </main>
+        <div class="panel mini-panel">
+          <h4>실험 시나리오</h4>
+          <ul>
+            <li>구매 추천 질문 테스트</li>
+            <li>개발 관련 설계 질문 테스트</li>
+            <li>메모리 재사용 검증</li>
+            <li>응답 요약/합치기 품질 검증</li>
+          </ul>
+        </div>
+
+        <div class="panel mini-panel">
+          <h4>기대 효과</h4>
+          <ul>
+            <li>단순 질문 전달이 아닌 개인화된 AI 비서</li>
+            <li>문맥 기반 응답 품질 향상</li>
+            <li>실제 서비스형 UX 제공</li>
+            <li>POC 시연용 데모 완성도 향상</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="response-modal" id="responseModal" aria-hidden="true">
+    <div class="response-modal-card">
+      <div class="response-modal-header">
+        <h3>Public AI 응답 비교 상세</h3>
+        <button class="secondary-btn" id="closeResponseModalBtn" type="button">닫기</button>
+      </div>
+      <div class="response-modal-body">
+        <div class="response-grid" id="providerResponseGrid"></div>
+      </div>
     </div>
+  </div>
 
-    <script>
-      const state = {
-        userId: 1,
-        conversationId: null,
-        providers: [
-          { key: 'gemini', label: 'Gemini', quota: 'unknown', status: 'unknown', enabled: true },
-          { key: 'openai', label: 'OpenAI', quota: 'unknown', status: 'unknown', enabled: true },
-          { key: 'groq', label: 'Groq', quota: 'unknown', status: 'unknown', enabled: true },
-          { key: 'meta', label: 'Meta AI', quota: 'unknown', status: 'unsupported', enabled: false }
-        ]
-      };
+  <script>
+    const state = {
+      userId: 1,
+      conversationId: null,
+      providers: [
+        { key: 'gemini', label: 'Gemini', quota: 'unknown', status: 'unknown', enabled: true },
+        { key: 'openai', label: 'OpenAI', quota: 'unknown', status: 'unknown', enabled: true },
+        { key: 'groq', label: 'Groq', quota: 'unknown', status: 'unknown', enabled: true },
+        { key: 'meta', label: 'Meta AI', quota: 'unknown', status: 'unsupported', enabled: false }
+      ]
+    };
 
-      const questionInput = document.getElementById('questionInput');
-      const sendBtn = document.getElementById('sendBtn');
-      const startAnswerBtn = document.getElementById('startAnswerBtn');
-      const historyBtn = document.getElementById('historyBtn');
-      const messageList = document.getElementById('messageList');
-      const chatStatus = document.getElementById('chatStatus');
-      const providerList = document.getElementById('providerList');
+    const questionInput = document.getElementById('questionInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const startAnswerBtn = document.getElementById('startAnswerBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const messageList = document.getElementById('messageList');
+    const chatStatus = document.getElementById('chatStatus');
+    const providerList = document.getElementById('providerList');
+    const responseModal = document.getElementById('responseModal');
+    const providerResponseGrid = document.getElementById('providerResponseGrid');
+    const closeResponseModalBtn = document.getElementById('closeResponseModalBtn');
 
-      function addMessage(role, content) {
-        const row = document.createElement('div');
-        row.className = `message ${role === 'user' ? 'user' : ''}`;
+    function openProviderResponsesModal(providerResponses) {
+      providerResponseGrid.innerHTML = '';
 
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar-mini';
-        avatar.textContent = role === 'user' ? 'ME' : 'AI';
-
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        bubble.textContent = content;
-
-        if (role === 'user') {
-          row.appendChild(bubble);
-        } else {
-          row.appendChild(avatar);
-          row.appendChild(bubble);
-        }
-
-        if (role === 'user') {
-          row.appendChild(avatar);
-        }
-
-        messageList.appendChild(row);
-        messageList.scrollTop = messageList.scrollHeight;
+      if (!Array.isArray(providerResponses) || !providerResponses.length) {
+        providerResponseGrid.innerHTML = '<div class="provider-response-box"><div class="provider-response-label">응답 정보</div><pre class="provider-response-text">저장된 Public AI 응답이 없습니다.</pre></div>';
+        responseModal.classList.add('visible');
+        responseModal.setAttribute('aria-hidden', 'false');
+        return;
       }
 
-      function setStatus(message) {
-        chatStatus.textContent = message;
+      providerResponses.forEach((item) => {
+        const box = document.createElement('div');
+        box.className = 'provider-response-box';
+
+        const label = document.createElement('div');
+        label.className = 'provider-response-label';
+        label.textContent = `${item.provider || 'Unknown'}${item.model ? ` · ${item.model}` : ''}`;
+
+        const text = document.createElement('pre');
+        text.className = 'provider-response-text';
+        text.textContent = item.answer || item.summary || '응답 내용이 비어 있습니다.';
+
+        box.appendChild(label);
+        box.appendChild(text);
+        providerResponseGrid.appendChild(box);
+      });
+
+      responseModal.classList.add('visible');
+      responseModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeProviderResponsesModal() {
+      responseModal.classList.remove('visible');
+      responseModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function addMessage(role, content, meta = null) {
+      const row = document.createElement('div');
+      row.className = `message ${role === 'user' ? 'user' : ''}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar-mini';
+      avatar.textContent = role === 'user' ? 'ME' : 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+
+      if (role !== 'user' && meta && Array.isArray(meta.providerResponses) && meta.providerResponses.length) {
+        bubble.classList.add('ai-summary');
+        bubble.title = '클릭하면 각 Public AI 응답을 확인할 수 있습니다.';
+        bubble.addEventListener('click', () => openProviderResponsesModal(meta.providerResponses));
       }
 
-      function getQuotaLabel(provider) {
-        const quota = provider.quota || 'unknown';
-        if (quota === 'unknown' || quota === 'unsupported') {
-          return 'quota unknown';
-        }
-        return `${quota} left`;
+      bubble.textContent = content;
+
+      if (role === 'user') {
+        row.appendChild(bubble);
+      } else {
+        row.appendChild(avatar);
+        row.appendChild(bubble);
       }
 
-      function renderProviderList() {
-        providerList.innerHTML = '';
-
-        state.providers.forEach((provider) => {
-          const item = document.createElement('label');
-          item.className = 'provider-item';
-
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.className = 'provider-checkbox';
-          checkbox.checked = provider.enabled;
-          checkbox.disabled = provider.status === 'unsupported';
-          checkbox.addEventListener('change', () => {
-            provider.enabled = checkbox.checked;
-            renderProviderList();
-          });
-
-          const left = document.createElement('div');
-          left.className = 'provider-left';
-
-          const logo = document.createElement('div');
-          logo.className = 'provider-logo';
-          logo.textContent = provider.label.charAt(0).toUpperCase();
-
-          const info = document.createElement('div');
-          info.className = 'provider-name';
-          info.textContent = provider.label;
-
-          left.appendChild(logo);
-          left.appendChild(info);
-
-          const right = document.createElement('div');
-          right.className = 'provider-right';
-          const quotaText = getQuotaLabel(provider);
-          const stateText = provider.status === 'unsupported' ? 'unsupported' : (provider.enabled ? 'selected' : 'disabled');
-          right.textContent = `${quotaText} / ${stateText}`;
-          right.style.color = provider.status === 'unsupported' ? '#fbbf24' : (provider.enabled ? '#6ee7b7' : '#fbbf24');
-
-          item.appendChild(checkbox);
-          item.appendChild(left);
-          item.appendChild(right);
-          providerList.appendChild(item);
-        });
+      if (role === 'user') {
+        row.appendChild(avatar);
       }
 
-      async function loadProviderStatus() {
-        try {
-          const res = await fetch('/ai/providers/status');
-          if (!res.ok) {
-            throw new Error('provider status unavailable');
-          }
+      messageList.appendChild(row);
+      messageList.scrollTop = messageList.scrollHeight;
+    }
 
-          const data = await res.json();
-          const providers = Array.isArray(data.providers) ? data.providers : state.providers;
-          state.providers = providers.map((provider) => ({
-            ...provider,
-            key: String(provider.key || provider.label || '').toLowerCase(),
-            enabled: Boolean(provider.enabled),
-            quota: provider.quota || 'unknown',
-            status: provider.status || 'unknown',
-          }));
+    function setStatus(message) {
+      chatStatus.textContent = message;
+    }
+
+    function getQuotaLabel(provider) {
+      const quota = provider.quota || 'unknown';
+      if (quota === 'unknown' || quota === 'unsupported') {
+        return 'quota unknown';
+      }
+      return `${quota} left`;
+    }
+
+    function renderProviderList() {
+      providerList.innerHTML = '';
+
+      state.providers.forEach((provider) => {
+        const item = document.createElement('label');
+        item.className = 'provider-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'provider-checkbox';
+        checkbox.checked = provider.enabled;
+        checkbox.disabled = provider.status === 'unsupported';
+        checkbox.addEventListener('change', () => {
+          provider.enabled = checkbox.checked;
           renderProviderList();
-        } catch (error) {
-          console.warn('provider status fetch failed, using fallback state', error);
-          renderProviderList();
-        }
-      }
-
-      function getSelectedProviders() {
-        return state.providers
-          .filter((provider) => provider.enabled)
-          .map((provider) => provider.key);
-      }
-
-      async function ensureConversation() {
-        if (state.conversationId) {
-          return state.conversationId;
-        }
-
-        try {
-          const listRes = await fetch('/conversations/');
-          if (listRes.ok) {
-            const conversations = await listRes.json();
-            if (Array.isArray(conversations) && conversations.length) {
-              const latest = conversations.sort((a, b) => Number(b.id) - Number(a.id))[0];
-              state.conversationId = latest.id;
-              return state.conversationId;
-            }
-          }
-        } catch (error) {
-          console.warn('최근 대화 조회 실패, 새 대화를 생성합니다.', error);
-        }
-
-        const res = await fetch('/conversations/', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ title: 'Demo conversation' })
         });
 
+        const left = document.createElement('div');
+        left.className = 'provider-left';
+
+        const logo = document.createElement('div');
+        logo.className = 'provider-logo';
+        logo.textContent = provider.label.charAt(0).toUpperCase();
+
+        const info = document.createElement('div');
+        info.className = 'provider-name';
+        info.textContent = provider.label;
+
+        left.appendChild(logo);
+        left.appendChild(info);
+
+        const right = document.createElement('div');
+        right.className = 'provider-right';
+        const quotaText = getQuotaLabel(provider);
+        const stateText = provider.status === 'unsupported' ? 'unsupported' : (provider.enabled ? 'selected' : 'disabled');
+        right.textContent = `${quotaText} / ${stateText}`;
+        right.style.color = provider.status === 'unsupported' ? '#fbbf24' : (provider.enabled ? '#6ee7b7' : '#fbbf24');
+
+        item.appendChild(checkbox);
+        item.appendChild(left);
+        item.appendChild(right);
+        providerList.appendChild(item);
+      });
+    }
+
+    async function loadProviderStatus() {
+      try {
+        const res = await fetch('/ai/providers/status');
         if (!res.ok) {
-          throw new Error('대화 생성 실패');
+          throw new Error('provider status unavailable');
         }
 
         const data = await res.json();
-        state.conversationId = data.id;
+        const providers = Array.isArray(data.providers) ? data.providers : state.providers;
+        state.providers = providers.map((provider) => ({
+          ...provider,
+          key: String(provider.key || provider.label || '').toLowerCase(),
+          enabled: Boolean(provider.enabled),
+          quota: provider.quota || 'unknown',
+          status: provider.status || 'unknown',
+        }));
+        renderProviderList();
+      } catch (error) {
+        console.warn('provider status fetch failed, using fallback state', error);
+        renderProviderList();
+      }
+    }
+
+    function getSelectedProviders() {
+      return state.providers
+        .filter((provider) => provider.enabled)
+        .map((provider) => provider.key);
+    }
+
+    async function ensureConversation() {
+      if (state.conversationId) {
         return state.conversationId;
       }
 
-      async function loadHistory() {
-        try {
-          const conversationId = await ensureConversation();
-          const res = await fetch(`/conversations/${conversationId}/history`);
-          if (!res.ok) {
-            throw new Error('이력 조회 실패');
+      try {
+        const listRes = await fetch('/conversations/');
+        if (listRes.ok) {
+          const conversations = await listRes.json();
+          if (Array.isArray(conversations) && conversations.length) {
+            const latest = conversations.sort((a, b) => Number(b.id) - Number(a.id))[0];
+            state.conversationId = latest.id;
+            return state.conversationId;
           }
-
-          const data = await res.json();
-          messageList.innerHTML = '';
-          if (!data.length) {
-            addMessage('ai', '대화 이력이 아직 없습니다. 첫 질문을 보내보세요.');
-            return;
-          }
-
-          data.forEach(item => {
-            addMessage('user', item.question);
-            addMessage('ai', item.answer || item.summary || '응답 내용이 비어 있습니다.');
-          });
-
-          setStatus('기록 로드 완료');
-        } catch (error) {
-          console.error(error);
-          setStatus('기록 로드 실패');
-          addMessage('ai', `기록 조회 중 오류: ${error.message}`);
         }
+      } catch (error) {
+        console.warn('최근 대화 조회 실패, 새 대화를 생성합니다.', error);
       }
 
-      async function loadPreferences() {
-        try {
-          const res = await fetch(`/memory-items/user/${state.userId}`);
-          if (!res.ok) {
-            throw new Error('선호도 조회 실패');
-          }
+      const res = await fetch('/conversations/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Demo conversation' })
+      });
 
-          const data = await res.json();
-          const items = (data || []).slice(0, 5);
-          const profileTags = document.querySelectorAll('.role');
-          const infoBox = document.querySelector('.insight-box p');
-
-          if (items.length) {
-            const summaries = items.map(item => item.content).slice(0, 4);
-            const tagLabels = summaries.length ? summaries : ['가성비', '후기', 'Top3', '표 형식'];
-            profileTags.forEach((tag, index) => {
-              tag.textContent = tagLabels[index] || tag.textContent;
-            });
-            infoBox.textContent = summaries.join(' · ');
-          }
-
-          setStatus('선호도 로드 완료');
-        } catch (error) {
-          console.error(error);
-          setStatus('선호도 로드 실패');
-          addMessage('ai', `선호도 조회 중 오류: ${error.message}`);
-        }
+      if (!res.ok) {
+        throw new Error('대화 생성 실패');
       }
 
-      async function sendQuestion() {
-        const text = questionInput.value.trim();
-        if (!text) {
-          setStatus('질문을 입력해 주세요');
+      const data = await res.json();
+      state.conversationId = data.id;
+      return state.conversationId;
+    }
+
+    async function loadHistory() {
+      try {
+        const conversationId = await ensureConversation();
+        const res = await fetch(`/conversations/${conversationId}/history`);
+        if (!res.ok) {
+          throw new Error('이력 조회 실패');
+        }
+
+        const data = await res.json();
+        messageList.innerHTML = '';
+        if (!data.length) {
+          addMessage('ai', '대화 이력이 아직 없습니다. 첫 질문을 보내보세요.');
           return;
         }
 
-        questionInput.value = '';
+        for (const item of data) {
+          addMessage('user', item.question);
 
-        try {
-          setStatus('질문 전송 중');
-          addMessage('user', text);
-          const conversationId = await ensureConversation();
-
-          const selectedProviders = getSelectedProviders();
-          const payload = {
-            user_id: state.userId,
-            question: text,
-            conversation_id: conversationId,
-            provider: selectedProviders[0] || 'gemini',
-            selected_providers: selectedProviders,
-            response_format_text: '답변은 아래 형식으로 정리해줘\n- 핵심 요약\n- 비교표\n- 최종 추천\n- 이유'
-          };
-
-          const res = await fetch('/ai/chat', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload),
-          });
-
-          if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || '질문 전송 실패');
+          let providerResponses = [];
+          try {
+            if (item.provider_response_path) {
+              const detailRes = await fetch(`/conversations/${conversationId}/history/${item.id}/provider-responses`);
+              if (detailRes.ok) {
+                const detailData = await detailRes.json();
+                providerResponses = Array.isArray(detailData.provider_responses) ? detailData.provider_responses : [];
+              }
+            }
+          } catch (error) {
+            console.warn('provider response history load failed', error);
           }
 
-          const data = await res.json();
-          const answer = data.answer || data.summary || '응답이 비어 있습니다.';
-          addMessage('ai', answer);
-          setStatus('AI 응답 완료');
-        } catch (error) {
-          console.error(error);
-          setStatus('전송 실패');
-          addMessage('ai', `오류: ${error.message}`);
+          addMessage('ai', item.answer || item.summary || '응답 내용이 비어 있습니다.', { providerResponses });
         }
+
+        setStatus('기록 로드 완료');
+      } catch (error) {
+        console.error(error);
+        setStatus('기록 로드 실패');
+        addMessage('ai', `기록 조회 중 오류: ${error.message}`);
+      }
+    }
+
+    async function loadPreferences() {
+      try {
+        const res = await fetch(`/memory-items/user/${state.userId}`);
+        if (!res.ok) {
+          throw new Error('선호도 조회 실패');
+        }
+
+        const data = await res.json();
+        const items = (data || []).slice(0, 5);
+        const profileTags = document.querySelectorAll('.role');
+        const infoBox = document.querySelector('.insight-box p');
+
+        if (items.length) {
+          const summaries = items.map(item => item.content).slice(0, 4);
+          const tagLabels = summaries.length ? summaries : ['가성비', '후기', 'Top3', '표 형식'];
+          profileTags.forEach((tag, index) => {
+            tag.textContent = tagLabels[index] || tag.textContent;
+          });
+          infoBox.textContent = summaries.join(' · ');
+        }
+
+        setStatus('선호도 로드 완료');
+      } catch (error) {
+        console.error(error);
+        setStatus('선호도 로드 실패');
+        addMessage('ai', `선호도 조회 중 오류: ${error.message}`);
+      }
+    }
+
+    async function sendQuestion() {
+      const text = questionInput.value.trim();
+      if (!text) {
+        setStatus('질문을 입력해 주세요');
+        return;
       }
 
-      sendBtn.addEventListener('click', sendQuestion);
-      startAnswerBtn.addEventListener('click', () => {
-        const current = questionInput.value.trim();
-        if (current) {
-          sendQuestion();
-        } else {
-          questionInput.value = '토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.';
-          sendQuestion();
-        }
-      });
-      historyBtn.addEventListener('click', loadHistory);
+      questionInput.value = '';
 
-      window.addEventListener('load', async () => {
-        try {
-          await loadProviderStatus();
-          await ensureConversation();
-          await loadHistory();
-          await loadPreferences();
-          setStatus('AI 비서 연결 완료');
-        } catch (error) {
-          console.error(error);
-          setStatus('연결 실패');
+      try {
+        setStatus('질문 전송 중');
+        addMessage('user', text);
+        const conversationId = await ensureConversation();
+
+        const selectedProviders = getSelectedProviders();
+        const payload = {
+          user_id: state.userId,
+          question: text,
+          conversation_id: conversationId,
+          provider: selectedProviders[0] || 'gemini',
+          selected_providers: selectedProviders,
+          response_format_text: '답변은 아래 형식으로 정리해줘\n- 핵심 요약\n- 비교표\n- 최종 추천\n- 이유'
+        };
+
+        const res = await fetch('/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || '질문 전송 실패');
         }
-      });
-    </script>
-  </body>
+
+        const data = await res.json();
+        const answer = data.answer || data.summary || '응답이 비어 있습니다.';
+        const providerResponses = Array.isArray(data.provider_responses) ? data.provider_responses : [];
+        addMessage('ai', answer, { providerResponses });
+        setStatus('AI 응답 완료');
+      } catch (error) {
+        console.error(error);
+        setStatus('전송 실패');
+        addMessage('ai', `오류: ${error.message}`);
+      }
+    }
+
+    closeResponseModalBtn.addEventListener('click', closeProviderResponsesModal);
+    responseModal.addEventListener('click', (event) => {
+      if (event.target === responseModal) {
+        closeProviderResponsesModal();
+      }
+    });
+
+    sendBtn.addEventListener('click', sendQuestion);
+    startAnswerBtn.addEventListener('click', () => {
+      const current = questionInput.value.trim();
+      if (current) {
+        sendQuestion();
+      } else {
+        questionInput.value = '토퍼를 구매해야 하는데, 10만원대 가성비가 좋고 후기 기준으로 Top3 제품을 표 형식으로 보여줘.';
+        sendQuestion();
+      }
+    });
+    historyBtn.addEventListener('click', loadHistory);
+
+    window.addEventListener('load', async () => {
+      try {
+        await loadProviderStatus();
+        await ensureConversation();
+        await loadHistory();
+        await loadPreferences();
+        setStatus('AI 비서 연결 완료');
+      } catch (error) {
+        console.error(error);
+        setStatus('연결 실패');
+      }
+    });
+  </script>
+</body>
+
 </html>

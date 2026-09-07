@@ -15,7 +15,8 @@ class ChatRepository:
         answer,
         input_tokens,
         output_tokens,
-        success
+        success,
+        provider_response_path=None
     ):
 
         model_name = str(model or provider or "unknown").strip() or "unknown"
@@ -26,6 +27,7 @@ class ChatRepository:
             model=model_name,
             question=question or "",
             answer=answer or "",
+            provider_response_path=provider_response_path,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             success=success

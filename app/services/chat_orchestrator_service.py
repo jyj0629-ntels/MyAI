@@ -28,6 +28,20 @@ class ChatOrchestratorService:
             )
         )
 
+        provider_response_path = None
+        provider_responses = getattr(response, "provider_responses", None) or getattr(response, "sources", None) or []
+        if provider_responses:
+            try:
+                from app.services.provider_response_storage_service import ProviderResponseStorageService
+                provider_response_path = str(
+                    ProviderResponseStorageService().write_markdown(
+                        conversation_id=request.conversation_id,
+                        provider_responses=provider_responses
+                    )
+                )
+            except Exception as exc:
+                print(f"[WARN] provider response markdown save failed: {exc}")
+
         try:
             chat_service.save_chat(
                 conversation_id=request.conversation_id,
@@ -37,9 +51,10 @@ class ChatOrchestratorService:
                 answer=response.answer,
                 input_tokens=response.input_tokens,
                 output_tokens=response.output_tokens,
-                success=response.success
+                success=response.success,
+                provider_response_path=provider_response_path
             )
-            tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success)})
+            tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success), "provider_response_path": provider_response_path})
         except Exception as exc:
             tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": False, "error": str(exc)})
             print(f"[WARN] chat history save failed: {exc}")

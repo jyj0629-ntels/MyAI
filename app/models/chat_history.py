@@ -45,6 +45,12 @@ class ChatHistory(Base):
         nullable=False
     )
 
+    provider_response_path: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        default=None
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),
