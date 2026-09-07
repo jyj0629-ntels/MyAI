@@ -11,6 +11,16 @@ import re
 class LocalBrainLLMService:
 
     @staticmethod
+    def resolve_local_brain_provider() -> str:
+        provider = (
+            settings.LOCAL_LLM_PROVIDER
+            or settings.LOCAL_BRAIN_DEFAULT_PROVIDER
+            or settings.PRIMARY_PROVIDER
+            or "ollama"
+        )
+        return (provider or "ollama").strip().lower()
+
+    @staticmethod
     def should_use_fast_path(question) -> bool:
         if not settings.LOCAL_LLM_FAST_PATH_ENABLED:
             return False
@@ -60,11 +70,7 @@ class LocalBrainLLMService:
         user_profile,
         project_context
     ) -> BrainResult:
-        provider_name = (
-            settings.PRIMARY_PROVIDER
-            or settings.LOCAL_LLM_PROVIDER
-            or "gemini"
-        )
+        provider_name = self.resolve_local_brain_provider()
 
         return BrainResult(
             task_type="GENERAL",
@@ -303,7 +309,7 @@ class LocalBrainLLMService:
 
             raw_provider = str(payload.get("provider", "")).strip()
             if not raw_provider or raw_provider.lower() in {"unknown", "none", "null"}:
-                raw_provider = settings.PRIMARY_PROVIDER
+                raw_provider = self.resolve_local_brain_provider()
             payload["provider"] = raw_provider
 
             payload.setdefault(

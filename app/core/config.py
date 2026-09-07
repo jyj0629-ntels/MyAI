@@ -67,7 +67,7 @@ class Settings:
 
     LOCAL_BRAIN_DEFAULT_PROVIDER = os.getenv(
         "LOCAL_BRAIN_DEFAULT_PROVIDER",
-        PRIMARY_PROVIDER
+        "ollama"
     )
 
     FALLBACK_PROVIDERS = os.getenv(
