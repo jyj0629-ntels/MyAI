@@ -1,3 +1,10 @@
+import asyncio
+import re
+
+from app.ai.models.request import AIRequest
+from app.ai.providers.ollama_provider import OllamaProvider
+
+
 class ResponseSummaryService:
 
     @staticmethod
@@ -7,7 +14,7 @@ class ResponseSummaryService:
             return False
 
         lowered = text.lower()
-        if len(text) < 18:
+        if len(text) < 10:
             return False
 
         boilerplate = (
@@ -73,27 +80,50 @@ class ResponseSummaryService:
             "위험",
             "대안",
             "대비",
+            "성능",
+            "속도",
+            "가성비",
+            "품질",
+            "신뢰성",
+            "지원",
+            "강하다",
+            "좋다",
+            "우수하다",
+            "강한",
+            "좋은",
         )
 
         if any(marker in lowered for marker in key_markers):
             return True
 
+        if any(marker in lowered for marker in ("skt", "kt", "lg u+", "lg", "sk telecom", "네트워크", "요금제", "유선", "광랜", "브로드밴드")):
+            return True
+
         if any(ch.isdigit() for ch in text):
+            return True
+
+        if len(text) >= 30 and any(ch.isalpha() for ch in text) and not any(marker in lowered for marker in ("장식", "잡담", "인사", "반갑", "도와드릴")):
             return True
 
         return False
 
-    def summarize(
-        self,
-        answer: str
-    ):
+    @staticmethod
+    def _clean_sentence(sentence: str) -> str:
+        text = str(sentence).strip()
+        if not text:
+            return ""
+        text = re.sub(r"^[\-\*•\s]+", "", text)
+        text = re.sub(r"^(안녕하세요|반갑습니다|hello|도와드릴게요|저는|여기|다음과|이번|이런|이것은)[^\n]*[\s:]*", "", text)
+        text = re.sub(r"\s{2,}", " ", text)
+        return text.strip()
 
+    @staticmethod
+    def _fallback_summary(answer: str) -> str:
         if not answer:
             return ""
 
         answer = answer.strip()
-
-        selected = []
+        candidates = []
         for raw_line in answer.splitlines():
             line = raw_line.strip()
             if not line:
@@ -106,19 +136,96 @@ class ResponseSummaryService:
                 continue
             if line.startswith("[") and line.endswith("]"):
                 continue
-            if self._is_important_line(line):
-                selected.append(line)
+            line = ResponseSummaryService._clean_sentence(line)
+            if not line:
+                continue
+            if ResponseSummaryService._is_important_line(line):
+                candidates.append(line)
 
-        if not selected:
-            cleaned = []
-            for raw_line in answer.splitlines():
-                line = raw_line.strip()
-                if line and len(line) >= 18 and not line.startswith("#"):
-                    cleaned.append(line)
-            selected = cleaned[:6]
+        if not candidates:
+            normalized = []
+            for raw_line in re.split(r"(?<=[.!?])\s+", answer):
+                sentence = ResponseSummaryService._clean_sentence(raw_line)
+                if sentence and len(sentence) >= 18:
+                    if not any(phrase in sentence.lower() for phrase in ("안녕하세요", "반갑습니다", "장식", "잡담", "도와드릴게요", "긴 설명", "의미 없는")):
+                        normalized.append(sentence)
+            candidates = normalized[:6]
 
-        summary = "\n".join(selected[:8])
-        max_length = 1200
-        if len(summary) > max_length:
-            summary = summary[:max_length].rsplit("\n", 1)[0].strip()
+        if not candidates:
+            cleaned_answer = re.sub(r"^(안녕하세요|반갑습니다|hello|도와드릴게요)[^.!?]*[.!?]\s*", "", answer, flags=re.I)
+            for raw_line in re.split(r"(?<=[.!?])\s+", cleaned_answer):
+                sentence = ResponseSummaryService._clean_sentence(raw_line)
+                if sentence and len(sentence) >= 18:
+                    candidates.append(sentence)
+
+        if len(candidates) > 6:
+            candidates = candidates[:6]
+
+        deduped = []
+        seen = set()
+        for item in candidates:
+            key = item.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(item)
+
+        summary = "\n".join(deduped[:8])
+        if len(summary) > 1200:
+            summary = summary[:1200].rsplit("\n", 1)[0].strip()
         return summary.strip()
+
+    @staticmethod
+    async def summarize_async(answer: str) -> str:
+        if not answer:
+            return ""
+
+        cleaned = str(answer).strip()
+        if not cleaned:
+            return ""
+
+        prompt = f"""
+아래 응답은 한 공공 AI 제공자가 작성한 답변이다.
+반드시 의미 단위로 핵심 사실만 추출해 요약하라.
+- 인사, 반복, 잡담, 장황한 배경 설명은 제거
+- 중요 주장, 근거, 숫자, 조건, 제한, 장점/단점, 추천/리스크만 남김
+- 4~8줄 이내로 간결하게 작성
+- 절대로 문장 끝에서 자르지 말고, 의미 있는 사실만 남겨라
+- 출력은 한국어로만 작성하고, 불필요한 마크다운/헤더는 사용하지 않는다
+
+응답:
+{cleaned}
+"""
+
+        try:
+            request = AIRequest(
+                question=prompt,
+                provider="ollama",
+                think=True,
+            )
+            response = await OllamaProvider().ask(request)
+            if getattr(response, "success", False) and getattr(response, "answer", "").strip():
+                text = str(response.answer).strip()
+                text = re.sub(r"^\s*[-*•]\s*", "", text, flags=re.M)
+                text = re.sub(r"\n{3,}", "\n\n", text)
+                return text.strip()[:1200]
+        except Exception:
+            pass
+
+        return ResponseSummaryService._fallback_summary(cleaned)
+
+    def summarize(self, answer: str):
+        if not answer:
+            return ""
+
+        try:
+            loop = asyncio.get_running_loop()
+            if loop and loop.is_running():
+                return self._fallback_summary(str(answer))
+        except RuntimeError:
+            try:
+                return asyncio.run(self.summarize_async(answer))
+            except RuntimeError:
+                return self._fallback_summary(str(answer))
+
+        return self._fallback_summary(str(answer))

@@ -85,9 +85,11 @@ ANSWER:
             )
         )
 
-        return AIRequest(
+        request = AIRequest(
             question=prompt,
             provider=(
                 settings.LOCAL_CONSENSUS_PROVIDER
             )
         )
+        request.think = True
+        return request

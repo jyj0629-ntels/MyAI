@@ -152,10 +152,24 @@ class MultiProviderOrchestrator:
         sections = []
         for item in responses:
             provider = item.get("provider", "provider")
-            summary = (item.get("summary") or item.get("answer") or "").strip()
-            if summary:
-                provider_summary = cls.format_final_answer(f"[{provider}] {summary[:1200]}")
-                sections.append(provider_summary)
+            raw = (item.get("summary") or item.get("answer") or "").strip()
+            if not raw:
+                continue
+
+            cleaned_lines = []
+            for sentence in re.split(r"(?<=[.!?])\s+", raw):
+                sentence = str(sentence).strip()
+                sentence = re.sub(r"^(안녕하세요|반갑습니다|hello|도와드릴게요|저는|여기|이번|다음과|이런|이것은)[^\n]*[\s:]*", "", sentence)
+                sentence = sentence.strip()
+                if sentence and len(sentence) >= 18:
+                    cleaned_lines.append(sentence)
+
+            if not cleaned_lines:
+                cleaned_lines = [raw[:400]]
+
+            provider_summary = "\n".join(cleaned_lines[:6])
+            provider_summary = cls.format_final_answer(f"[{provider}] {provider_summary}")
+            sections.append(provider_summary)
 
         combined = "\n\n".join(section for section in sections if section)
         if len(combined) > 1800:
@@ -395,8 +409,8 @@ class MultiProviderOrchestrator:
             ResponseCollector()
         )
 
-        collected = (
-            collector.collect(
+        collected = await (
+            collector.collect_async(
                 responses
             )
         )

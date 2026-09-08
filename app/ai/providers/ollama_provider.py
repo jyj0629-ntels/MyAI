@@ -5,6 +5,7 @@ from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
 
 from app.core.config import settings
+from app.services.performance_tracker import PerformanceTracker
 
 
 class OllamaProvider(
