@@ -37,10 +37,22 @@ from app.models.user import User
 def ensure_database_schema():
     try:
         Base.metadata.create_all(bind=engine)
-        return True
     except Exception as exc:
         print(f"[WARN] DB schema bootstrap failed: {exc}")
         return False
+
+    # create_all() only creates missing tables, it never adds columns to
+    # tables that already exist, so newly added columns need an explicit patch.
+    try:
+        with engine.begin() as connection:
+            connection.execute(text(
+                "ALTER TABLE memory_items "
+                "ADD COLUMN IF NOT EXISTS occurrence_count INTEGER NOT NULL DEFAULT 1"
+            ))
+    except Exception as exc:
+        print(f"[WARN] memory_items schema patch failed: {exc}")
+
+    return True
 
 
 ensure_database_schema()
