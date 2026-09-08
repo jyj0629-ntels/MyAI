@@ -93,5 +93,5 @@ ANSWER:
                 settings.LOCAL_CONSENSUS_PROVIDER
             )
         )
-        request.think = True
+        request.think = False
         return request

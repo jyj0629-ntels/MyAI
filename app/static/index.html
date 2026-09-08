@@ -834,6 +834,8 @@
       userId: 1,
       conversationId: null,
       sendInFlight: false,
+      pendingSince: null,
+      pendingTimerId: null,
       providers: [
         { key: 'gemini', label: 'Gemini', quota: 'unknown', status: 'unknown', enabled: true },
         { key: 'openai', label: 'OpenAI', quota: 'unknown', status: 'unknown', enabled: true },
@@ -953,6 +955,23 @@
 
     function setStatus(message) {
       chatStatus.textContent = message;
+    }
+
+    function startPendingTimer() {
+      state.pendingSince = Date.now();
+      stopPendingTimer();
+      state.pendingTimerId = setInterval(() => {
+        const elapsedSeconds = Math.floor((Date.now() - state.pendingSince) / 1000);
+        setStatus(`AI가 답변을 생성하는 중입니다... (경과 ${elapsedSeconds}초, 응답까지 몇 분 걸릴 수 있습니다)`);
+      }, 1000);
+    }
+
+    function stopPendingTimer() {
+      if (state.pendingTimerId) {
+        clearInterval(state.pendingTimerId);
+        state.pendingTimerId = null;
+      }
+      state.pendingSince = null;
     }
 
     function setSendControlsLocked(isLocked) {
@@ -1156,12 +1175,14 @@
       }
 
       if (state.sendInFlight) {
-        setStatus('이전 질문 처리 중입니다. 잠시만 기다려 주세요.');
+        const elapsedSeconds = state.pendingSince ? Math.floor((Date.now() - state.pendingSince) / 1000) : 0;
+        setStatus(`이전 질문을 아직 처리 중입니다 (경과 ${elapsedSeconds}초). 응답을 받은 후 다시 시도해 주세요.`);
         return;
       }
 
       state.sendInFlight = true;
       setSendControlsLocked(true);
+      startPendingTimer();
       questionInput.value = '';
 
       try {
@@ -1201,6 +1222,7 @@
         addMessage('ai', `오류: ${error.message}`);
       } finally {
         state.sendInFlight = false;
+        stopPendingTimer();
         setSendControlsLocked(false);
         questionInput.focus();
       }

@@ -193,7 +193,7 @@ class Settings:
     OLLAMA_TIMEOUT = int(
         os.getenv(
             "OLLAMA_TIMEOUT",
-            "600"
+            "900"
         )
     )
 

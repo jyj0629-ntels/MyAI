@@ -216,7 +216,7 @@ class LocalBrainLLMService:
             project_context=project_context
         )
 
-        request.think = True
+        request.think = False
 
         print()
         print("# --------------------------------")
