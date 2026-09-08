@@ -63,6 +63,22 @@ def test_ollama_thinking_is_not_exposed_as_final_answer():
     assert "internal reasoning" not in answer.lower()
 
 
+def test_combined_summary_is_rewritten_not_just_concatenated():
+    responses = [
+        {"provider": "gemini", "answer": "SKT는 네트워크 안정성이 가장 좋다. KT는 유선 결합에 강하다. LG U+는 요금제 혜택이 가장 좋다."},
+        {"provider": "groq", "answer": "LG U+는 요금제 혜택이 좋다. SKT는 네트워크 품질이 좋다. KT는 브로드밴드가 강하다."},
+    ]
+
+    summary = MultiProviderOrchestrator.build_combined_summary(responses)
+
+    assert "네트워크" in summary
+    assert "요금제" in summary
+    assert "KT는 유선 결합에 강하다." not in summary
+    assert "KT는 브로드밴드가 강하다." not in summary
+    assert "LG U+는 요금제 혜택이 가장 좋다." not in summary
+    assert "LG U+는 요금제 혜택이 좋다." not in summary
+
+
 def test_summary_keeps_all_important_key_points_without_truncating_by_count():
     answer = """
     트위터는 사용자 참여도가 높다.
