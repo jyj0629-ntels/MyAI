@@ -56,18 +56,16 @@ class MultiProviderOrchestrator:
 
         selected = []
         for sentence in sentences:
-            lower = sentence.lower()
             if len(sentence) < 20:
                 continue
-            if any(keyword in lower for keyword in ["결론", "추천", "중요", "근거", "원인", "해결", "우선", "리스크", "출처", "문제"]):
-                selected.append(sentence)
-            elif len(selected) < 2:
-                selected.append(sentence)
+            if re.fullmatch(r"[\W_]+", sentence):
+                continue
+            selected.append(sentence)
 
         if not selected:
-            selected = sentences
+            selected = sentences[:3]
 
-        summary = " ".join(selected)
+        summary = " ".join(selected[:3])
         return summary.strip()
 
     @classmethod
@@ -149,12 +147,8 @@ class MultiProviderOrchestrator:
         if not responses:
             return "공급자 응답이 없어 요약할 수 없습니다."
 
-        candidate_map = {
-            "network": [],
-            "pricing": [],
-            "coverage": [],
-            "general": [],
-        }
+        claims = []
+        seen = set()
 
         for item in responses:
             raw = (item.get("summary") or item.get("answer") or "").strip()
@@ -163,60 +157,30 @@ class MultiProviderOrchestrator:
 
             for sentence in re.split(r"(?<=[.!?])\s+", raw):
                 sentence = str(sentence).strip()
-                sentence = re.sub(r"^(안녕하세요|반갑습니다|hello|도와드릴게요|저는|여기|이번|다음과|이런|이것은)[^\n]*[\s:]*", "", sentence)
+                sentence = re.sub(r"^[\-\*•\s]+", "", sentence)
                 sentence = sentence.strip()
+
                 if not sentence or len(sentence) < 12:
                     continue
-                if any(phrase in sentence.lower() for phrase in ("안녕하세요", "반갑습니다", "도와드릴게요", "인사말", "장식", "잡담")):
+                if re.fullmatch(r"[\W_]+", sentence):
                     continue
 
-                lowered = sentence.lower()
-                if any(keyword in lowered for keyword in ("네트워크", "품질", "안정", "속도", "신뢰", "브로드밴드")):
-                    candidate_map["network"].append(sentence)
-                elif any(keyword in lowered for keyword in ("요금제", "가성비", "가격", "혜택", "할인")):
-                    candidate_map["pricing"].append(sentence)
-                elif any(keyword in lowered for keyword in ("유선", "결합", "광랜", "브로드밴드")):
-                    candidate_map["coverage"].append(sentence)
-                else:
-                    candidate_map["general"].append(sentence)
+                key = sentence.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                claims.append(sentence)
 
-        synthesized = []
-
-        network_claims = candidate_map["network"] or candidate_map["general"]
-        if network_claims:
-            best_network = network_claims[0]
-            if "SKT" in best_network or "네트워크" in best_network:
-                synthesized.append("네트워크 품질 측면에서는 SKT가 가장 강한 것으로 보입니다.")
-            elif "LG U+" in best_network:
-                synthesized.append("네트워크와 안정성 면에서는 LG U+가 경쟁력 있는 편입니다.")
-            else:
-                synthesized.append("네트워크 품질은 일부 공급자 간 편차가 있지만, 전반적으로 품질 경쟁력이 높은 편입니다.")
-
-        pricing_claims = candidate_map["pricing"]
-        if pricing_claims:
-            best_pricing = pricing_claims[0]
-            if "LG U+" in best_pricing or "요금제" in best_pricing or "가성비" in best_pricing:
-                synthesized.append("요금제와 가성비 면에서는 LG U+가 유리한 것으로 보입니다.")
-            else:
-                synthesized.append("가격과 혜택을 고려하면 가성비 우위 공급자가 분명히 존재합니다.")
-
-        coverage_claims = candidate_map["coverage"]
-        if coverage_claims:
-            best_coverage = coverage_claims[0]
-            if "KT" in best_coverage or "유선" in best_coverage or "브로드밴드" in best_coverage:
-                synthesized.append("KT는 유선 결합과 브로드밴드 강점이 두드러집니다.")
-            else:
-                synthesized.append("유선 결합과 광랜 품질은 특정 공급자에서 강점을 보입니다.")
-
-        if not synthesized:
+        if not claims:
             fallback = []
             for item in responses:
                 raw = (item.get("summary") or item.get("answer") or "").strip()
                 if raw:
                     fallback.append(raw)
-            return cls.format_final_answer("\n\n".join(fallback))
+            return cls.format_final_answer("\n\n".join(fallback[:3]))
 
-        final_text = "\n\n".join(synthesized)
+        selected = claims[:3]
+        final_text = "\n\n".join(f"- {item}" for item in selected)
         return cls.format_final_answer(final_text)
 
     @classmethod
