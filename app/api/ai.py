@@ -611,7 +611,7 @@ async def chat(
                 "provider": item["provider"],
                 "model": item.get("model"),
                 "answer": item.get("answer") or "",
-                "summary": (item.get("summary") or item.get("answer") or "")[:500],
+                "summary": item.get("summary") or item.get("answer") or "",
                 "score": comparison.get("consensus_score", 0)
             }
             for item in multi_result.get("responses", [])
@@ -619,7 +619,7 @@ async def chat(
         response.sources = [{
             "provider": item["provider"],
             "model": item.get("model"),
-            "summary": (item.get("summary") or item.get("answer") or "")[:500],
+            "summary": item.get("summary") or item.get("answer") or "",
             "score": comparison.get("consensus_score", 0)
         } for item in multi_result.get("responses", [])]
         response.provider_responses = raw_provider_responses
@@ -639,7 +639,7 @@ async def chat(
                 "provider": item["provider"],
                 "model": item.get("model"),
                 "answer": item.get("answer") or "",
-                "summary": (item.get("summary") or item.get("answer") or "")[:500],
+                "summary": item.get("summary") or item.get("answer") or "",
                 "score": 0
             }
             for item in multi_result.get("responses", [])
@@ -663,7 +663,7 @@ async def chat(
                 "provider": item["provider"],
                 "model": item.get("model"),
                 "answer": item.get("answer") or "",
-                "summary": (item.get("summary") or item.get("answer") or "")[:500],
+                "summary": item.get("summary") or item.get("answer") or "",
                 "score": 0
             }
             for item in multi_result.get("responses", [])

@@ -52,7 +52,7 @@ class MultiProviderOrchestrator:
         text = text.replace("\n", " ")
         sentences = [segment.strip() for segment in re.split(r"(?<=[.!?])\s+", text) if segment.strip()]
         if not sentences:
-            return text[:500].strip()
+            return text.strip()
 
         selected = []
         for sentence in sentences:
@@ -68,7 +68,7 @@ class MultiProviderOrchestrator:
             selected = sentences[:2]
 
         summary = " ".join(selected[:3])
-        return summary[:600].strip()
+        return summary.strip()
 
     @classmethod
     def keyword_tokens(cls, value):
@@ -165,15 +165,13 @@ class MultiProviderOrchestrator:
                     cleaned_lines.append(sentence)
 
             if not cleaned_lines:
-                cleaned_lines = [raw[:400]]
+                cleaned_lines = [raw]
 
             provider_summary = "\n".join(cleaned_lines[:6])
             provider_summary = cls.format_final_answer(f"[{provider}] {provider_summary}")
             sections.append(provider_summary)
 
         combined = "\n\n".join(section for section in sections if section)
-        if len(combined) > 1800:
-            combined = combined[:1800] + "..."
         return combined if combined else "공급자 응답이 없어 요약할 수 없습니다."
 
     @classmethod

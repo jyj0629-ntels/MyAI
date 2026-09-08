@@ -171,8 +171,6 @@ class ResponseSummaryService:
             deduped.append(item)
 
         summary = "\n".join(deduped[:8])
-        if len(summary) > 1200:
-            summary = summary[:1200].rsplit("\n", 1)[0].strip()
         return summary.strip()
 
     @staticmethod
@@ -208,7 +206,7 @@ class ResponseSummaryService:
                 text = str(response.answer).strip()
                 text = re.sub(r"^\s*[-*•]\s*", "", text, flags=re.M)
                 text = re.sub(r"\n{3,}", "\n\n", text)
-                return text.strip()[:1200]
+                return text.strip()
         except Exception:
             pass
 
