@@ -41,6 +41,14 @@ class ResponseSummaryService:
             "정리하면",
             "요약하면",
             "기본",
+            "장식",
+            "잡담",
+            "인사",
+            "반갑",
+            "도와드릴",
+            "불필요",
+            "의미 없는",
+            "그거",
         )
 
         if any(marker in lowered for marker in boilerplate):
@@ -83,7 +91,6 @@ class ResponseSummaryService:
             "성능",
             "속도",
             "가성비",
-            "품질",
             "신뢰성",
             "지원",
             "강하다",
@@ -91,18 +98,27 @@ class ResponseSummaryService:
             "우수하다",
             "강한",
             "좋은",
+            "유리하다",
+            "효과적",
+            "참여도",
+            "노출",
+            "전환",
+            "유입",
+            "소비",
+            "신뢰",
+            "형성",
         )
 
         if any(marker in lowered for marker in key_markers):
             return True
 
-        if any(marker in lowered for marker in ("skt", "kt", "lg u+", "lg", "sk telecom", "네트워크", "요금제", "유선", "광랜", "브로드밴드")):
+        if any(marker in lowered for marker in ("skt", "kt", "lg u+", "lg", "sk telecom", "네트워크", "요금제", "유선", "광랜", "브로드밴드", "트위터", "인스타그램", "유튜브", "블로그", "카카오톡", "틱톡", "링크드인")):
             return True
 
         if any(ch.isdigit() for ch in text):
             return True
 
-        if len(text) >= 30 and any(ch.isalpha() for ch in text) and not any(marker in lowered for marker in ("장식", "잡담", "인사", "반갑", "도와드릴")):
+        if len(text) >= 12 and any(ch.isalpha() for ch in text):
             return True
 
         return False
@@ -149,7 +165,7 @@ class ResponseSummaryService:
                 if sentence and len(sentence) >= 18:
                     if not any(phrase in sentence.lower() for phrase in ("안녕하세요", "반갑습니다", "장식", "잡담", "도와드릴게요", "긴 설명", "의미 없는")):
                         normalized.append(sentence)
-            candidates = normalized[:6]
+            candidates = normalized
 
         if not candidates:
             cleaned_answer = re.sub(r"^(안녕하세요|반갑습니다|hello|도와드릴게요)[^.!?]*[.!?]\s*", "", answer, flags=re.I)
@@ -157,9 +173,6 @@ class ResponseSummaryService:
                 sentence = ResponseSummaryService._clean_sentence(raw_line)
                 if sentence and len(sentence) >= 18:
                     candidates.append(sentence)
-
-        if len(candidates) > 6:
-            candidates = candidates[:6]
 
         deduped = []
         seen = set()
@@ -170,7 +183,7 @@ class ResponseSummaryService:
             seen.add(key)
             deduped.append(item)
 
-        summary = "\n".join(deduped[:8])
+        summary = "\n".join(deduped)
         return summary.strip()
 
     @staticmethod
@@ -187,8 +200,8 @@ class ResponseSummaryService:
 반드시 의미 단위로 핵심 사실만 추출해 요약하라.
 - 인사, 반복, 잡담, 장황한 배경 설명은 제거
 - 중요 주장, 근거, 숫자, 조건, 제한, 장점/단점, 추천/리스크만 남김
-- 4~8줄 이내로 간결하게 작성
-- 절대로 문장 끝에서 자르지 말고, 의미 있는 사실만 남겨라
+- 전체 내용을 이해한 뒤, 의미 있는 사실만 남겨라
+- 절대로 문장 끝에서 자르지 말고, 핵심 사실을 누락하지 않고 정리하라
 - 출력은 한국어로만 작성하고, 불필요한 마크다운/헤더는 사용하지 않는다
 
 응답:

@@ -65,9 +65,9 @@ class MultiProviderOrchestrator:
                 selected.append(sentence)
 
         if not selected:
-            selected = sentences[:2]
+            selected = sentences
 
-        summary = " ".join(selected[:3])
+        summary = " ".join(selected)
         return summary.strip()
 
     @classmethod
@@ -167,7 +167,7 @@ class MultiProviderOrchestrator:
             if not cleaned_lines:
                 cleaned_lines = [raw]
 
-            provider_summary = "\n".join(cleaned_lines[:6])
+            provider_summary = "\n".join(cleaned_lines)
             provider_summary = cls.format_final_answer(f"[{provider}] {provider_summary}")
             sections.append(provider_summary)
 
