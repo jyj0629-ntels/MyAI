@@ -49,7 +49,14 @@ ANSWER:
 질문:
 {question}
 
-아래 응답을 비교해 가장 적절한 답변을 고르고 JSON만 반환하라.
+아래 응답을 비교해 가장 적절한 답변을 고르고, 최종 응답은 사람이 읽기 쉬운 문장과 적절한 줄바꿈, 문단 구조를 갖춘 한국어로 작성하라.
+- 절대로 긴 한 줄의 문장으로 이어붙이지 말 것
+- 각 섹션은 줄바꿈으로 분리할 것
+- 표/목록이 있으면 Markdown 형식으로 정리할 것
+- 중복 내용을 제거하고 핵심만 남길 것
+- 최종 문서에서 중요한 사실만 남기고, 불필요한 서술/배경은 제거하라
+- final_answer는 사용자에게 바로 보여줄 수 있는 가장 중요한 핵심 문구 중심으로 작성하라
+- 각 항목의 핵심 특징만 남기고, 장황한 설명은 제외하라
 
 {responses_block}
 
@@ -78,9 +85,11 @@ ANSWER:
             )
         )
 
-        return AIRequest(
+        request = AIRequest(
             question=prompt,
             provider=(
                 settings.LOCAL_CONSENSUS_PROVIDER
             )
         )
+        request.think = True
+        return request

@@ -2,75 +2,56 @@ import os
 
 from openai import AsyncOpenAI
 
-from app.core.config import settings, _is_placeholder_value
 from app.ai.providers.base import AIProvider
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
+from app.core.config import settings, _is_placeholder_value
 
 
-class OpenAIProvider(AIProvider):
+class MistralProvider(AIProvider):
 
     def __init__(self):
-
-        api_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY")
-
+        api_key = settings.MISTRAL_API_KEY or os.getenv("MISTRAL_API_KEY")
         if not api_key or _is_placeholder_value(api_key):
-            raise RuntimeError(
-                "OPENAI_API_KEY is not configured."
-            )
+            raise RuntimeError("MISTRAL_API_KEY is not configured.")
 
         self.client = AsyncOpenAI(
-            api_key=api_key
+            api_key=api_key,
+            base_url="https://api.mistral.ai/v1"
         )
-
-        self.model = (
-            settings.OPENAI_MODEL
-        )
+        self.model = settings.MISTRAL_MODEL
 
     @property
     def name(self) -> str:
+        return "mistral"
 
-        return "openai"
-
-    async def ask(
-        self,
-        request: AIRequest
-    ) -> AIResponse:
-
+    async def ask(self, request: AIRequest) -> AIResponse:
         try:
-
             messages = []
 
             if request.system_prompt:
-
-                messages.append(
-                    {
-                        "role": "system",
-                        "content": request.system_prompt
-                    }
-                )
+                messages.append({
+                    "role": "system",
+                    "content": request.system_prompt,
+                })
 
             user_content = request.question
-
             if request.user_context:
-
                 user_content = (
                     f"{request.user_context}\n\n"
                     f"### USER QUESTION\n"
                     f"{request.question}"
                 )
 
-            messages.append(
-                {
-                    "role": "user",
-                    "content": user_content
-                }
-            )
+            messages.append({
+                "role": "user",
+                "content": user_content,
+            })
 
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                temperature=request.temperature
+                temperature=getattr(request, "temperature", 0.7),
             )
 
             answer = response.choices[0].message.content or ""
@@ -84,15 +65,14 @@ class OpenAIProvider(AIProvider):
                 answer=answer,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
-                success=True
+                success=True,
             )
 
         except Exception as e:
-
             return AIResponse(
                 provider=self.name,
                 model=self.model,
                 answer="",
                 success=False,
-                error=str(e)
+                error=str(e),
             )

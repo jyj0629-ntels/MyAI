@@ -1,3 +1,4 @@
+from app.models.memory_item import MemoryItem
 from app.repositories.chat_repository import ChatRepository
 
 from app.services.chat_service import ChatService
@@ -18,26 +19,50 @@ class ChatOrchestratorService:
         memory_service
     ):
 
+        tracker = __import__("app.services.performance_tracker", fromlist=["PerformanceTracker"]).PerformanceTracker()
+        tracker.start("conversation_save")
+
         chat_service = (
             ChatService(
                 ChatRepository(db)
             )
         )
 
-        chat_service.save_chat(
-            conversation_id=request.conversation_id,
-            provider=response.provider,
-            model=response.model,
-            question=request.question,
-            answer=response.answer,
-            input_tokens=response.input_tokens,
-            output_tokens=response.output_tokens,
-            success=response.success
-        )
+        provider_response_path = None
+        provider_responses = getattr(response, "provider_responses", None) or getattr(response, "sources", None) or []
+        if provider_responses:
+            try:
+                from app.services.provider_response_storage_service import ProviderResponseStorageService
+                provider_response_path = str(
+                    ProviderResponseStorageService().write_markdown(
+                        conversation_id=request.conversation_id,
+                        provider_responses=provider_responses
+                    )
+                )
+            except Exception as exc:
+                print(f"[WARN] provider response markdown save failed: {exc}")
+
+        try:
+            chat_service.save_chat(
+                conversation_id=request.conversation_id,
+                provider=response.provider,
+                model=response.model or response.provider or "unknown",
+                question=request.question,
+                answer=response.answer,
+                input_tokens=response.input_tokens,
+                output_tokens=response.output_tokens,
+                success=response.success,
+                provider_response_path=provider_response_path
+            )
+            tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success), "provider_response_path": provider_response_path})
+        except Exception as exc:
+            tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": False, "error": str(exc)})
+            print(f"[WARN] chat history save failed: {exc}")
 
         if not request.conversation_id:
             return
 
+        tracker.start("conversation_summary_build")
         history = (
             chat_service
             .get_recent_by_conversation(
@@ -45,6 +70,7 @@ class ChatOrchestratorService:
                 limit=20
             )
         )
+        tracker.finish("conversation_summary_build", metadata={"conversation_id": request.conversation_id, "history_count": len(history)})
 
         messages = []
 
@@ -68,6 +94,7 @@ class ChatOrchestratorService:
         if not request.user_id:
             return
 
+        tracker.start("memory_extraction")
         summary = (
             ConversationMemoryService(
                 db
@@ -77,6 +104,7 @@ class ChatOrchestratorService:
         )
 
         if not summary:
+            tracker.finish("memory_extraction", metadata={"status": "skipped_empty_summary"})
 
             print()
             print("# --------------------------------")
@@ -105,8 +133,10 @@ class ChatOrchestratorService:
                     summary=summary
                 )
             )
+            tracker.finish("memory_extraction", metadata={"status": "completed", "memory_count": len(memories)})
 
         except Exception as e:
+            tracker.finish("memory_extraction", metadata={"status": "error", "error": str(e)})
 
             print()
             print("# --------------------------------")
@@ -118,6 +148,7 @@ class ChatOrchestratorService:
 
             return
 
+        tracker.start("memory_persist")
         for memory in memories:
 
             print()
@@ -180,5 +211,28 @@ class ChatOrchestratorService:
                 f"{memory.key}"
             )
 
+        if getattr(response, "comparison", None) and request.user_id:
+            score = float((response.comparison or {}).get("consensus_score", 0.0)) / 100.0
+            if score >= 0.75:
+                theme_key = f"theme_{abs(hash(request.question[:120]))}"
+                memory = MemoryItem(
+                    user_id=request.user_id,
+                    type="PREFERENCE",
+                    key=theme_key,
+                    content=f"질문: {request.question[:180]} | 결론: {response.summary or response.answer[:300]} | 신뢰도: {score:.2f}",
+                    importance=0.8,
+                    confidence=score,
+                    freshness=1.0,
+                    source_type="conversation",
+                    source_conversation_id=request.conversation_id,
+                    source_chat_history_id=None,
+                    scope="USER",
+                    status="CANDIDATE"
+                )
+                if not memory_service.exists_by_key(request.user_id, memory.key):
+                    memory_service.create(memory)
+                    print(f"[MEMORY SAVED FROM COMPARISON] {memory.key} confidence={score:.2f}")
+
+        tracker.finish("memory_persist", metadata={"saved_memory_count": len(memories)})
         print("# --------------------------------")
         print()

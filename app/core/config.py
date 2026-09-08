@@ -5,35 +5,99 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _is_placeholder_value(value):
+    if value is None:
+        return True
+
+    normalized = str(value).strip()
+    if not normalized:
+        return True
+
+    lowered = normalized.lower()
+    placeholder_markers = (
+        "your_",
+        "placeholder",
+        "changeme",
+        "example",
+        "test_",
+        "dummy",
+        "fill_me",
+        "api_key_here",
+        "not_configured",
+        "<your",
+    )
+
+    return any(marker in lowered for marker in placeholder_markers)
+
+
 class Settings:
 
-    DATABASE_URL = os.getenv(
-        "DATABASE_URL"
+    POSTGRES_HOST = os.getenv(
+        "POSTGRES_HOST",
+        "postgres"
     )
 
-    GEMINI_API_KEY = os.getenv(
-        "GEMINI_API_KEY"
+    POSTGRES_PORT = os.getenv(
+        "POSTGRES_PORT",
+        "5432"
     )
+
+    POSTGRES_DB = os.getenv(
+        "POSTGRES_DB",
+        "myai"
+    )
+
+    POSTGRES_USER = os.getenv(
+        "POSTGRES_USER",
+        "myai"
+    )
+
+    POSTGRES_PASSWORD = os.getenv(
+        "POSTGRES_PASSWORD",
+        "wjddudwns.123"
+    )
+
+    DATABASE_URL = os.getenv(
+        "DATABASE_URL",
+        f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    )
+
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    if _is_placeholder_value(GEMINI_API_KEY):
+        GEMINI_API_KEY = None
 
     GEMINI_MODEL = os.getenv(
         "GEMINI_MODEL"
     )
 
-    GROQ_API_KEY = os.getenv(
-        "GROQ_API_KEY"
-    )
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    if _is_placeholder_value(GROQ_API_KEY):
+        GROQ_API_KEY = None
 
     GROQ_MODEL = os.getenv(
         "GROQ_MODEL"
     )
 
-    DEEPSEEK_API_KEY = os.getenv(
-        "DEEPSEEK_API_KEY"
+    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+    if _is_placeholder_value(MISTRAL_API_KEY):
+        MISTRAL_API_KEY = None
+
+    MISTRAL_MODEL = os.getenv(
+        "MISTRAL_MODEL",
+        "mistral-small-latest"
     )
+
+    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+    if _is_placeholder_value(DEEPSEEK_API_KEY):
+        DEEPSEEK_API_KEY = None
 
     DEEPSEEK_MODEL = os.getenv(
         "DEEPSEEK_MODEL"
     )
+
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    if _is_placeholder_value(OPENAI_API_KEY):
+        OPENAI_API_KEY = None
 
     OPENAI_MODEL = os.getenv(
         "OPENAI_MODEL"
@@ -53,12 +117,12 @@ class Settings:
 
     PUBLIC_PROVIDERS = os.getenv(
         "PUBLIC_PROVIDERS",
-        "gemini,groq,openai"
+        "gemini,groq,mistral"
     )
 
     LOCAL_BRAIN_DEFAULT_PROVIDER = os.getenv(
         "LOCAL_BRAIN_DEFAULT_PROVIDER",
-        PRIMARY_PROVIDER
+        "ollama"
     )
 
     FALLBACK_PROVIDERS = os.getenv(
@@ -106,7 +170,7 @@ class Settings:
 
     LOCAL_LLM_MODEL = os.getenv(
         "LOCAL_LLM_MODEL",
-        "qwen3:8b"
+        "qwen3:14b"
     )
 
     OLLAMA_HOST = os.getenv(
@@ -122,15 +186,36 @@ class Settings:
     OLLAMA_TIMEOUT = int(
         os.getenv(
             "OLLAMA_TIMEOUT",
-            "300"
+            "600"
         )
     )
 
     ENABLE_LOCAL_LLM_JUDGE = (
         os.getenv(
             "ENABLE_LOCAL_LLM_JUDGE",
+            "false"
+        ).lower() == "true"
+    )
+
+    LOCAL_LLM_FAST_PATH_ENABLED = (
+        os.getenv(
+            "LOCAL_LLM_FAST_PATH_ENABLED",
             "true"
         ).lower() == "true"
+    )
+
+    LOCAL_LLM_DEEP_ANALYSIS_ENABLED = (
+        os.getenv(
+            "LOCAL_LLM_DEEP_ANALYSIS_ENABLED",
+            "true"
+        ).lower() == "true"
+    )
+
+    LOCAL_LLM_FAST_PATH_MAX_CHARS = int(
+        os.getenv(
+            "LOCAL_LLM_FAST_PATH_MAX_CHARS",
+            "120"
+        )
     )
 
     MULTI_PROVIDER_EXCLUDE = os.getenv(

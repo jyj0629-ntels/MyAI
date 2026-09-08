@@ -7,7 +7,18 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = settings.DATABASE_URL
+
+def _normalize_database_url(database_url: str | None) -> str | None:
+    if not database_url:
+        return database_url
+
+    return database_url.replace(
+        "postgresql+psycopg2",
+        "postgresql+psycopg",
+    )
+
+
+DATABASE_URL = _normalize_database_url(settings.DATABASE_URL)
 
 engine = create_engine(
     DATABASE_URL,

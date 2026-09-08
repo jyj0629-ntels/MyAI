@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
@@ -16,9 +16,11 @@ from app.schemas.chat_history import ChatHistoryResponse
 
 from app.services.chat_service import ChatService
 from app.services.local_brain_service import LocalBrainService
+from app.services.local_brain_llm_service import LocalBrainLLMService
 
 from app.services.memory_item_service import MemoryItemService
 from app.services.memory_query_service import MemoryQueryService
+from app.services.preference_extraction_service import PreferenceExtractionService
 
 from app.services.prompt_trace_service import PromptTraceService
 
@@ -34,6 +36,8 @@ from app.services.llm_memory_extraction_service import LLMMemoryExtractionServic
 from app.services.gemini_memory_extraction_provider import GeminiMemoryExtractionProvider
 from app.services.chat_orchestrator_service import ChatOrchestratorService
 from app.services.performance_tracker import PerformanceTracker
+from app.services.response_format_template_service import ResponseFormatTemplateService
+from app.repositories.response_format_template_repository import ResponseFormatTemplateRepository
 
 from app.models.ai_prompt_run import AIPromptRun
 from app.repositories.ai_prompt_run_repository import AIPromptRunRepository
@@ -50,20 +54,56 @@ router = APIRouter(
 orchestrator = create_orchestrator()
 
 
-@router.post("/chat")
+@router.post("/chat", response_model=AIResponse)
 async def chat(
-    payload: dict | None = Body(default=None),
+    request: AIRequest = Body(
+        ..., 
+        description="Question and optional context for the AI assistant."
+    ),
+    http_request: Request = None,
     db: Session = Depends(get_db)
 ):
     tracker = PerformanceTracker()
-    tracker.start("request_parse")
+    tracker.start("1. request_parse")
+    tracker.add_log("request_input", {"question_length": len(str(request.question or "")), "user_id": request.user_id, "conversation_id": request.conversation_id})
+
+    if request.user_id:
+        try:
+            PreferenceExtractionService.persist_from_question(request.user_id, request.question, db)
+        except Exception as exc:
+            db.rollback()
+            print(f"[WARN] preference extraction failed: {exc}")
 
     try:
-        request = AIRequest.from_payload(payload or {})
+        if http_request is not None:
+            content_type = (
+                http_request.headers.get("content-type", "")
+                .lower()
+            )
+
+            if "application/json" not in content_type and (
+                "application/x-www-form-urlencoded" in content_type
+                or "multipart/form-data" in content_type
+            ):
+                form_data = await http_request.form()
+                payload = {
+                    key: value
+                    for key, value in form_data.items()
+                }
+                request = AIRequest.from_payload(payload or {})
+
+        if not request.question or not str(request.question).strip():
+            raise ValueError("question is required and must be a non-empty string.")
+
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {str(exc)}") from exc
 
-    tracker.finish("request_parse")
+    tracker.finish("1. request_parse")
+    tracker.add_log("request_parse_report", tracker.as_dict())
+
+    tracker.start("2. context_build")
 
     memory_service = MemoryItemService(
         MemoryItemRepository(db)
@@ -78,14 +118,14 @@ async def chat(
     retrieved_memories = []
 
     if request.user_id:
-        tracker.start("memory_retrieval")
+        tracker.start("2.1 memory_retrieval")
         retrieved_memories = (
             memory_query_service.query(
                 user_id=request.user_id,
                 question=request.question
             )
         )
-        tracker.finish("memory_retrieval")
+        tracker.finish("2.1 memory_retrieval")
 
     print()
     print("# --------------------------------")
@@ -118,7 +158,7 @@ async def chat(
         if memory.type == "GOAL"
     ]
 
-    tracker.start("context_package_build")
+    tracker.start("2.2 context_package_build")
     context_package = (
         ContextPackageService()
         .build(
@@ -127,7 +167,8 @@ async def chat(
             projects=projects
         )
     )
-    tracker.finish("context_package_build")
+    tracker.finish("2.2 context_package_build")
+    tracker.finish("2. context_build", metadata={"preferences": len(preferences), "projects": len(projects), "goals": len(goals)})
 
     print()
     print("# --------------------------------")
@@ -146,7 +187,7 @@ async def chat(
     print()
 
     brain = LocalBrainService()
-    tracker.start("local_brain_analysis")
+    tracker.start("3. local_llm_prompt_generation")
     brain_result = await (
         brain.analyze(
             question=request.question,
@@ -162,7 +203,7 @@ async def chat(
             )
         )
     )
-    tracker.finish("local_brain_analysis")
+    tracker.finish("3. local_llm_prompt_generation", metadata={"task_type": getattr(brain_result, "task_type", None), "provider": getattr(brain_result, "provider", None)})
 
     print()
     print("# --------------------------------")
@@ -188,6 +229,36 @@ async def chat(
         request.provider
         or brain_result.provider
     )
+
+    response_template = None
+    response_template_repo = ResponseFormatTemplateRepository(db)
+    try:
+        if request.response_format_template_id:
+            response_template = ResponseFormatTemplateService(response_template_repo).get_by_id(request.response_format_template_id)
+        elif request.user_id:
+            response_template = ResponseFormatTemplateService(response_template_repo).get_default(request.user_id)
+    except Exception as exc:
+        print(f"[WARN] response template lookup failed: {exc}")
+        response_template = None
+
+    response_template_text = None
+    if response_template is not None:
+        response_template_text = response_template.template_text
+    elif request.response_format_text:
+        response_template_text = request.response_format_text
+
+    provider_prompt = LocalBrainLLMService().build_provider_prompt(
+        question=request.question,
+        user_profile=context_package.get("user_profile") or "",
+        project_context=context_package.get("project_context") or [],
+        provider_name=provider or settings.PRIMARY_PROVIDER,
+        task_type=brain_result.task_type,
+        response_format=response_template_text
+    )
+    request.prompt = provider_prompt
+    request.system_prompt = provider_prompt
+    request.user_context = context_package.get("user_profile") or ""
+    brain_result.prompt = provider_prompt
 
     available_providers = (
         orchestrator.registry.list()
@@ -219,10 +290,14 @@ async def chat(
         print()
 
         provider = (
-            settings.PRIMARY_PROVIDER
-            .strip()
-            .lower()
-        )
+            settings.LOCAL_LLM_PROVIDER
+            or settings.LOCAL_BRAIN_DEFAULT_PROVIDER
+            or settings.PRIMARY_PROVIDER
+            or "ollama"
+        ).strip().lower()
+
+        if provider not in available_providers and "ollama" in available_providers:
+            provider = "ollama"
 
     print()
     print("# --------------------------------")
@@ -248,8 +323,20 @@ async def chat(
     print("# --------------------------------")
     print()
 
+    requested_format = request.response_format_text
+    if requested_format is None and request.user_id:
+        try:
+            default_template = ResponseFormatTemplateService(ResponseFormatTemplateRepository(db)).get_default(request.user_id)
+            if default_template is not None:
+                requested_format = default_template.template_text
+        except Exception as exc:
+            print(f"[WARN] default response template lookup failed: {exc}")
+            requested_format = None
+
     prompt = (
-        brain_result.prompt
+        request.prompt
+        or brain_result.prompt
+        or request.question
     )
 
     trace = (
@@ -299,8 +386,25 @@ async def chat(
     print(prompt)
     print("# --------------------------------")
     print()
-    
-    tracker.start("provider_fanout")
+
+    print()
+    print("# --------------------------------")
+    print("# PUBLIC PROVIDER FINAL PROMPT")
+    print("# --------------------------------")
+    print(prompt)
+    print("# --------------------------------")
+    print()
+
+    if requested_format:
+        print()
+        print("# --------------------------------")
+        print("# RESPONSE FORMAT TEMPLATE")
+        print("# --------------------------------")
+        print(requested_format)
+        print("# --------------------------------")
+        print()
+
+    tracker.start("4. provider_fanout")
     multi_result = await (
         MultiProviderOrchestrator(
             orchestrator.registry
@@ -309,7 +413,8 @@ async def chat(
             request
         )
     )
-    tracker.finish("provider_fanout")
+    tracker.finish("4. provider_fanout", metadata={"response_count": len(multi_result.get("responses", []))})
+    comparison = multi_result.get("comparison")
 
     judge_request = (
         multi_result.get(
@@ -330,7 +435,7 @@ async def chat(
         judge_request
         and settings.ENABLE_LOCAL_CONSENSUS
     ):
-        tracker.start("local_consensus_judge")
+        tracker.start("5. consensus_judge")
         judge_response = await (
             orchestrator.ask(
                 provider_name=
@@ -338,16 +443,14 @@ async def chat(
                 request=judge_request
             )
         )
-        tracker.finish("local_consensus_judge")
+        tracker.finish("5. consensus_judge")
 
         print()
-        print("# --------------------------------")
-        print("# LOCAL CONSENSUS RESULT")
-        print("# --------------------------------")
-        print(
+        PerformanceTracker.print_section(
+            "consensus",
+            "LOCAL CONSENSUS RESULT",
             judge_response.answer
         )
-        print("# --------------------------------")
         print()
 
         if judge_response:
@@ -472,13 +575,11 @@ async def chat(
                 print()
 
             if final_answer:
-                response.answer = (
-                    final_answer
-                ) 
-                
-                if best_provider: 
+                response.answer = MultiProviderOrchestrator.format_final_answer(final_answer)
+
+                if best_provider:
                     for item in multi_result.get(
-                        "responses", 
+                        "responses",
                         []
                     ):
                         if (
@@ -490,7 +591,7 @@ async def chat(
                             .strip()
                             .lower()
                         ):
-                            
+
                             response.provider = (
                                 item["provider"]
                             )
@@ -501,7 +602,78 @@ async def chat(
 
                             break
 
-    tracker.start("post_process")
+    if comparison:
+        combined_summary = MultiProviderOrchestrator.format_final_answer(comparison.get("combined_summary"))
+        response.summary = combined_summary
+        response.comparison = comparison
+        raw_provider_responses = [
+            {
+                "provider": item["provider"],
+                "model": item.get("model"),
+                "answer": item.get("answer") or "",
+                "summary": item.get("summary") or item.get("answer") or "",
+                "score": comparison.get("consensus_score", 0)
+            }
+            for item in multi_result.get("responses", [])
+        ]
+        response.sources = [{
+            "provider": item["provider"],
+            "model": item.get("model"),
+            "summary": item.get("summary") or item.get("answer") or "",
+            "score": comparison.get("consensus_score", 0)
+        } for item in multi_result.get("responses", [])]
+        response.provider_responses = raw_provider_responses
+        response.requires_confirmation = comparison.get("consensus_score", 0) < 80
+
+        final_consensus_text = MultiProviderOrchestrator.build_human_readable_result(
+            responses=multi_result.get("responses", []),
+            comparison=comparison,
+            judge_result=judge_result,
+            threshold=settings.CONSENSUS_THRESHOLD,
+        )
+        response.answer = final_consensus_text
+
+    if not getattr(response, "provider_responses", None) and multi_result.get("responses"):
+        response.provider_responses = [
+            {
+                "provider": item["provider"],
+                "model": item.get("model"),
+                "answer": item.get("answer") or "",
+                "summary": item.get("summary") or item.get("answer") or "",
+                "score": 0
+            }
+            for item in multi_result.get("responses", [])
+        ]
+
+    if not response.answer and comparison:
+        response.answer = MultiProviderOrchestrator.build_human_readable_result(
+            responses=multi_result.get("responses", []),
+            comparison=comparison,
+            judge_result=judge_result,
+            threshold=settings.CONSENSUS_THRESHOLD,
+        )
+
+    response.answer = MultiProviderOrchestrator.format_final_answer(response.answer or "")
+    if response.summary:
+        response.summary = MultiProviderOrchestrator.format_final_answer(response.summary)
+
+    if not getattr(response, "provider_responses", None) and multi_result.get("responses"):
+        response.provider_responses = [
+            {
+                "provider": item["provider"],
+                "model": item.get("model"),
+                "answer": item.get("answer") or "",
+                "summary": item.get("summary") or item.get("answer") or "",
+                "score": 0
+            }
+            for item in multi_result.get("responses", [])
+        ]
+
+    response.answer = MultiProviderOrchestrator.format_final_answer(response.answer or "")
+    if response.summary:
+        response.summary = MultiProviderOrchestrator.format_final_answer(response.summary)
+
+    tracker.start("6. memory_persist_and_finalize")
     await (
         ChatOrchestratorService()
         .post_process(
@@ -511,9 +683,11 @@ async def chat(
             memory_service=memory_service
         )
     )
-    tracker.finish("post_process")
+    tracker.finish("6. memory_persist_and_finalize", metadata={"provider": response.provider, "success": bool(response.success)})
     tracker.print_summary()
-
+    final_report = tracker.final_report()
+    tracker.add_log("final_performance_report", final_report)
+    response.performance = final_report
     return response
 
 @router.get(

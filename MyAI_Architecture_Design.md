@@ -494,7 +494,7 @@ CREATE TABLE workflow_definition (
 
 권장 구성:
 
-- qwen3:8b 또는 유사 용량 모델 우선
+- qwen3:14b 또는 유사 용량 모델 우선
 - GPU가 없으면 CPU 기반 실행
 - 추론 속도와 메모리를 고려해 8B급 모델 우선
 

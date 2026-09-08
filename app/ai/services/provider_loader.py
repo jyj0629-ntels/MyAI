@@ -5,7 +5,7 @@ import importlib
 from pathlib import Path
 
 from app.ai.providers.base import AIProvider
-from app.core.config import settings
+from app.core.config import settings, _is_placeholder_value
 
 
 class ProviderLoader:
@@ -22,6 +22,13 @@ class ProviderLoader:
                 .split(",")
             )
             if name.strip()
+        }
+
+        required_key_map = {
+            "gemini": "GEMINI_API_KEY",
+            "groq": "GROQ_API_KEY",
+            "mistral": "MISTRAL_API_KEY",
+            "openai": "OPENAI_API_KEY",
         }
 
         provider_path = (
@@ -65,7 +72,7 @@ class ProviderLoader:
 
                 print()
                 print("# --------------------------------")
-                print("# PROVIDER IMPORT FAIL")
+                print("[ERROR] PROVIDER IMPORT FAIL")
                 print("# --------------------------------")
                 print(module_name)
                 print(str(e))
@@ -91,11 +98,27 @@ class ProviderLoader:
                         and obj is not AIProvider
                     ):
 
-                        instance = obj()
-                        provider_name = str(instance.name).strip().lower()
+                        provider_name = str(obj.__name__).replace("Provider", "").strip().lower()
 
                         if provider_name not in enabled_public_providers:
                             continue
+
+                        required_key_name = required_key_map.get(provider_name)
+                        key_value = getattr(settings, required_key_name, None) if required_key_name else None
+                        if required_key_name and (
+                            not key_value or _is_placeholder_value(key_value)
+                        ):
+                            print()
+                            print("# --------------------------------")
+                            print("# PROVIDER SKIPPED (missing/placeholder API key)")
+                            print("# --------------------------------")
+                            print(provider_name)
+                            print("# --------------------------------")
+                            print()
+                            continue
+
+                        instance = obj()
+                        provider_name = str(instance.name).strip().lower()
 
                         if (
                             provider_name
@@ -132,7 +155,7 @@ class ProviderLoader:
 
                     print()
                     print("# --------------------------------")
-                    print("# PROVIDER CREATE FAIL")
+                    print("[ERROR] PROVIDER CREATE FAIL")
                     print("# --------------------------------")
                     print(obj)
                     print(str(e))

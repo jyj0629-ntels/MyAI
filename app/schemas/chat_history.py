@@ -11,6 +11,7 @@ class ChatHistoryResponse(BaseModel):
 
     question: str
     answer: str
+    provider_response_path: Optional[str] = None
 
     input_tokens: Optional[int] = None
     output_tokens: Optional[int] = None

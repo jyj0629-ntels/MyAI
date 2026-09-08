@@ -4,6 +4,32 @@ from app.ai.services.response_summary_service import ResponseSummaryService
 
 class ResponseCollector:
 
+    async def collect_async(self, responses):
+        result = []
+
+        for response in responses:
+            if not response.success:
+                continue
+
+            summary = await ResponseSummaryService().summarize_async(response.answer)
+
+            response_time_ms = getattr(response, "response_time_ms", None)
+            if response_time_ms is None:
+                perf = getattr(response, "performance", None) or {}
+                response_time_ms = perf.get("response_time_ms")
+
+            result.append(
+                {
+                    "provider": response.provider,
+                    "model": response.model,
+                    "answer": response.answer,
+                    "summary": summary,
+                    "response_time_ms": response_time_ms,
+                }
+            )
+
+        return result
+
     def collect(
         self,
         responses
@@ -23,12 +49,18 @@ class ResponseCollector:
                 )
             )
 
+            response_time_ms = getattr(response, "response_time_ms", None)
+            if response_time_ms is None:
+                perf = getattr(response, "performance", None) or {}
+                response_time_ms = perf.get("response_time_ms")
+
             result.append(
                 {
                     "provider": response.provider,
                     "model": response.model,
                     "answer": response.answer,
-                    "summary": summary
+                    "summary": summary,
+                    "response_time_ms": response_time_ms,
                 }
             )
 

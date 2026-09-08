@@ -1,6 +1,6 @@
 from google import genai
 
-from app.core.config import settings
+from app.core.config import settings, _is_placeholder_value
 
 from app.ai.providers.base import AIProvider
 from app.ai.models.request import AIRequest
@@ -17,6 +17,15 @@ class GeminiProvider(AIProvider):
         self,
         request: AIRequest
     ) -> AIResponse:
+
+        if not settings.GEMINI_API_KEY or _is_placeholder_value(settings.GEMINI_API_KEY):
+            return AIResponse(
+                provider=self.name,
+                model=settings.GEMINI_MODEL,
+                answer="",
+                success=False,
+                error="GEMINI_API_KEY is not configured."
+            )
 
         client = genai.Client(
             api_key=settings.GEMINI_API_KEY
@@ -48,13 +57,14 @@ class GeminiProvider(AIProvider):
                 contents=prompt
             )
 
-            if hasattr(
-                result,
-                "usage_metadata"
-            ):
-                print(
-                    result.usage_metadata
-                )
+            usage_metadata = getattr(result, "usage_metadata", None)
+            input_tokens = None
+            output_tokens = None
+
+            if usage_metadata is not None:
+                print(usage_metadata)
+                input_tokens = getattr(usage_metadata, "prompt_token_count", None)
+                output_tokens = getattr(usage_metadata, "candidates_token_count", None)
 
             print()
             print("# --------------------------------")
@@ -68,6 +78,8 @@ class GeminiProvider(AIProvider):
                 provider=self.name,
                 model=settings.GEMINI_MODEL,
                 answer=result.text,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
                 success=True
             )
 
