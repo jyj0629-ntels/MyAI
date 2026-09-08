@@ -75,16 +75,15 @@ class OllamaProvider(
 
 
 
-            answer = (
-                data.get("response")
-                or ""
-            )
+            answer = (data.get("response") or "").strip()
 
             if not answer:
-
-                answer = (
-                    data.get("thinking")
-                    or ""
+                return AIResponse(
+                    provider=self.name,
+                    model=settings.LOCAL_LLM_MODEL,
+                    answer="",
+                    success=False,
+                    error="Ollama returned an empty public response; hidden reasoning was intentionally not exposed to the user."
                 )
 
             return AIResponse(

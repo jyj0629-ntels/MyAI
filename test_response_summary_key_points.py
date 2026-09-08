@@ -52,6 +52,17 @@ def test_combined_summary_keeps_key_claims_without_truncating_from_end():
     assert "안녕하세요" not in summary
 
 
+def test_ollama_thinking_is_not_exposed_as_final_answer():
+    raw = {
+        "response": "",
+        "thinking": "Okay, this is internal reasoning that must not be shown to the user."
+    }
+
+    answer = raw.get("response") or ""
+    assert answer == ""
+    assert "internal reasoning" not in answer.lower()
+
+
 def test_log_border_vary_by_step_type():
     request_border = PerformanceTracker.get_log_border("request")
     response_border = PerformanceTracker.get_log_border("response")
