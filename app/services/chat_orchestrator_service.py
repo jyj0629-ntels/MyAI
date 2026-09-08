@@ -1,6 +1,7 @@
 from app.models.memory_item import MemoryItem
 from app.repositories.chat_repository import ChatRepository
 
+from app.core.config import settings
 from app.services.chat_service import ChatService
 from app.services.conversation_memory_update_service import ConversationMemoryUpdateService
 from app.services.conversation_memory_service import ConversationMemoryService
@@ -213,7 +214,7 @@ class ChatOrchestratorService:
 
         if getattr(response, "comparison", None) and request.user_id:
             score = float((response.comparison or {}).get("consensus_score", 0.0)) / 100.0
-            if score >= 0.75:
+            if score >= (settings.CONSENSUS_THRESHOLD / 100.0):
                 theme_key = f"theme_{abs(hash(str(request.question)))}"
                 memory = MemoryItem(
                     user_id=request.user_id,

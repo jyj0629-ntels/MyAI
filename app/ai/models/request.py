@@ -32,6 +32,12 @@ class AIRequest(BaseModel):
 
     max_tokens: Optional[int] = None
 
+    user_profile: Optional[str] = None
+
+    project_context: Optional[Any] = None
+
+    task_type: Optional[str] = None
+
     @field_validator("question", mode="before")
     @classmethod
     def normalize_question(cls, value: Any) -> str:

@@ -73,6 +73,11 @@ class MemoryQueryService:
             )
         )
 
+        preferences = [
+            memory for memory in preferences
+            if getattr(memory, "status", "ACTIVE") == "ACTIVE"
+        ]
+
         goals = (
             self.memory_service.get_by_type(
                 user_id,

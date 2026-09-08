@@ -1,5 +1,6 @@
 import re
 
+from app.core.config import settings
 from app.models.memory_item import MemoryItem
 from app.models.user import User
 
@@ -69,8 +70,18 @@ class PreferenceExtractionService:
                 )
                 .first()
             )
+
             if existing:
+                existing.occurrence_count = (existing.occurrence_count or 1) + 1
+                if (
+                    existing.status != "ACTIVE"
+                    and existing.occurrence_count >= settings.PREFERENCE_MIN_FREQUENCY
+                ):
+                    existing.status = "ACTIVE"
+                saved.append(existing)
                 continue
+
+            initial_status = "ACTIVE" if settings.PREFERENCE_MIN_FREQUENCY <= 1 else "CANDIDATE"
 
             memory = MemoryItem(
                 user_id=user_id,
@@ -82,7 +93,8 @@ class PreferenceExtractionService:
                 freshness=1.0,
                 source_type="QUESTION",
                 scope="USER",
-                status="ACTIVE",
+                status=initial_status,
+                occurrence_count=1,
             )
             db.add(memory)
             saved.append(memory)

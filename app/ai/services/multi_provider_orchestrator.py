@@ -8,10 +8,10 @@ from app.core.config import settings
 from app.ai.models.request import AIRequest
 
 from app.ai.services.response_collector import ResponseCollector
-from app.ai.services.consensus_engine import ConsensusEngine
 from app.ai.services.local_consensus_service import LocalConsensusService
 from app.ai.services.response_summary_service import ResponseSummaryService
 from app.services.performance_tracker import PerformanceTracker
+from app.services.local_brain_llm_service import LocalBrainLLMService
 
 class MultiProviderOrchestrator:
 
@@ -122,10 +122,10 @@ class MultiProviderOrchestrator:
             providers = ["비교 대상 없음"]
 
         score_value = 0.0
-        if comparison and comparison.get("consensus_score") is not None:
-            score_value = float(comparison.get("consensus_score", 0) or 0)
-        elif judge_result and judge_result.get("consensus_score") is not None:
+        if judge_result and judge_result.get("consensus_score") is not None:
             score_value = float(judge_result.get("consensus_score", 0) or 0)
+        elif comparison and comparison.get("consensus_score") is not None:
+            score_value = float(comparison.get("consensus_score", 0) or 0)
 
         baseline = float(threshold if threshold is not None else settings.CONSENSUS_THRESHOLD)
         summary_source = None
@@ -311,11 +311,23 @@ class MultiProviderOrchestrator:
                 {"provider": provider_name, "question_length": len(str(request.question or ""))}
             )
 
+            provider_prompt = (
+                LocalBrainLLMService.build_provider_prompt(
+                    question=request.question,
+                    user_profile=getattr(request, "user_profile", None),
+                    project_context=getattr(request, "project_context", None),
+                    provider_name=provider_name,
+                    task_type=getattr(request, "task_type", None) or "GENERAL",
+                    response_format=getattr(request, "response_format_text", None),
+                )
+            )
+            provider_request = request.model_copy(update={"prompt": provider_prompt})
+
             print()
             PerformanceTracker.print_section(
                 "provider",
                 f"PUBLIC PROVIDER PROMPT: {provider_name}",
-                request.prompt or request.question
+                provider_request.prompt
             )
             print()
 
@@ -344,7 +356,7 @@ class MultiProviderOrchestrator:
                 _ask_with_timing(
                     provider,
                     provider_name,
-                    request,
+                    provider_request,
                     provider_started_at
                 )
             )
@@ -432,7 +444,7 @@ class MultiProviderOrchestrator:
                 "response_count": len(collected),
                 "comparison_score": comparison.get("consensus_score", 0)
             }
-            if len(collected) >= 2
+            if len(collected) >= settings.MIN_CONSENSUS_RESPONSES
             else None
         )
 
@@ -447,7 +459,7 @@ class MultiProviderOrchestrator:
 
             selected = None
 
-        elif len(collected) == 1:
+        elif len(collected) < settings.MIN_CONSENSUS_RESPONSES:
 
             print()
             print("# --------------------------------")
@@ -488,7 +500,7 @@ class MultiProviderOrchestrator:
 
         judge_request = None
 
-        if len(collected) >= 2 and settings.ENABLE_LOCAL_CONSENSUS:
+        if len(collected) >= settings.MIN_CONSENSUS_RESPONSES and settings.ENABLE_LOCAL_CONSENSUS:
 
             judge_request = (
                 LocalConsensusService()

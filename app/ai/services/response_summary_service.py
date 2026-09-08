@@ -3,6 +3,7 @@ import re
 
 from app.ai.models.request import AIRequest
 from app.ai.providers.ollama_provider import OllamaProvider
+from app.services.local_brain_llm_service import LocalBrainLLMService
 
 
 class ResponseSummaryService:
@@ -115,7 +116,12 @@ class ResponseSummaryService:
                 provider="ollama",
                 think=False,
             )
-            response = await OllamaProvider().ask(request)
+            provider_name = LocalBrainLLMService.resolve_local_brain_provider()
+            provider_instance = (
+                LocalBrainLLMService.get_provider_instance(provider_name)
+                or OllamaProvider()
+            )
+            response = await provider_instance.ask(request)
             if getattr(response, "success", False) and getattr(response, "answer", "").strip():
                 text = str(response.answer).strip()
                 text = re.sub(r"^\s*[-*•]\s*", "", text, flags=re.M)

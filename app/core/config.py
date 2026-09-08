@@ -137,6 +137,13 @@ class Settings:
         )
     )
 
+    PREFERENCE_MIN_FREQUENCY = int(
+        os.getenv(
+            "PREFERENCE_MIN_FREQUENCY",
+            "2"
+        )
+    )
+
     ALLOW_SINGLE_PROVIDER = (
         os.getenv(
             "ALLOW_SINGLE_PROVIDER",

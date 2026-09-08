@@ -362,6 +362,10 @@ async def chat(
     print()
 
     request.prompt = prompt
+    request.user_profile = context_package.get("user_profile")
+    request.project_context = context_package.get("project_context")
+    request.task_type = brain_result.task_type
+    request.response_format_text = requested_format
 
     prompt_run_service = ( 
         AIPromptRunService(
@@ -623,7 +627,7 @@ async def chat(
             "score": comparison.get("consensus_score", 0)
         } for item in multi_result.get("responses", [])]
         response.provider_responses = raw_provider_responses
-        response.requires_confirmation = comparison.get("consensus_score", 0) < 80
+        response.requires_confirmation = comparison.get("consensus_score", 0) < settings.CONSENSUS_THRESHOLD
 
         # Only replace the full answer with the multi-provider comparison layout when a
         # real comparison happened; a single responding provider must keep its full answer.

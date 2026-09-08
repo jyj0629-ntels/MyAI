@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import func
@@ -83,6 +84,13 @@ class MemoryItem(Base):
         String(50),
         nullable=False,
         default="CANDIDATE"
+    )
+
+    occurrence_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=1,
+        server_default="1"
     )
 
     first_seen_at: Mapped[datetime] = mapped_column(
