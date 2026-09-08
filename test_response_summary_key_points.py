@@ -63,6 +63,30 @@ def test_ollama_thinking_is_not_exposed_as_final_answer():
     assert "internal reasoning" not in answer.lower()
 
 
+def test_summary_keeps_all_important_key_points_without_truncating_by_count():
+    answer = """
+    트위터는 사용자 참여도가 높다.
+    인스타그램은 시각 콘텐츠 노출이 강하다.
+    유튜브는 장기 콘텐츠 소비에 유리하다.
+    네이버 블로그는 검색 유입이 강하다.
+    카카오톡 채널은 커머스 전환에 효과적이다.
+    틱톡은 짧은 숏폼 확산력이 강하다.
+    링크드인은 B2B 신뢰 형성에 유리하다.
+    안녕하세요. 인사말입니다.
+    """
+
+    summary = ResponseSummaryService().summarize(answer)
+
+    assert "트위터는 사용자 참여도가 높다" in summary
+    assert "인스타그램은 시각 콘텐츠 노출이 강하다" in summary
+    assert "유튜브는 장기 콘텐츠 소비에 유리하다" in summary
+    assert "네이버 블로그는 검색 유입이 강하다" in summary
+    assert "카카오톡 채널은 커머스 전환에 효과적이다" in summary
+    assert "틱톡은 짧은 숏폼 확산력이 강하다" in summary
+    assert "링크드인은 B2B 신뢰 형성에 유리하다" in summary
+    assert "안녕하세요" not in summary
+
+
 def test_log_border_vary_by_step_type():
     request_border = PerformanceTracker.get_log_border("request")
     response_border = PerformanceTracker.get_log_border("response")
