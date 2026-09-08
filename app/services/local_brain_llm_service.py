@@ -21,6 +21,14 @@ class LocalBrainLLMService:
         return (provider or "ollama").strip().lower()
 
     @staticmethod
+    def get_provider_instance(provider_name: str):
+        normalized = (provider_name or "").strip().lower()
+        if normalized == "ollama":
+            from app.ai.providers.ollama_provider import OllamaProvider
+            return OllamaProvider()
+        return None
+
+    @staticmethod
     def should_use_fast_path(question) -> bool:
         if not settings.LOCAL_LLM_FAST_PATH_ENABLED:
             return False
@@ -32,34 +40,13 @@ class LocalBrainLLMService:
         if not text:
             return True
 
-        normalized = text.lower()
-
         if len(text) <= 32:
             return True
 
         if len(text) <= settings.LOCAL_LLM_FAST_PATH_MAX_CHARS and "?" in text:
             return True
 
-        simple_patterns = (
-            "오늘",
-            "지금",
-            "어때",
-            "뭐야",
-            "뭐",
-            "추천",
-            "예상",
-            "얼마",
-            "언제",
-            "누구",
-            "어디",
-            "날씨",
-            "상태",
-            "비교",
-            "간단",
-            "요약",
-        )
-
-        if any(pattern in normalized for pattern in simple_patterns):
+        if text.count(" ") <= 8 and ("?" in text or "!" in text):
             return True
 
         return False
@@ -241,13 +228,19 @@ class LocalBrainLLMService:
         print("# --------------------------------")
         print()
 
-        tracker.start("local_llm_provider_call", {"provider": "ollama"})
+        provider_name = self.resolve_local_brain_provider()
+        provider_instance = self.get_provider_instance(provider_name)
+        if provider_instance is None:
+            from app.ai.providers.ollama_provider import OllamaProvider
+            provider_instance = OllamaProvider()
+
+        tracker.start("local_llm_provider_call", {"provider": provider_name})
         response = await (
-            OllamaProvider().ask(
+            provider_instance.ask(
                 request
             )
         )
-        tracker.finish("local_llm_provider_call", metadata={"provider": "ollama", "success": bool(getattr(response, "success", False))})
+        tracker.finish("local_llm_provider_call", metadata={"provider": provider_name, "success": bool(getattr(response, "success", False))})
 
         print()
         print("# --------------------------------")

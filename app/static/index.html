@@ -384,8 +384,8 @@
     .chat-box {
       display: flex;
       flex-direction: column;
-      height: 100%;
-      min-height: 640px;
+      height: clamp(520px, 62vh, 760px);
+      min-height: 520px;
     }
 
     .chat-header {
@@ -415,12 +415,15 @@
     }
 
     .messages {
-      flex: 1;
+      flex: 1 1 auto;
       display: flex;
       flex-direction: column;
       gap: 14px;
       padding: 20px 0;
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+      scroll-behavior: smooth;
     }
 
     .message {
@@ -943,6 +946,9 @@
 
       messageList.appendChild(row);
       messageList.scrollTop = messageList.scrollHeight;
+      if (messageList.scrollHeight > messageList.clientHeight) {
+        messageList.scrollTo({ top: messageList.scrollHeight, behavior: 'smooth' });
+      }
     }
 
     function setStatus(message) {
