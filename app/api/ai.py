@@ -446,13 +446,11 @@ async def chat(
         tracker.finish("5. consensus_judge")
 
         print()
-        print("# --------------------------------")
-        print("# LOCAL CONSENSUS RESULT")
-        print("# --------------------------------")
-        print(
+        PerformanceTracker.print_section(
+            "consensus",
+            "LOCAL CONSENSUS RESULT",
             judge_response.answer
         )
-        print("# --------------------------------")
         print()
 
         if judge_response:
@@ -626,7 +624,38 @@ async def chat(
         } for item in multi_result.get("responses", [])]
         response.provider_responses = raw_provider_responses
         response.requires_confirmation = comparison.get("consensus_score", 0) < 80
-        response.answer = combined_summary or response.answer
+
+        final_consensus_text = MultiProviderOrchestrator.build_human_readable_result(
+            responses=multi_result.get("responses", []),
+            comparison=comparison,
+            judge_result=judge_result,
+            threshold=settings.CONSENSUS_THRESHOLD,
+        )
+        response.answer = final_consensus_text
+
+    if not getattr(response, "provider_responses", None) and multi_result.get("responses"):
+        response.provider_responses = [
+            {
+                "provider": item["provider"],
+                "model": item.get("model"),
+                "answer": item.get("answer") or "",
+                "summary": (item.get("summary") or item.get("answer") or "")[:500],
+                "score": 0
+            }
+            for item in multi_result.get("responses", [])
+        ]
+
+    if not response.answer and comparison:
+        response.answer = MultiProviderOrchestrator.build_human_readable_result(
+            responses=multi_result.get("responses", []),
+            comparison=comparison,
+            judge_result=judge_result,
+            threshold=settings.CONSENSUS_THRESHOLD,
+        )
+
+    response.answer = MultiProviderOrchestrator.format_final_answer(response.answer or "")
+    if response.summary:
+        response.summary = MultiProviderOrchestrator.format_final_answer(response.summary)
 
     if not getattr(response, "provider_responses", None) and multi_result.get("responses"):
         response.provider_responses = [

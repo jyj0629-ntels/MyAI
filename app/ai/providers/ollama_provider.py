@@ -24,20 +24,11 @@ class OllamaProvider(
         try:
 
             print()
-            print("# --------------------------------")
-            print("# OLLAMA REQUEST")
-            print("# --------------------------------")
-            print(
-                f"model={settings.LOCAL_LLM_MODEL}"
+            PerformanceTracker.print_section(
+                "request",
+                "OLLAMA REQUEST",
+                f"model={settings.LOCAL_LLM_MODEL}\ntimeout={settings.OLLAMA_TIMEOUT}\nprompt_length={len(request.prompt or request.question)}"
             )
-            print(
-                f"timeout={settings.OLLAMA_TIMEOUT}"
-            )
-            print(
-                f"prompt_length="
-                f"{len(request.prompt or request.question)}"
-            )
-            print("# --------------------------------")
             print()
 
 
@@ -64,19 +55,19 @@ class OllamaProvider(
                     )
                 )
                 print()
-                print("# --------------------------------")
-                print("# OLLAMA HTTP STATUS")
-                print("# --------------------------------")
-                print(response.status_code)
-                print("# --------------------------------")
+                PerformanceTracker.print_section(
+                    "response",
+                    "OLLAMA HTTP STATUS",
+                    response.status_code
+                )
                 print()
 
                 print()
-                print("# --------------------------------")
-                print("# OLLAMA RAW RESPONSE")
-                print("# --------------------------------")
-                print(response.text)
-                print("# --------------------------------")
+                PerformanceTracker.print_section(
+                    "response",
+                    "OLLAMA RAW RESPONSE",
+                    response.text
+                )
                 print()
 
                 data = response.json()

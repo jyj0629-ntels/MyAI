@@ -8,6 +8,34 @@ class PerformanceTracker:
         self._steps: list[dict[str, Any]] = []
 
     @staticmethod
+    def get_log_border(kind: str) -> str:
+        kind_name = (kind or "general").strip().lower()
+        borders = {
+            "request": "# ============================================================ #",
+            "response": "# --------------------------- RESPONSE --------------------------- #",
+            "provider": "# -------------------------- PROVIDER --------------------------- #",
+            "consensus": "# ------------------------- CONSENSUS --------------------------- #",
+            "local": "# --------------------------- LOCAL ----------------------------- #",
+            "trace": "# --------------------------- TRACE ----------------------------- #",
+            "summary": "# -------------------------- SUMMARY ---------------------------- #",
+            "default": "# --------------------------------------------------------------- #",
+        }
+        return borders.get(kind_name, borders["default"])
+
+    @staticmethod
+    def print_section(kind: str, title: str, content: Any = None):
+        border = PerformanceTracker.get_log_border(kind)
+        print(border)
+        print(f"# {title}")
+        print(border)
+        if content is not None:
+            if isinstance(content, str):
+                print(content)
+            else:
+                print(content)
+        print(border)
+
+    @staticmethod
     def normalize_step_name(step_name: str) -> str:
         value = str(step_name or "").strip()
         if not value:
@@ -120,4 +148,4 @@ class PerformanceTracker:
         }
 
     def add_log(self, label: str, payload: Any):
-        print(f"[TRACE] {label}: {payload}")
+        print(f"{self.get_log_border('trace')}\n[TRACE] {label}: {payload}\n{self.get_log_border('trace')}")

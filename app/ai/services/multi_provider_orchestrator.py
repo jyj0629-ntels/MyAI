@@ -100,7 +100,7 @@ class MultiProviderOrchestrator:
         if not text:
             return ""
 
-        cleaned = str(text).replace("\r\n", "\n").replace("\r", "\n").strip()
+        cleaned = str(text).replace("\r\n", "\n").replace("\r", "\n").replace("\t", "    ").strip()
         cleaned = re.sub(r"\[(?:gemini|groq|openai|chatgpt|deepseek|meta|ollama|provider)\]\s*", "\n\n", cleaned, flags=re.I)
         cleaned = re.sub(r"\s*[-–—]\s*\*\*(핵심 요약|불확실성 명시|다음 행동|비교표|최종 추천|근거|결론|추천|리스크|주의점)\*\*", "\n\n**\\1**", cleaned)
         cleaned = re.sub(r"(?<!\n)\*\*(핵심 요약|불확실성 명시|다음 행동|비교표|최종 추천|근거|결론|추천|리스크|주의점)\*\*", "\n\n**\\1**", cleaned)
@@ -108,9 +108,41 @@ class MultiProviderOrchestrator:
         cleaned = re.sub(r"(?<=[.!?])\s+(?=(?:\*\*|[가-힣A-Z]))", "\n\n", cleaned)
         cleaned = re.sub(r"(?<=[가-힣])\s+(?=(?:[-•·]|\d+\.|\* ))", "\n", cleaned)
         cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
-        cleaned = re.sub(r"[ \t]{2,}", " ", cleaned)
+        cleaned = re.sub(r"[ ]{2,}", " ", cleaned)
         cleaned = cleaned.strip()
         return cleaned
+
+    @staticmethod
+    def build_human_readable_result(responses, comparison=None, judge_result=None, threshold=None):
+        providers = []
+        for item in responses or []:
+            provider_name = str(item.get("provider") or "").strip()
+            if provider_name and provider_name not in providers:
+                providers.append(provider_name)
+
+        if not providers:
+            providers = ["비교 대상 없음"]
+
+        score_value = 0.0
+        if comparison and comparison.get("consensus_score") is not None:
+            score_value = float(comparison.get("consensus_score", 0) or 0)
+        elif judge_result and judge_result.get("consensus_score") is not None:
+            score_value = float(judge_result.get("consensus_score", 0) or 0)
+
+        baseline = float(threshold if threshold is not None else settings.CONSENSUS_THRESHOLD)
+        summary_source = None
+        if judge_result and judge_result.get("final_answer"):
+            summary_source = judge_result.get("final_answer")
+        elif comparison and comparison.get("combined_summary"):
+            summary_source = comparison.get("combined_summary")
+        elif responses:
+            summary_source = "\n\n".join(str(item.get("summary") or item.get("answer") or "").strip() for item in responses if (item.get("summary") or item.get("answer")))
+
+        summary_text = MultiProviderOrchestrator.format_final_answer(summary_source or "요약 결과를 생성할 수 없습니다.")
+        provider_line = f"(1) 비교 대상 AI : {', '.join(providers)}"
+        consensus_line = f"(2) Consensus : 기준 {int(baseline)}% / 현재 결과 : {score_value:.0f}%"
+        summary_line = "(3) 최종 요약 결과."
+        return f"{provider_line}\n{consensus_line}\n\n{summary_line}\n\n{summary_text}"
 
     @classmethod
     def build_combined_summary(cls, responses):
@@ -259,11 +291,11 @@ class MultiProviderOrchestrator:
             )
 
             print()
-            print("# --------------------------------")
-            print(f"# PUBLIC PROVIDER PROMPT: {provider_name}")
-            print("# --------------------------------")
-            print(request.prompt or request.question)
-            print("# --------------------------------")
+            PerformanceTracker.print_section(
+                "provider",
+                f"PUBLIC PROVIDER PROMPT: {provider_name}",
+                request.prompt or request.question
+            )
             print()
 
             async def _ask_with_timing(provider_instance, provider_name_value, request_payload, started_at):
@@ -343,9 +375,11 @@ class MultiProviderOrchestrator:
             )
 
         print()
-        print("# --------------------------------")
-        print("# PROVIDER RESPONSES")
-        print("# --------------------------------")
+        PerformanceTracker.print_section(
+            "response",
+            "PROVIDER RESPONSES",
+            ""
+        )
 
         for response in responses:
 
@@ -353,12 +387,7 @@ class MultiProviderOrchestrator:
             print(
                 f"[{response.provider}]"
             )
-
-            print(
-                response.answer[:300]
-            )
-
-            print("# --------------------------------")
+            print(response.answer[:300])
             print()
 
         tracker.start("4.3 public_response_summary")
@@ -421,31 +450,19 @@ class MultiProviderOrchestrator:
                 selected = None
 
         print()
-        print("# --------------------------------")
-        print("# PROVIDER SUMMARY")
-        print("# --------------------------------")
-        print(
-            f"consensus_threshold="
-            f"{settings.CONSENSUS_THRESHOLD}"
+        PerformanceTracker.print_section(
+            "summary",
+            "PROVIDER SUMMARY",
+            f"consensus_threshold={settings.CONSENSUS_THRESHOLD}\nselected={selected}\nresponse_count={len(collected)}"
         )
-        print(
-            f"selected="
-            f"{selected}"
-        )
-        print(
-            f"response_count="
-            f"{len(collected)}"
-        )
-
-        print("# --------------------------------")
         print()
 
         print()
-        print("# --------------------------------")
-        print("# CONSENSUS RESULT")
-        print("# --------------------------------")
-        print("Handled by Local LLM Judge")
-        print("# --------------------------------")
+        PerformanceTracker.print_section(
+            "consensus",
+            "CONSENSUS RESULT",
+            "Handled by Local LLM Judge"
+        )
         print()
 
         judge_request = None
