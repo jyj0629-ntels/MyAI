@@ -399,7 +399,7 @@ class MultiProviderOrchestrator:
             print(
                 f"[{response.provider}]"
             )
-            print(response.answer[:300])
+            print(response.answer)
             print()
 
         tracker.start("4.3 public_response_summary")

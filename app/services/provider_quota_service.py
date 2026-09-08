@@ -54,11 +54,11 @@ class ProviderQuotaService:
             async with httpx.AsyncClient(timeout=timeout) as client:
                 response = await client.get(url, headers=headers or {})
                 if response.status_code >= 400:
-                    return False, {"status_code": response.status_code, "text": response.text[:300]}
+                    return False, {"status_code": response.status_code, "text": response.text}
                 try:
                     return True, response.json()
                 except Exception:
-                    return True, {"text": response.text[:300]}
+                    return True, {"text": response.text}
         except Exception as exc:
             return False, {"error": str(exc)}
 

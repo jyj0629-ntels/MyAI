@@ -214,12 +214,12 @@ class ChatOrchestratorService:
         if getattr(response, "comparison", None) and request.user_id:
             score = float((response.comparison or {}).get("consensus_score", 0.0)) / 100.0
             if score >= 0.75:
-                theme_key = f"theme_{abs(hash(request.question[:120]))}"
+                theme_key = f"theme_{abs(hash(str(request.question)))}"
                 memory = MemoryItem(
                     user_id=request.user_id,
                     type="PREFERENCE",
                     key=theme_key,
-                    content=f"질문: {request.question[:180]} | 결론: {response.summary or response.answer[:300]} | 신뢰도: {score:.2f}",
+                    content=f"질문: {request.question} | 결론: {response.summary or response.answer} | 신뢰도: {score:.2f}",
                     importance=0.8,
                     confidence=score,
                     freshness=1.0,
