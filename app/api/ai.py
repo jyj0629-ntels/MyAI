@@ -625,13 +625,16 @@ async def chat(
         response.provider_responses = raw_provider_responses
         response.requires_confirmation = comparison.get("consensus_score", 0) < 80
 
-        final_consensus_text = MultiProviderOrchestrator.build_human_readable_result(
-            responses=multi_result.get("responses", []),
-            comparison=comparison,
-            judge_result=judge_result,
-            threshold=settings.CONSENSUS_THRESHOLD,
-        )
-        response.answer = final_consensus_text
+        # Only replace the full answer with the multi-provider comparison layout when a
+        # real comparison happened; a single responding provider must keep its full answer.
+        if comparison.get("response_count", 0) >= 2:
+            final_consensus_text = MultiProviderOrchestrator.build_human_readable_result(
+                responses=multi_result.get("responses", []),
+                comparison=comparison,
+                judge_result=judge_result,
+                threshold=settings.CONSENSUS_THRESHOLD,
+            )
+            response.answer = final_consensus_text
 
     if not getattr(response, "provider_responses", None) and multi_result.get("responses"):
         response.provider_responses = [

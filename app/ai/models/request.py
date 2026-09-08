@@ -30,6 +30,8 @@ class AIRequest(BaseModel):
 
     think: bool = False
 
+    max_tokens: Optional[int] = None
+
     @field_validator("question", mode="before")
     @classmethod
     def normalize_question(cls, value: Any) -> str:

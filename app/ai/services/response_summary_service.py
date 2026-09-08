@@ -113,7 +113,7 @@ class ResponseSummaryService:
             request = AIRequest(
                 question=prompt,
                 provider="ollama",
-                think=True,
+                think=False,
             )
             response = await OllamaProvider().ask(request)
             if getattr(response, "success", False) and getattr(response, "answer", "").strip():

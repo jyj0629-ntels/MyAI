@@ -190,6 +190,13 @@ class Settings:
         )
     )
 
+    OLLAMA_NUM_PREDICT = int(
+        os.getenv(
+            "OLLAMA_NUM_PREDICT",
+            "1024"
+        )
+    )
+
     ENABLE_LOCAL_LLM_JUDGE = (
         os.getenv(
             "ENABLE_LOCAL_LLM_JUDGE",
