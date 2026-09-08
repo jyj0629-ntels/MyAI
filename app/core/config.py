@@ -5,6 +5,31 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _is_placeholder_value(value):
+    if value is None:
+        return True
+
+    normalized = str(value).strip()
+    if not normalized:
+        return True
+
+    lowered = normalized.lower()
+    placeholder_markers = (
+        "your_",
+        "placeholder",
+        "changeme",
+        "example",
+        "test_",
+        "dummy",
+        "fill_me",
+        "api_key_here",
+        "not_configured",
+        "<your",
+    )
+
+    return any(marker in lowered for marker in placeholder_markers)
+
+
 class Settings:
 
     POSTGRES_HOST = os.getenv(
@@ -37,38 +62,42 @@ class Settings:
         f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     )
 
-    GEMINI_API_KEY = os.getenv(
-        "GEMINI_API_KEY"
-    )
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    if _is_placeholder_value(GEMINI_API_KEY):
+        GEMINI_API_KEY = None
 
     GEMINI_MODEL = os.getenv(
         "GEMINI_MODEL"
     )
 
-    GROQ_API_KEY = os.getenv(
-        "GROQ_API_KEY"
-    )
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    if _is_placeholder_value(GROQ_API_KEY):
+        GROQ_API_KEY = None
 
     GROQ_MODEL = os.getenv(
         "GROQ_MODEL"
     )
 
-    MISTRAL_API_KEY = os.getenv(
-        "MISTRAL_API_KEY"
-    )
+    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+    if _is_placeholder_value(MISTRAL_API_KEY):
+        MISTRAL_API_KEY = None
 
     MISTRAL_MODEL = os.getenv(
         "MISTRAL_MODEL",
         "mistral-small-latest"
     )
 
-    DEEPSEEK_API_KEY = os.getenv(
-        "DEEPSEEK_API_KEY"
-    )
+    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+    if _is_placeholder_value(DEEPSEEK_API_KEY):
+        DEEPSEEK_API_KEY = None
 
     DEEPSEEK_MODEL = os.getenv(
         "DEEPSEEK_MODEL"
     )
+
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    if _is_placeholder_value(OPENAI_API_KEY):
+        OPENAI_API_KEY = None
 
     OPENAI_MODEL = os.getenv(
         "OPENAI_MODEL"
@@ -88,7 +117,7 @@ class Settings:
 
     PUBLIC_PROVIDERS = os.getenv(
         "PUBLIC_PROVIDERS",
-        "gemini,groq,openai,mistral"
+        "gemini,groq,mistral"
     )
 
     LOCAL_BRAIN_DEFAULT_PROVIDER = os.getenv(

@@ -1,6 +1,6 @@
 import os
 
-from app.core.config import settings
+from app.core.config import settings, _is_placeholder_value
 
 from groq import AsyncGroq
 
@@ -12,10 +12,12 @@ class GroqProvider(AIProvider):
 
     def __init__(self):
 
+        api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
+        if not api_key or _is_placeholder_value(api_key):
+            raise RuntimeError("GROQ_API_KEY is not configured.")
+
         self.client = AsyncGroq(
-            api_key=os.getenv(
-                "GROQ_API_KEY"
-            )
+            api_key=api_key
         )
 
         self.model = (

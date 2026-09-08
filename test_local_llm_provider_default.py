@@ -1,3 +1,4 @@
+from app.ai.services.provider_loader import ProviderLoader
 from app.core import config
 from app.services.local_brain_llm_service import LocalBrainLLMService
 
@@ -25,3 +26,14 @@ def test_local_llm_fallback_uses_ollama_not_public_primary(monkeypatch):
         raw_provider = config.settings.LOCAL_LLM_PROVIDER or config.settings.PRIMARY_PROVIDER or "gemini"
 
     assert raw_provider == "ollama"
+
+
+def test_provider_loader_skips_placeholder_api_keys(monkeypatch):
+    monkeypatch.setattr(config.settings, "PUBLIC_PROVIDERS", "gemini,groq,mistral", raising=False)
+    monkeypatch.setattr(config.settings, "GEMINI_API_KEY", "your_gemini_api_key_here", raising=False)
+    monkeypatch.setattr(config.settings, "GROQ_API_KEY", "your_groq_api_key_here", raising=False)
+    monkeypatch.setattr(config.settings, "MISTRAL_API_KEY", "your_mistral_api_key_here", raising=False)
+
+    providers = ProviderLoader().load_all()
+
+    assert [provider.name for provider in providers] == []

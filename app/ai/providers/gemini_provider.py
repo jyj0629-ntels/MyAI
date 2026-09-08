@@ -1,6 +1,6 @@
 from google import genai
 
-from app.core.config import settings
+from app.core.config import settings, _is_placeholder_value
 
 from app.ai.providers.base import AIProvider
 from app.ai.models.request import AIRequest
@@ -17,6 +17,15 @@ class GeminiProvider(AIProvider):
         self,
         request: AIRequest
     ) -> AIResponse:
+
+        if not settings.GEMINI_API_KEY or _is_placeholder_value(settings.GEMINI_API_KEY):
+            return AIResponse(
+                provider=self.name,
+                model=settings.GEMINI_MODEL,
+                answer="",
+                success=False,
+                error="GEMINI_API_KEY is not configured."
+            )
 
         client = genai.Client(
             api_key=settings.GEMINI_API_KEY

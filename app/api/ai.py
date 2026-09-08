@@ -290,10 +290,14 @@ async def chat(
         print()
 
         provider = (
-            settings.PRIMARY_PROVIDER
-            .strip()
-            .lower()
-        )
+            settings.LOCAL_LLM_PROVIDER
+            or settings.LOCAL_BRAIN_DEFAULT_PROVIDER
+            or settings.PRIMARY_PROVIDER
+            or "ollama"
+        ).strip().lower()
+
+        if provider not in available_providers and "ollama" in available_providers:
+            provider = "ollama"
 
     print()
     print("# --------------------------------")

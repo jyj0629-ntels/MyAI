@@ -5,14 +5,14 @@ from openai import AsyncOpenAI
 from app.ai.providers.base import AIProvider
 from app.ai.models.request import AIRequest
 from app.ai.models.response import AIResponse
-from app.core.config import settings
+from app.core.config import settings, _is_placeholder_value
 
 
 class MistralProvider(AIProvider):
 
     def __init__(self):
-        api_key = os.getenv("MISTRAL_API_KEY") or settings.MISTRAL_API_KEY
-        if not api_key:
+        api_key = settings.MISTRAL_API_KEY or os.getenv("MISTRAL_API_KEY")
+        if not api_key or _is_placeholder_value(api_key):
             raise RuntimeError("MISTRAL_API_KEY is not configured.")
 
         self.client = AsyncOpenAI(
