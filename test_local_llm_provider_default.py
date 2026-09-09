@@ -1,6 +1,7 @@
 from app.ai.services.provider_loader import ProviderLoader
 from app.core import config
 from app.services.local_brain_llm_service import LocalBrainLLMService
+from app.services.preference_extraction_service import PreferenceExtractionService
 
 
 def test_fast_path_prefers_local_ollama_provider(monkeypatch):
@@ -37,3 +38,19 @@ def test_provider_loader_skips_placeholder_api_keys(monkeypatch):
     providers = ProviderLoader().load_all()
 
     assert [provider.name for provider in providers] == []
+
+
+def test_preference_registration_uses_configured_frequency_threshold(monkeypatch):
+    monkeypatch.setattr(config.settings, "PREFERENCE_MIN_FREQUENCY", 2, raising=False)
+
+    assert PreferenceExtractionService.should_register_preference(1, 2, "project") is False
+    assert PreferenceExtractionService.should_register_preference(2, 2, "project") is True
+    assert PreferenceExtractionService.should_register_preference(10, 1, "project") is True
+
+
+def test_local_llm_is_not_replaced_by_public_provider_default(monkeypatch):
+    monkeypatch.setattr(config.settings, "LOCAL_LLM_PROVIDER", "ollama", raising=False)
+    monkeypatch.setattr(config.settings, "PRIMARY_PROVIDER", "gemini", raising=False)
+
+    assert LocalBrainLLMService.resolve_local_brain_provider() == "ollama"
+    assert LocalBrainLLMService.resolve_local_brain_provider() != "gemini"

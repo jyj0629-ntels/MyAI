@@ -1,5 +1,4 @@
 from app.ai.models.request import AIRequest
-from app.ai.providers.ollama_provider import OllamaProvider
 from app.schemas.brain_result import BrainResult
 from app.core.config import settings
 from app.services.performance_tracker import PerformanceTracker
@@ -9,6 +8,27 @@ import re
 
 
 class LocalBrainLLMService:
+
+    @staticmethod
+    def get_local_provider_instance():
+        provider_name = str(
+            settings.LOCAL_LLM_PROVIDER or "ollama"
+        ).strip().lower()
+
+        if provider_name == "ollama":
+            from app.ai.providers.ollama_provider import OllamaProvider
+            return OllamaProvider()
+
+        module_name = f"app.ai.providers.{provider_name}_provider"
+        try:
+            module = __import__(module_name, fromlist=["*"])
+            provider_cls = next(
+                obj for obj in vars(module).values()
+                if isinstance(obj, type) and obj.__name__.lower() == f"{provider_name}provider"
+            )
+            return provider_cls()
+        except Exception as exc:
+            raise ValueError(f"Unsupported local LLM provider: {provider_name}") from exc
 
     @staticmethod
     def resolve_local_brain_provider() -> str:
@@ -32,34 +52,17 @@ class LocalBrainLLMService:
         if not text:
             return True
 
-        normalized = text.lower()
-
         if len(text) <= 32:
             return True
 
         if len(text) <= settings.LOCAL_LLM_FAST_PATH_MAX_CHARS and "?" in text:
             return True
 
-        simple_patterns = (
-            "오늘",
-            "지금",
-            "어때",
-            "뭐야",
-            "뭐",
-            "추천",
-            "예상",
-            "얼마",
-            "언제",
-            "누구",
-            "어디",
-            "날씨",
-            "상태",
-            "비교",
-            "간단",
-            "요약",
-        )
-
-        if any(pattern in normalized for pattern in simple_patterns):
+        hints = [
+            item.strip().lower() for item in (settings.LOCAL_LLM_FAST_PATH_HINTS or "").split(",") if item.strip()
+        ]
+        normalized = text.lower()
+        if hints and any(hint in normalized for hint in hints):
             return True
 
         return False
@@ -241,13 +244,10 @@ class LocalBrainLLMService:
         print("# --------------------------------")
         print()
 
-        tracker.start("local_llm_provider_call", {"provider": "ollama"})
-        response = await (
-            OllamaProvider().ask(
-                request
-            )
-        )
-        tracker.finish("local_llm_provider_call", metadata={"provider": "ollama", "success": bool(getattr(response, "success", False))})
+        local_provider_name = self.resolve_local_brain_provider()
+        tracker.start("local_llm_provider_call", {"provider": local_provider_name})
+        response = await self.get_local_provider_instance().ask(request)
+        tracker.finish("local_llm_provider_call", metadata={"provider": local_provider_name, "success": bool(getattr(response, "success", False))})
 
         print()
         print("# --------------------------------")

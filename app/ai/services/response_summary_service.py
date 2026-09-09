@@ -2,10 +2,28 @@ import asyncio
 import re
 
 from app.ai.models.request import AIRequest
-from app.ai.providers.ollama_provider import OllamaProvider
+from app.core.config import settings
 
 
 class ResponseSummaryService:
+
+    @staticmethod
+    def _local_provider_instance():
+        provider_name = str(settings.LOCAL_LLM_PROVIDER or "ollama").strip().lower()
+        if provider_name == "ollama":
+            from app.ai.providers.ollama_provider import OllamaProvider
+            return OllamaProvider()
+
+        module_name = f"app.ai.providers.{provider_name}_provider"
+        try:
+            module = __import__(module_name, fromlist=["*"])
+            provider_cls = next(
+                obj for obj in vars(module).values()
+                if isinstance(obj, type) and obj.__name__.lower() == f"{provider_name}provider"
+            )
+            return provider_cls()
+        except Exception as exc:
+            raise ValueError(f"Unsupported local LLM provider: {provider_name}") from exc
 
     @staticmethod
     def _is_important_line(line: str) -> bool:
@@ -40,6 +58,7 @@ class ResponseSummaryService:
 
         answer = answer.strip()
         candidates = []
+
         for raw_line in answer.splitlines():
             line = raw_line.strip()
             if not line:
@@ -52,26 +71,32 @@ class ResponseSummaryService:
                 continue
             if line.startswith("[") and line.endswith("]"):
                 continue
+
             line = ResponseSummaryService._clean_sentence(line)
             if not line:
+                continue
+
+            lowered = line.lower()
+            if re.fullmatch(r"(?:안녕하세요|반갑습니다|hello|hi)[^가-힣a-z0-9]*", lowered):
+                continue
+            if "장식 문장" in lowered or "의미 없는" in lowered or "잡담" in lowered:
+                continue
+            if len(line) < 10:
+                continue
+            if re.fullmatch(r"[\W_]+", line):
                 continue
             if ResponseSummaryService._is_important_line(line):
                 candidates.append(line)
 
         if not candidates:
-            normalized = []
-            for raw_line in re.split(r"(?<=[.!?])\s+", answer):
-                sentence = ResponseSummaryService._clean_sentence(raw_line)
-                if sentence and len(sentence) >= 18:
-                    if re.fullmatch(r"[\W_]+", sentence):
-                        continue
-                    normalized.append(sentence)
-            candidates = normalized
-
-        if not candidates:
             for raw_line in re.split(r"(?<=[.!?])\s+", answer):
                 sentence = ResponseSummaryService._clean_sentence(raw_line)
                 if sentence and len(sentence) >= 18 and not re.fullmatch(r"[\W_]+", sentence):
+                    lowered = sentence.lower()
+                    if re.fullmatch(r"(?:안녕하세요|반갑습니다|hello|hi)[^가-힣a-z0-9]*", lowered):
+                        continue
+                    if "장식 문장" in lowered or "의미 없는" in lowered or "잡담" in lowered:
+                        continue
                     candidates.append(sentence)
 
         deduped = []
@@ -112,10 +137,10 @@ class ResponseSummaryService:
         try:
             request = AIRequest(
                 question=prompt,
-                provider="ollama",
+                provider=settings.LOCAL_LLM_PROVIDER or "ollama",
                 think=True,
             )
-            response = await OllamaProvider().ask(request)
+            response = await ResponseSummaryService._local_provider_instance().ask(request)
             if getattr(response, "success", False) and getattr(response, "answer", "").strip():
                 text = str(response.answer).strip()
                 text = re.sub(r"^\s*[-*•]\s*", "", text, flags=re.M)

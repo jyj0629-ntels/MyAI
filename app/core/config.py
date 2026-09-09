@@ -173,6 +173,20 @@ class Settings:
         "qwen3:14b"
     )
 
+    PREFERENCE_MIN_FREQUENCY = int(
+        os.getenv(
+            "PREFERENCE_MIN_FREQUENCY",
+            "2"
+        )
+    )
+
+    PREFERENCE_MIN_CONFIDENCE = float(
+        os.getenv(
+            "PREFERENCE_MIN_CONFIDENCE",
+            "0.7"
+        )
+    )
+
     OLLAMA_HOST = os.getenv(
         "OLLAMA_HOST",
         "http://ollama:11434"
@@ -187,6 +201,13 @@ class Settings:
         os.getenv(
             "OLLAMA_TIMEOUT",
             "600"
+        )
+    )
+
+    OLLAMA_NUM_PREDICT = int(
+        os.getenv(
+            "OLLAMA_NUM_PREDICT",
+            "1024"
         )
     )
 
@@ -216,6 +237,21 @@ class Settings:
             "LOCAL_LLM_FAST_PATH_MAX_CHARS",
             "120"
         )
+    )
+
+    LOCAL_LLM_FAST_PATH_HINTS = os.getenv(
+        "LOCAL_LLM_FAST_PATH_HINTS",
+        "오늘,지금,어때,추천,예상,얼마,언제,누구,어디,날씨,상태,비교,간단,요약"
+    )
+
+    PURCHASE_THEME_KEYWORDS = os.getenv(
+        "PURCHASE_THEME_KEYWORDS",
+        "구매,상품,제품,가격,예산,가성비,후기,리뷰,평점,비교,추천,브랜드"
+    )
+
+    DEVELOPMENT_THEME_KEYWORDS = os.getenv(
+        "DEVELOPMENT_THEME_KEYWORDS",
+        "개발,코드,프로그램,api,fastapi,docker,db,sql,설계,버그,테스트,백엔드,아키텍처"
     )
 
     MULTI_PROVIDER_EXCLUDE = os.getenv(

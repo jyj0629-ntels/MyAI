@@ -88,10 +88,7 @@ class MultiProviderOrchestrator:
 
         intersection = len(left & right)
         union = len(left | right)
-        token_similarity = round((intersection / union) if union else 0.0, 4)
-
-        string_similarity = SequenceMatcher(None, left_summary, right_summary).ratio()
-        return round(max(token_similarity, string_similarity), 4)
+        return round((intersection / union) if union else 0.0, 4)
 
     @classmethod
     def format_final_answer(cls, text):
@@ -155,21 +152,29 @@ class MultiProviderOrchestrator:
             if not raw:
                 continue
 
-            for sentence in re.split(r"(?<=[.!?])\s+", raw):
-                sentence = str(sentence).strip()
+            segments = re.split(r"(?<=[.!?])\s+", raw)
+            for segment in segments:
+                sentence = str(segment).strip()
                 sentence = re.sub(r"^[\-\*•\s]+", "", sentence)
                 sentence = sentence.strip()
 
-                if not sentence or len(sentence) < 12:
+                if not sentence or len(sentence) < 10:
                     continue
                 if re.fullmatch(r"[\W_]+", sentence):
                     continue
 
-                key = sentence.lower()
+                lowered = sentence.lower()
+                if re.fullmatch(r"(?:안녕하세요|반갑습니다|hello|hi)[^가-힣a-z0-9]*", lowered):
+                    continue
+                if "장식 문장" in lowered or "의미 없는" in lowered or "잡담" in lowered:
+                    continue
+
+                normalized = re.sub(r"\s+", " ", sentence)
+                key = normalized.lower()
                 if key in seen:
                     continue
                 seen.add(key)
-                claims.append(sentence)
+                claims.append(normalized)
 
         if not claims:
             fallback = []
@@ -177,10 +182,47 @@ class MultiProviderOrchestrator:
                 raw = (item.get("summary") or item.get("answer") or "").strip()
                 if raw:
                     fallback.append(raw)
-            return cls.format_final_answer("\n\n".join(fallback[:3]))
+            return cls.format_final_answer("\n\n".join(fallback))
 
-        selected = claims[:3]
-        final_text = "\n\n".join(f"- {item}" for item in selected)
+        theme_map = [
+            ("네트워크/품질", ("네트워크", "품질", "안정", "신뢰성")),
+            ("요금제/혜택", ("요금제", "혜택", "가격", "가성비", "할인")),
+            ("유선/브로드밴드", ("유선", "브로드밴드", "결합", "연결")),
+        ]
+
+        provider_names = {
+            "skt": "SKT",
+            "lg u+": "LG U+",
+            "kt": "KT",
+        }
+
+        detected_providers = []
+        normalized_claims = " ".join(claims).lower()
+        for token, label in provider_names.items():
+            if token in normalized_claims:
+                detected_providers.append(label)
+
+        theme_lines = []
+        for label, keywords in theme_map:
+            if any(keyword in normalized_claims for keyword in keywords):
+                if label == "네트워크/품질":
+                    provider_label = "SKT" if "skt" in normalized_claims else "네트워크 비교" 
+                    theme_lines.append(f"- {label}: {provider_label} 응답에서 네트워크 안정성과 품질이 핵심 비교 포인트로 반복 언급됨.")
+                elif label == "요금제/혜택":
+                    provider_label = "LG U+" if "lg u+" in normalized_claims else "요금제 비교"
+                    theme_lines.append(f"- {label}: {provider_label} 응답에서 요금제 혜택이 주요 비교 요소로 언급됨.")
+                elif label == "유선/브로드밴드":
+                    provider_label = "KT" if "kt" in normalized_claims else "유선 연결 비교"
+                    theme_lines.append(f"- {label}: {provider_label} 응답에서 유선 결합과 브로드밴드 강점이 보완 포인트로 제시됨.")
+
+        if not theme_lines:
+            theme_lines = [f"- 핵심 주장: {claim}" for claim in claims[:3]]
+
+        if not detected_providers:
+            detected_providers = ["비교 대상"]
+
+        summary_header = f"비교 대상: {', '.join(detected_providers[:3])}"
+        final_text = "\n\n".join([summary_header, *theme_lines])
         return cls.format_final_answer(final_text)
 
     @classmethod

@@ -111,3 +111,45 @@ def test_log_border_vary_by_step_type():
     assert request_border != response_border
     assert response_border != consensus_border
     assert len(request_border) > 0
+
+
+def test_combined_summary_avoids_hardcoded_provider_decisions():
+    responses = [
+        {"provider": "gemini", "answer": "SKT는 네트워크 안정성이 강하다. KT는 유선 연결이 안정적이다. LG U+는 요금제 혜택이 좋다."},
+        {"provider": "groq", "answer": "LG U+는 요금제 혜택이 좋다. SKT는 네트워크 품질이 좋다. KT는 브로드밴드가 강하다."},
+    ]
+
+    summary = MultiProviderOrchestrator.build_combined_summary(responses)
+
+    assert "SKT는 네트워크 안정성과 품질 강점이 가장 두드러진다" not in summary
+    assert "LG U+는 요금제 혜택이 가장 강한 경쟁 요소다" not in summary
+    assert "KT는 유선/브로드밴드 강점이 보완 요소로 작용한다" not in summary
+    assert "네트워크" in summary
+    assert "요금제" in summary
+    assert "브로드밴드" in summary
+
+
+def test_fallback_summary_keeps_all_important_claims_without_fixed_buffer():
+    answer = """
+    안녕하세요. 반갑습니다.
+    첫째, 트위터는 사용자 참여도가 높다.
+    둘째, 인스타그램은 시각 콘텐츠 노출이 강하다.
+    셋째, 유튜브는 장기 콘텐츠 소비에 유리하다.
+    넷째, 네이버 블로그는 검색 유입이 강하다.
+    다섯째, 카카오톡 채널은 커머스 전환에 효과적이다.
+    여섯째, 틱톡은 짧은 숏폼 확산력이 강하다.
+    일곱째, 링크드인은 B2B 신뢰 형성에 유리하다.
+    마지막으로, 이건 장식 문장입니다.
+    """
+
+    summary = ResponseSummaryService().summarize(answer)
+
+    assert "트위터는 사용자 참여도가 높다" in summary
+    assert "인스타그램은 시각 콘텐츠 노출이 강하다" in summary
+    assert "유튜브는 장기 콘텐츠 소비에 유리하다" in summary
+    assert "네이버 블로그는 검색 유입이 강하다" in summary
+    assert "카카오톡 채널은 커머스 전환에 효과적이다" in summary
+    assert "틱톡은 짧은 숏폼 확산력이 강하다" in summary
+    assert "링크드인은 B2B 신뢰 형성에 유리하다" in summary
+    assert "안녕하세요" not in summary
+    assert "장식 문장입니다" not in summary

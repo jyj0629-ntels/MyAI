@@ -50,7 +50,7 @@ class OllamaProvider(
                                 False
                             ),
                             "options": {
-                                "num_predict": 320
+                                "num_predict": getattr(request, "max_tokens", None) or settings.OLLAMA_NUM_PREDICT
                             }
                         }
                     )

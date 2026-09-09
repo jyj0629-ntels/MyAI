@@ -20,7 +20,8 @@ class AIOrchestrator:
         else:
             normalized_name = ""
 
-        if normalized_name in {"ollama", settings.LOCAL_LLM_PROVIDER.lower()}:
+        local_provider_name = str(settings.LOCAL_LLM_PROVIDER or "ollama").strip().lower()
+        if normalized_name in {"ollama", local_provider_name}:
             from app.ai.providers.ollama_provider import OllamaProvider
             return await OllamaProvider().ask(request)
 
