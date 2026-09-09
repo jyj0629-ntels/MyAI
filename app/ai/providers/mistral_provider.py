@@ -25,7 +25,7 @@ class MistralProvider(AIProvider):
     def name(self) -> str:
         return "mistral"
 
-    async def ask(self, request: AIRequest) -> AIResponse:
+    async def _ask_once(self, request: AIRequest) -> AIResponse:
         try:
             messages = []
 
@@ -48,16 +48,10 @@ class MistralProvider(AIProvider):
                 "content": user_content,
             })
 
-            def _log_attempt_error(attempt, max_attempts, error):
-                print(f"[MISTRAL ERROR] attempt={attempt}/{max_attempts} {error}")
-
-            response = await self.call_with_retry(
-                lambda: self.client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    temperature=getattr(request, "temperature", 0.7),
-                ),
-                on_attempt_error=_log_attempt_error
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=getattr(request, "temperature", 0.7),
             )
 
             answer = response.choices[0].message.content or ""

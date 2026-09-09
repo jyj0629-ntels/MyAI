@@ -17,7 +17,7 @@ class OllamaProvider(
 
         return "ollama"
 
-    async def ask(
+    async def _ask_once(
         self,
         request: AIRequest
     ):

@@ -15,7 +15,7 @@ class GeminiProvider(AIProvider):
     def name(self) -> str:
         return "gemini"
 
-    async def ask(
+    async def _ask_once(
         self,
         request: AIRequest
     ) -> AIResponse:
@@ -52,21 +52,17 @@ class GeminiProvider(AIProvider):
         print("# --------------------------------")
         print()
 
-        def _log_attempt_error(attempt, max_attempts, error):
-            print(f"[GEMINI ERROR] attempt={attempt}/{max_attempts} {error}")
-
         try:
 
-            result = await self.call_with_retry(
-                lambda: asyncio.to_thread(
-                    client.models.generate_content,
-                    model=settings.GEMINI_MODEL,
-                    contents=prompt
-                ),
-                on_attempt_error=_log_attempt_error
+            result = await asyncio.to_thread(
+                client.models.generate_content,
+                model=settings.GEMINI_MODEL,
+                contents=prompt
             )
 
         except Exception as e:
+
+            print(f"[GEMINI ERROR] {e}")
 
             return AIResponse(
                 provider=self.name,

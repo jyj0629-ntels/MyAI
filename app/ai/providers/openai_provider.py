@@ -32,7 +32,7 @@ class OpenAIProvider(AIProvider):
 
         return "openai"
 
-    async def ask(
+    async def _ask_once(
         self,
         request: AIRequest
     ) -> AIResponse:
@@ -67,16 +67,10 @@ class OpenAIProvider(AIProvider):
                 }
             )
 
-            def _log_attempt_error(attempt, max_attempts, error):
-                print(f"[OPENAI ERROR] attempt={attempt}/{max_attempts} {error}")
-
-            response = await self.call_with_retry(
-                lambda: self.client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    temperature=request.temperature
-                ),
-                on_attempt_error=_log_attempt_error
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=request.temperature
             )
 
             answer = response.choices[0].message.content or ""

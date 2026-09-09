@@ -29,7 +29,7 @@ class GroqProvider(AIProvider):
 
         return "groq"
 
-    async def ask(
+    async def _ask_once(
         self,
         request: AIRequest
     ) -> AIResponse:
@@ -50,11 +50,8 @@ class GroqProvider(AIProvider):
             print("# --------------------------------")
             print()
 
-            def _log_attempt_error(attempt, max_attempts, error):
-                print(f"[GROQ ERROR] attempt={attempt}/{max_attempts} {error}")
-
-            response = await self.call_with_retry(
-                lambda: self.client.chat.completions.create(
+            response = await (
+                self.client.chat.completions.create(
                     model=self.model,
                     messages=[
                         {
@@ -65,8 +62,7 @@ class GroqProvider(AIProvider):
                             )
                         }
                     ]
-                ),
-                on_attempt_error=_log_attempt_error
+                )
             )
 
             answer = (

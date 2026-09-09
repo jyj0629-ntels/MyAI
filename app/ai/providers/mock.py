@@ -9,7 +9,7 @@ class MockProvider(AIProvider):
     def name(self) -> str:
         return "mock"
 
-    async def ask(
+    async def _ask_once(
         self,
         request: AIRequest
     ) -> AIResponse:

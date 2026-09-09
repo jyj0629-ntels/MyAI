@@ -7,6 +7,15 @@ from app.core.config import settings
 
 
 class AIProvider(ABC):
+    """
+    Base class for every AI provider.
+
+    Subclasses only implement `_ask_once()` (a single call attempt that returns an
+    AIResponse, success or failure). `ask()` itself is NOT overridden by subclasses:
+    it is a template method defined here that wraps `_ask_once()` with transient-error
+    retry + exponential backoff. This makes retry behavior automatic for any provider,
+    including ones added in the future, with zero retry-specific code in the subclass.
+    """
 
     @property
     @abstractmethod
@@ -14,38 +23,39 @@ class AIProvider(ABC):
         pass
 
     @abstractmethod
-    async def ask(self, request: AIRequest) -> AIResponse:
+    async def _ask_once(self, request: AIRequest) -> AIResponse:
         pass
 
     @staticmethod
-    def is_transient_error(error: Exception) -> bool:
-        text = str(error).upper()
+    def is_transient_error(text) -> bool:
+        upper_text = str(text or "").upper()
         return any(
-            marker in text
+            marker in upper_text
             for marker in ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "RATE_LIMIT", "RATE LIMIT", "OVERLOADED")
         )
 
-    @classmethod
-    async def call_with_retry(cls, call, *, on_attempt_error=None):
-        """Awaits `call()`, retrying only transient provider errors with exponential backoff."""
+    async def ask(self, request: AIRequest) -> AIResponse:
         max_attempts = settings.PROVIDER_MAX_RETRIES + 1
-        last_error = None
+        response = None
 
         for attempt in range(1, max_attempts + 1):
-            try:
-                return await call()
-            except Exception as e:
-                last_error = e
+            response = await self._ask_once(request)
 
-                if on_attempt_error:
-                    on_attempt_error(attempt, max_attempts, e)
+            if getattr(response, "success", False):
+                return response
 
-                is_last_attempt = attempt >= max_attempts
-                if cls.is_transient_error(e) and not is_last_attempt:
-                    backoff_seconds = settings.PROVIDER_RETRY_BACKOFF_SECONDS * (2 ** (attempt - 1))
-                    await asyncio.sleep(backoff_seconds)
-                    continue
+            is_last_attempt = attempt >= max_attempts
+            error_text = getattr(response, "error", None) or getattr(response, "answer", "")
 
-                raise
+            if is_last_attempt or not self.is_transient_error(error_text):
+                return response
 
-        raise last_error
+            backoff_seconds = settings.PROVIDER_RETRY_BACKOFF_SECONDS * (2 ** (attempt - 1))
+            print(
+                f"[{self.name.upper()} RETRY] attempt={attempt}/{max_attempts} "
+                f"transient error, retrying in {backoff_seconds:.1f}s"
+            )
+            await asyncio.sleep(backoff_seconds)
+
+        return response
+
