@@ -94,4 +94,5 @@ ANSWER:
             )
         )
         request.think = True
+        request.max_tokens = settings.OLLAMA_THINK_NUM_PREDICT
         return request

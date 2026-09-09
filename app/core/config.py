@@ -211,6 +211,16 @@ class Settings:
         )
     )
 
+    # think=true calls (judge, brain deep-analysis, response summary) spend part of this budget on
+    # hidden reasoning before writing the visible answer; too small and the model gets cut off
+    # (done_reason="length") having produced reasoning only, returning an empty response.
+    OLLAMA_THINK_NUM_PREDICT = int(
+        os.getenv(
+            "OLLAMA_THINK_NUM_PREDICT",
+            "4096"
+        )
+    )
+
     ENABLE_LOCAL_LLM_JUDGE = (
         os.getenv(
             "ENABLE_LOCAL_LLM_JUDGE",

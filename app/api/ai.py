@@ -453,13 +453,24 @@ async def chat(
         )
         print()
 
-        if judge_response:
-        
+        judge_answer = str(getattr(judge_response, "answer", "") or "").strip()
+
+        if not judge_answer:
+
+            print()
+            print("# --------------------------------")
+            print("# JUDGE RESPONSE EMPTY")
+            print("# --------------------------------")
+            print("Local consensus judge returned no content; falling back to the comparison-based summary.")
+            print("# --------------------------------")
+            print()
+
+        else:
+
             try:
 
-
                 clean_json = (
-                    judge_response.answer
+                    judge_answer
                     .replace(
                         "```json",
                         ""
@@ -475,7 +486,6 @@ async def chat(
                     clean_json
                 )
 
-
             except Exception as e:
 
                 print()
@@ -485,6 +495,17 @@ async def chat(
                 print(str(e))
                 print("# --------------------------------")
                 print()
+
+        if judge_result and comparison:
+
+            try:
+                llm_consensus_score = float(judge_result.get("consensus_score"))
+            except (TypeError, ValueError):
+                llm_consensus_score = None
+
+            if llm_consensus_score is not None:
+                comparison["consensus_score"] = llm_consensus_score
+                comparison["average_score"] = llm_consensus_score
 
     if not selected:
 

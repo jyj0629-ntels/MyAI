@@ -1,7 +1,6 @@
 import asyncio
 import re
 import time
-from difflib import SequenceMatcher
 
 from app.core.config import settings
 
@@ -144,10 +143,15 @@ class MultiProviderOrchestrator:
         if not responses:
             return "공급자 응답이 없어 요약할 수 없습니다."
 
+        providers = []
         claims = []
         seen = set()
 
         for item in responses:
+            provider_name = str(item.get("provider") or "").strip()
+            if provider_name and provider_name not in providers:
+                providers.append(provider_name)
+
             raw = (item.get("summary") or item.get("answer") or "").strip()
             if not raw:
                 continue
@@ -163,12 +167,6 @@ class MultiProviderOrchestrator:
                 if re.fullmatch(r"[\W_]+", sentence):
                     continue
 
-                lowered = sentence.lower()
-                if re.fullmatch(r"(?:안녕하세요|반갑습니다|hello|hi)[^가-힣a-z0-9]*", lowered):
-                    continue
-                if "장식 문장" in lowered or "의미 없는" in lowered or "잡담" in lowered:
-                    continue
-
                 normalized = re.sub(r"\s+", " ", sentence)
                 key = normalized.lower()
                 if key in seen:
@@ -177,52 +175,19 @@ class MultiProviderOrchestrator:
                 claims.append(normalized)
 
         if not claims:
-            fallback = []
-            for item in responses:
-                raw = (item.get("summary") or item.get("answer") or "").strip()
-                if raw:
-                    fallback.append(raw)
+            fallback = [
+                (item.get("summary") or item.get("answer") or "").strip()
+                for item in responses
+            ]
+            fallback = [text for text in fallback if text]
             return cls.format_final_answer("\n\n".join(fallback))
 
-        theme_map = [
-            ("네트워크/품질", ("네트워크", "품질", "안정", "신뢰성")),
-            ("요금제/혜택", ("요금제", "혜택", "가격", "가성비", "할인")),
-            ("유선/브로드밴드", ("유선", "브로드밴드", "결합", "연결")),
-        ]
+        if not providers:
+            providers = ["비교 대상"]
 
-        provider_names = {
-            "skt": "SKT",
-            "lg u+": "LG U+",
-            "kt": "KT",
-        }
-
-        detected_providers = []
-        normalized_claims = " ".join(claims).lower()
-        for token, label in provider_names.items():
-            if token in normalized_claims:
-                detected_providers.append(label)
-
-        theme_lines = []
-        for label, keywords in theme_map:
-            if any(keyword in normalized_claims for keyword in keywords):
-                if label == "네트워크/품질":
-                    provider_label = "SKT" if "skt" in normalized_claims else "네트워크 비교" 
-                    theme_lines.append(f"- {label}: {provider_label} 응답에서 네트워크 안정성과 품질이 핵심 비교 포인트로 반복 언급됨.")
-                elif label == "요금제/혜택":
-                    provider_label = "LG U+" if "lg u+" in normalized_claims else "요금제 비교"
-                    theme_lines.append(f"- {label}: {provider_label} 응답에서 요금제 혜택이 주요 비교 요소로 언급됨.")
-                elif label == "유선/브로드밴드":
-                    provider_label = "KT" if "kt" in normalized_claims else "유선 연결 비교"
-                    theme_lines.append(f"- {label}: {provider_label} 응답에서 유선 결합과 브로드밴드 강점이 보완 포인트로 제시됨.")
-
-        if not theme_lines:
-            theme_lines = [f"- 핵심 주장: {claim}" for claim in claims[:3]]
-
-        if not detected_providers:
-            detected_providers = ["비교 대상"]
-
-        summary_header = f"비교 대상: {', '.join(detected_providers[:3])}"
-        final_text = "\n\n".join([summary_header, *theme_lines])
+        summary_header = f"비교 대상: {', '.join(providers[:3])}"
+        claim_lines = [f"- {claim}" for claim in claims]
+        final_text = "\n\n".join([summary_header, *claim_lines])
         return cls.format_final_answer(final_text)
 
     @classmethod

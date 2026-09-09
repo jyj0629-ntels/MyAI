@@ -52,9 +52,6 @@ class LocalBrainLLMService:
         if not text:
             return True
 
-        if len(text) <= 32:
-            return True
-
         if len(text) <= settings.LOCAL_LLM_FAST_PATH_MAX_CHARS and "?" in text:
             return True
 
@@ -233,6 +230,7 @@ class LocalBrainLLMService:
         )
 
         request.think = True
+        request.max_tokens = settings.OLLAMA_THINK_NUM_PREDICT
 
         print()
         print("# --------------------------------")

@@ -76,15 +76,6 @@ class ResponseSummaryService:
             if not line:
                 continue
 
-            lowered = line.lower()
-            if re.fullmatch(r"(?:안녕하세요|반갑습니다|hello|hi)[^가-힣a-z0-9]*", lowered):
-                continue
-            if "장식 문장" in lowered or "의미 없는" in lowered or "잡담" in lowered:
-                continue
-            if len(line) < 10:
-                continue
-            if re.fullmatch(r"[\W_]+", line):
-                continue
             if ResponseSummaryService._is_important_line(line):
                 candidates.append(line)
 
@@ -92,11 +83,6 @@ class ResponseSummaryService:
             for raw_line in re.split(r"(?<=[.!?])\s+", answer):
                 sentence = ResponseSummaryService._clean_sentence(raw_line)
                 if sentence and len(sentence) >= 18 and not re.fullmatch(r"[\W_]+", sentence):
-                    lowered = sentence.lower()
-                    if re.fullmatch(r"(?:안녕하세요|반갑습니다|hello|hi)[^가-힣a-z0-9]*", lowered):
-                        continue
-                    if "장식 문장" in lowered or "의미 없는" in lowered or "잡담" in lowered:
-                        continue
                     candidates.append(sentence)
 
         deduped = []
@@ -139,6 +125,7 @@ class ResponseSummaryService:
                 question=prompt,
                 provider=settings.LOCAL_LLM_PROVIDER or "ollama",
                 think=True,
+                max_tokens=settings.OLLAMA_THINK_NUM_PREDICT,
             )
             response = await ResponseSummaryService._local_provider_instance().ask(request)
             if getattr(response, "success", False) and getattr(response, "answer", "").strip():
