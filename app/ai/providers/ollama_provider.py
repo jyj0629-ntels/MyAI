@@ -17,6 +17,22 @@ class OllamaProvider(
 
         return "ollama"
 
+    @staticmethod
+    def _resolve_num_predict(request: AIRequest) -> int:
+        # Explicit per-request budget always wins (caller knows best).
+        explicit = getattr(request, "max_tokens", None)
+        if explicit:
+            return int(explicit)
+
+        # think=true spends part of the budget on hidden reasoning before the visible
+        # answer. With the normal (small) budget the model can get cut off
+        # (done_reason="length") having produced reasoning only, returning an empty
+        # response. So think calls get the larger think-specific budget.
+        if getattr(request, "think", False):
+            return settings.OLLAMA_THINK_NUM_PREDICT
+
+        return settings.OLLAMA_NUM_PREDICT
+
     async def _ask_once(
         self,
         request: AIRequest
@@ -24,11 +40,13 @@ class OllamaProvider(
 
         try:
 
+            num_predict = self._resolve_num_predict(request)
+
             print()
             PerformanceTracker.print_section(
                 "request",
                 "OLLAMA REQUEST",
-                f"model={settings.LOCAL_LLM_MODEL}\ntimeout={settings.OLLAMA_TIMEOUT}\nprompt_length={len(request.prompt or request.question)}"
+                f"model={settings.LOCAL_LLM_MODEL}\ntimeout={settings.OLLAMA_TIMEOUT}\nthink={getattr(request, 'think', False)}\nnum_predict={num_predict}\nprompt_length={len(request.prompt or request.question)}"
             )
             print()
 
@@ -50,7 +68,7 @@ class OllamaProvider(
                                 False
                             ),
                             "options": {
-                                "num_predict": getattr(request, "max_tokens", None) or settings.OLLAMA_NUM_PREDICT
+                                "num_predict": num_predict
                             }
                         }
                     )
@@ -78,12 +96,29 @@ class OllamaProvider(
             answer = (data.get("response") or "").strip()
 
             if not answer:
+                done_reason = data.get("done_reason")
+                had_thinking = bool((data.get("thinking") or "").strip())
+
+                # A common failure mode with think=true: the model exhausted num_predict
+                # on hidden reasoning (done_reason="length") and never wrote the visible
+                # answer. Surface that clearly so callers/logs can act on it.
+                if done_reason == "length" and had_thinking:
+                    error_message = (
+                        "Ollama produced only hidden reasoning and was cut off "
+                        "(done_reason=length) before writing a visible answer. "
+                        "Increase num_predict (e.g. OLLAMA_THINK_NUM_PREDICT) for think=true calls."
+                    )
+                else:
+                    error_message = (
+                        f"Ollama returned an empty response (done_reason={done_reason})."
+                    )
+
                 return AIResponse(
                     provider=self.name,
                     model=settings.LOCAL_LLM_MODEL,
                     answer="",
                     success=False,
-                    error="Ollama returned an empty public response; hidden reasoning was intentionally not exposed to the user."
+                    error=error_message
                 )
 
             return AIResponse(

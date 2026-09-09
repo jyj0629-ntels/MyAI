@@ -64,10 +64,13 @@ class GeminiProvider(AIProvider):
 
             print(f"[GEMINI ERROR] {e}")
 
+            # Keep answer empty on failure (consistent with every other provider) so the
+            # common retry template in AIProvider.ask() can classify the error and so a
+            # failed call never leaks an error string into the answer channel downstream.
             return AIResponse(
                 provider=self.name,
                 model=settings.GEMINI_MODEL,
-                answer=f"[GEMINI ERROR] {str(e)}",
+                answer="",
                 success=False,
                 error=str(e)
             )
