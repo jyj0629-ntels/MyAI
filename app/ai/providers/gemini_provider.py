@@ -1,3 +1,5 @@
+import asyncio
+
 from google import genai
 
 from app.core.config import settings, _is_placeholder_value
@@ -42,56 +44,60 @@ class GeminiProvider(AIProvider):
                 f"{prompt}"
             )
 
+        print()
+        print("# --------------------------------")
+        print("# GEMINI REQUEST")
+        print("# --------------------------------")
+        print(prompt)
+        print("# --------------------------------")
+        print()
+
+        def _log_attempt_error(attempt, max_attempts, error):
+            print(f"[GEMINI ERROR] attempt={attempt}/{max_attempts} {error}")
+
         try:
 
-            print()
-            print("# --------------------------------")
-            print("# GEMINI REQUEST")
-            print("# --------------------------------")
-            print(prompt)
-            print("# --------------------------------")
-            print()
-
-            result = client.models.generate_content(
-                model=settings.GEMINI_MODEL,
-                contents=prompt
-            )
-
-            usage_metadata = getattr(result, "usage_metadata", None)
-            input_tokens = None
-            output_tokens = None
-
-            if usage_metadata is not None:
-                print(usage_metadata)
-                input_tokens = getattr(usage_metadata, "prompt_token_count", None)
-                output_tokens = getattr(usage_metadata, "candidates_token_count", None)
-
-            print()
-            print("# --------------------------------")
-            print("# GEMINI RESPONSE")
-            print("# --------------------------------")
-            print(result.text)
-            print("# --------------------------------")
-            print()
-
-            return AIResponse(
-                provider=self.name,
-                model=settings.GEMINI_MODEL,
-                answer=result.text,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                success=True
+            result = await self.call_with_retry(
+                lambda: asyncio.to_thread(
+                    client.models.generate_content,
+                    model=settings.GEMINI_MODEL,
+                    contents=prompt
+                ),
+                on_attempt_error=_log_attempt_error
             )
 
         except Exception as e:
-
-            print(
-                f"[GEMINI ERROR] {e}"
-            )
 
             return AIResponse(
                 provider=self.name,
                 model=settings.GEMINI_MODEL,
                 answer=f"[GEMINI ERROR] {str(e)}",
-                success=False
+                success=False,
+                error=str(e)
             )
+
+        usage_metadata = getattr(result, "usage_metadata", None)
+        input_tokens = None
+        output_tokens = None
+
+        if usage_metadata is not None:
+            print(usage_metadata)
+            input_tokens = getattr(usage_metadata, "prompt_token_count", None)
+            output_tokens = getattr(usage_metadata, "candidates_token_count", None)
+
+        print()
+        print("# --------------------------------")
+        print("# GEMINI RESPONSE")
+        print("# --------------------------------")
+        print(result.text)
+        print("# --------------------------------")
+        print()
+
+        return AIResponse(
+            provider=self.name,
+            model=settings.GEMINI_MODEL,
+            answer=result.text,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            success=True
+        )

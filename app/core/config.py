@@ -110,6 +110,22 @@ class Settings:
         )
     )
 
+    # Retries only apply to transient provider errors (503/overloaded, 429/rate-limited),
+    # never to permanent failures like bad API keys or invalid requests.
+    PROVIDER_MAX_RETRIES = int(
+        os.getenv(
+            "PROVIDER_MAX_RETRIES",
+            "2"
+        )
+    )
+
+    PROVIDER_RETRY_BACKOFF_SECONDS = float(
+        os.getenv(
+            "PROVIDER_RETRY_BACKOFF_SECONDS",
+            "2"
+        )
+    )
+
     PRIMARY_PROVIDER = os.getenv(
         "PRIMARY_PROVIDER",
         "gemini"
