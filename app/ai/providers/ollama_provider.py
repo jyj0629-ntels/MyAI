@@ -33,6 +33,30 @@ class OllamaProvider(
 
         return settings.OLLAMA_NUM_PREDICT
 
+    @staticmethod
+    def _is_thinking_unsupported(status_code: int, body_text: str) -> bool:
+        # Ollama returns 400 with a message like:
+        #   {"error": "\"<model>\" does not support thinking"}
+        # for models that don't have a reasoning/think mode. This is a permanent
+        # capability mismatch, not a transient error, so we retry once WITHOUT think.
+        if status_code != 400:
+            return False
+        return "does not support thinking" in (body_text or "").lower()
+
+    async def _post_generate(self, client, request: AIRequest, think: bool, num_predict: int):
+        return await client.post(
+            settings.OLLAMA_GENERATE_URL,
+            json={
+                "model": settings.LOCAL_LLM_MODEL,
+                "prompt": request.prompt or request.question,
+                "stream": False,
+                "think": think,
+                "options": {
+                    "num_predict": num_predict
+                }
+            }
+        )
+
     async def _ask_once(
         self,
         request: AIRequest
@@ -40,13 +64,14 @@ class OllamaProvider(
 
         try:
 
+            requested_think = bool(getattr(request, "think", False))
             num_predict = self._resolve_num_predict(request)
 
             print()
             PerformanceTracker.print_section(
                 "request",
                 "OLLAMA REQUEST",
-                f"model={settings.LOCAL_LLM_MODEL}\ntimeout={settings.OLLAMA_TIMEOUT}\nthink={getattr(request, 'think', False)}\nnum_predict={num_predict}\nprompt_length={len(request.prompt or request.question)}"
+                f"model={settings.LOCAL_LLM_MODEL}\ntimeout={settings.OLLAMA_TIMEOUT}\nthink={requested_think}\nnum_predict={num_predict}\nprompt_length={len(request.prompt or request.question)}"
             )
             print()
 
@@ -55,24 +80,21 @@ class OllamaProvider(
 		        timeout=settings.OLLAMA_TIMEOUT
             ) as client:
 
-                response = await (
-                    client.post(
-			            settings.OLLAMA_GENERATE_URL,
-                        json={
-                            "model": settings.LOCAL_LLM_MODEL,
-                            "prompt": request.prompt or request.question,
-                            "stream": False,
-                            "think": getattr(
-                                request,
-                                "think",
-                                False
-                            ),
-                            "options": {
-                                "num_predict": num_predict
-                            }
-                        }
-                    )
-                )
+                response = await self._post_generate(client, request, requested_think, num_predict)
+
+                # Some models (e.g. qwen2.5-coder) reject think=true with HTTP 400.
+                # Fall back to a plain (non-think) call so any configured model works.
+                if requested_think and self._is_thinking_unsupported(response.status_code, response.text):
+                    print()
+                    print("# --------------------------------")
+                    print("# OLLAMA THINK UNSUPPORTED — RETRYING WITHOUT THINK")
+                    print("# --------------------------------")
+                    print(f"model={settings.LOCAL_LLM_MODEL}")
+                    print("# --------------------------------")
+                    print()
+                    num_predict = settings.OLLAMA_NUM_PREDICT
+                    response = await self._post_generate(client, request, False, num_predict)
+
                 print()
                 PerformanceTracker.print_section(
                     "response",
