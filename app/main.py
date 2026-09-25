@@ -23,6 +23,8 @@ from app.api.memory import router as memory_router
 from app.api.memory_item import router as memory_item_router
 from app.api.markdown_memory import router as markdown_memory_router
 from app.api.response_format_templates import router as response_format_templates_router
+from app.api.forbidden_terms import router as forbidden_terms_router
+from app.api.ai_dpi import router as ai_dpi_router
 from app.db.base import Base
 from app.db.database import engine
 from app.models.ai_prompt_run import AIPromptRun
@@ -32,6 +34,7 @@ from app.models.conversation_memory import ConversationMemory
 from app.models.memory_item import MemoryItem
 from app.models.response_format_template import ResponseFormatTemplate
 from app.models.user import User
+from app.models.forbidden_term import ForbiddenTerm
 
 
 def ensure_database_schema():
@@ -43,7 +46,44 @@ def ensure_database_schema():
         return False
 
 
+def seed_forbidden_terms():
+    """demo_dpi 시연용 초기 금지어 시드. 이미 데이터가 있으면 건너뛴다."""
+    try:
+        from app.db.database import SessionLocal
+        from app.repositories.forbidden_term_repository import ForbiddenTermRepository
+        from app.models.forbidden_term import ForbiddenTerm
+
+        default_terms = [
+            {"term": "사내프로젝트명", "term_type": "WORD", "replacement_hint": "당사 내부 프로젝트", "category": "사내보안"},
+            {"term": "내부서버주소", "term_type": "WORD", "replacement_hint": "사내 시스템", "category": "사내보안"},
+            {"term": "고객사명", "term_type": "WORD", "replacement_hint": "특정 고객사", "category": "사내보안"},
+        ]
+
+        db = SessionLocal()
+        try:
+            repo = ForbiddenTermRepository(db)
+            existing = repo.get_all(include_inactive=True)
+            if existing:
+                return
+            for item in default_terms:
+                repo.create(
+                    ForbiddenTerm(
+                        term=item["term"],
+                        term_type=item["term_type"],
+                        replacement_hint=item.get("replacement_hint"),
+                        category=item.get("category"),
+                        is_active=True,
+                    )
+                )
+            print(f"[INFO] Seeded {len(default_terms)} forbidden terms.")
+        finally:
+            db.close()
+    except Exception as exc:
+        print(f"[WARN] forbidden term seed failed: {exc}")
+
+
 ensure_database_schema()
+seed_forbidden_terms()
 prompt_builder = PromptBuilder()
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -64,6 +104,8 @@ app.include_router(memory_item_router)
 
 app.include_router(markdown_memory_router)
 app.include_router(response_format_templates_router)
+app.include_router(forbidden_terms_router)
+app.include_router(ai_dpi_router)
 
 orchestrator = create_orchestrator()
 
@@ -83,6 +125,12 @@ def root():
 @app.get("/ui/")
 async def demo_ui():
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/demo_dpi")
+@app.get("/demo_dpi/")
+async def demo_dpi_ui():
+    return FileResponse(STATIC_DIR / "demo_dpi.html")
 
 
 from app.services.provider_quota_service import ProviderQuotaService

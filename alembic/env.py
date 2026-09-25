@@ -26,6 +26,7 @@ import app.models.conversation
 import app.models.conversation_memory
 import app.models.memory_item
 import app.models.ai_prompt_run
+import app.models.forbidden_term
 
 target_metadata = Base.metadata
 
