@@ -28,6 +28,7 @@ import app.models.memory_item
 import app.models.ai_prompt_run
 import app.models.compare_history
 import app.models.compare_source_response
+import app.models.forbidden_term
 
 target_metadata = Base.metadata
 
