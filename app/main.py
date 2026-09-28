@@ -23,6 +23,7 @@ from app.api.memory import router as memory_router
 from app.api.memory_item import router as memory_item_router
 from app.api.markdown_memory import router as markdown_memory_router
 from app.api.response_format_templates import router as response_format_templates_router
+from app.api.compare import router as compare_router
 from app.db.base import Base
 from app.db.database import engine
 from app.models.ai_prompt_run import AIPromptRun
@@ -32,6 +33,8 @@ from app.models.conversation_memory import ConversationMemory
 from app.models.memory_item import MemoryItem
 from app.models.response_format_template import ResponseFormatTemplate
 from app.models.user import User
+from app.models.compare_history import CompareHistory
+from app.models.compare_source_response import CompareSourceResponse
 
 
 def ensure_database_schema():
@@ -64,6 +67,7 @@ app.include_router(memory_item_router)
 
 app.include_router(markdown_memory_router)
 app.include_router(response_format_templates_router)
+app.include_router(compare_router)
 
 orchestrator = create_orchestrator()
 
@@ -83,6 +87,12 @@ def root():
 @app.get("/ui/")
 async def demo_ui():
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/demo_compare")
+@app.get("/demo_compare/")
+async def demo_compare_ui():
+    return FileResponse(STATIC_DIR / "demo_compare.html")
 
 
 from app.services.provider_quota_service import ProviderQuotaService

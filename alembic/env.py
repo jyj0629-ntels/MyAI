@@ -26,6 +26,8 @@ import app.models.conversation
 import app.models.conversation_memory
 import app.models.memory_item
 import app.models.ai_prompt_run
+import app.models.compare_history
+import app.models.compare_source_response
 
 target_metadata = Base.metadata
 

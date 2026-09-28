@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyAI · Public AI 비교 요약 (/demo_compare)</title>
+  <style>
+    :root {
+      --bg: #09111f;
+      --panel: rgba(14, 24, 40, 0.92);
+      --panel-strong: #0d1d2d;
+      --panel-soft: #13233c;
+      --border: rgba(148, 163, 184, 0.18);
+      --primary: #6ee7f9;
+      --primary-2: #9a7bff;
+      --green: #6ee7b7;
+      --amber: #fbbf24;
+      --text: #edf6ff;
+      --muted: #9bb1c7;
+      --danger: #f87171;
+      --shadow: 0 20px 60px rgba(9, 17, 31, 0.6);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(110, 231, 249, 0.20), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(154, 123, 255, 0.18), transparent 30%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(9, 17, 31, 0.78);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1440px; margin: 0 auto; padding: 18px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.02em; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      display: grid; place-items: center; font-size: 18px; box-shadow: var(--shadow);
+    }
+    .brand-name { font-size: 1.1rem; }
+    .pill {
+      border: 1px solid var(--border); background: rgba(148, 163, 184, 0.08);
+      color: var(--text); border-radius: 999px; padding: 8px 14px; font-size: 0.85rem;
+    }
+    a.pill { text-decoration: none; }
+
+    .main { max-width: 1440px; width: 100%; margin: 0 auto; padding: 28px; }
+
+    .layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+
+    .panel {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 22px; box-shadow: var(--shadow); padding: 22px;
+    }
+    .panel h3 { margin: 0 0 14px; font-size: 1.05rem; }
+    .muted { color: var(--muted); }
+
+    label.field-label { display: block; font-size: 0.85rem; color: var(--muted); margin: 14px 0 6px; }
+
+    textarea, select {
+      width: 100%; background: var(--panel-soft); color: var(--text);
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+      font-size: 1rem; font-family: inherit;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+
+    .checks { display: flex; flex-wrap: wrap; gap: 10px; }
+    .check {
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+      border: 1px solid var(--border); border-radius: 999px; background: rgba(148,163,184,0.06);
+      cursor: pointer; font-size: 0.9rem;
+    }
+    .check input { accent-color: var(--primary); }
+
+    .btn {
+      margin-top: 18px; width: 100%; cursor: pointer;
+      border: none; border-radius: 14px; padding: 13px 16px; font-size: 1rem; font-weight: 700;
+      color: #04121d; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .status-line { margin-top: 12px; font-size: 0.85rem; color: var(--muted); min-height: 1.2em; }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px;
+      border: 2px solid rgba(110,231,249,0.35); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .summary-box {
+      border: 1px solid rgba(110, 231, 249, 0.32);
+      box-shadow: inset 0 0 0 1px rgba(110, 231, 249, 0.12);
+      border-radius: 16px; padding: 18px; background: rgba(110,231,249,0.05);
+      white-space: pre-wrap; line-height: 1.7; font-size: 1.05rem;
+    }
+
+    .response-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .provider-box { border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: rgba(148,163,184,0.06); }
+    .provider-label { font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .provider-text { white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; color: var(--text); }
+    .badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+    .badge.ok { color: var(--green); border-color: rgba(110,231,183,0.4); }
+    .badge.err { color: var(--danger); border-color: rgba(248,113,113,0.4); }
+
+    .history-item {
+      padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 10px; cursor: pointer; background: rgba(148,163,184,0.05);
+    }
+    .history-item:hover { background: rgba(110,231,249,0.08); }
+    .history-q { font-size: 0.92rem; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-meta { font-size: 0.75rem; color: var(--muted); }
+
+    .section-title { margin: 22px 0 6px; font-size: 0.95rem; color: var(--muted); }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">AI</div>
+        <div class="brand-name">MyAI · Public AI 비교 요약</div>
+      </div>
+      <div class="top-actions">
+        <a class="pill" href="/demo">← 기본 데모(/demo)</a>
+        <span class="pill" id="connState">준비됨</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="layout">
+      <!-- Left: input + history -->
+      <div>
+        <div class="panel">
+          <h3>질문 입력</h3>
+          <textarea id="question" placeholder="여러 Public AI에게 물어볼 질문을 입력하세요."></textarea>
+
+          <label class="field-label">수집 대상 Public AI</label>
+          <div class="checks">
+            <label class="check"><input type="checkbox" value="chatgpt" checked /> ChatGPT</label>
+            <label class="check"><input type="checkbox" value="claude" checked /> Claude</label>
+            <label class="check"><input type="checkbox" value="gemini" checked /> Gemini</label>
+          </div>
+
+          <label class="field-label">Local LLM 요약 모델</label>
+          <select id="llmModel">
+            <option value="">서버 기본값 사용</option>
+            <option value="qwen3:4b">qwen3:4b</option>
+            <option value="qwen3:8b">qwen3:8b</option>
+            <option value="qwen3:14b">qwen3:14b</option>
+            <option value="llama3.1:8b">llama3.1:8b</option>
+          </select>
+
+          <button class="btn" id="runBtn">비교 및 요약 실행</button>
+          <div class="status-line" id="statusLine"></div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+          <h3>이력</h3>
+          <div id="historyList"><div class="muted">불러오는 중...</div></div>
+        </div>
+      </div>
+
+      <!-- Right: results -->
+      <div class="panel">
+        <h3>종합 요약 및 교차 검증 <span class="muted" id="summaryModel"></span></h3>
+        <div class="summary-box" id="summaryBox">질문을 입력하고 [비교 및 요약 실행]을 누르세요.</div>
+
+        <div class="section-title">각 Public AI 원본 응답</div>
+        <div class="response-grid" id="responseGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    const runBtn = el('runBtn');
+    const statusLine = el('statusLine');
+    const summaryBox = el('summaryBox');
+    const summaryModel = el('summaryModel');
+    const responseGrid = el('responseGrid');
+    const historyList = el('historyList');
+    const connState = el('connState');
+
+    const PROVIDER_LABELS = { chatgpt: 'ChatGPT', claude: 'Claude', gemini: 'Gemini' };
+
+    function selectedProviders() {
+      return Array.from(document.querySelectorAll('.checks input:checked')).map((c) => c.value);
+    }
+
+    function setBusy(busy, message) {
+      runBtn.disabled = busy;
+      statusLine.innerHTML = busy
+        ? `<span class="spinner"></span>${message || '처리 중...'}`
+        : (message || '');
+    }
+
+    function badgeClass(status) {
+      if (status === 'SUCCESS') return 'badge ok';
+      if (status === 'TIMEOUT' || status === 'ERROR') return 'badge err';
+      return 'badge';
+    }
+
+    function renderDetail(detail) {
+      if (!detail) return;
+      summaryModel.textContent = detail.llm_model_used ? `· ${detail.llm_model_used}` : '';
+      summaryBox.textContent = detail.summary_result || '요약 결과가 없습니다.';
+
+      const sources = Array.isArray(detail.source_responses) ? detail.source_responses : [];
+      responseGrid.innerHTML = '';
+      if (!sources.length) {
+        responseGrid.innerHTML = '<div class="muted">수집된 응답이 없습니다.</div>';
+        return;
+      }
+      sources.forEach((s) => {
+        const box = document.createElement('div');
+        box.className = 'provider-box';
+        const label = PROVIDER_LABELS[s.ai_provider] || s.ai_provider;
+        box.innerHTML =
+          `<div class="provider-label"><span>${label}</span>` +
+          `<span class="${badgeClass(s.status)}">${s.status}</span></div>` +
+          `<div class="provider-text"></div>`;
+        box.querySelector('.provider-text').textContent = s.raw_response || '(응답 없음)';
+        responseGrid.appendChild(box);
+      });
+    }
+
+    async function runCompare() {
+      const question = el('question').value.trim();
+      if (!question) { setBusy(false, '질문을 입력하세요.'); return; }
+      const providers = selectedProviders();
+      if (!providers.length) { setBusy(false, '수집 대상 AI를 하나 이상 선택하세요.'); return; }
+
+      setBusy(true, 'Public AI 응답 수집 및 Local LLM 요약 중... (수십 초 소요될 수 있습니다)');
+      summaryBox.textContent = '';
+      responseGrid.innerHTML = '';
+      try {
+        const res = await fetch('/compare/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question,
+            providers,
+            llm_model: el('llmModel').value || null,
+            user_id: 1,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const detail = await res.json();
+        renderDetail(detail);
+        setBusy(false, detail.status === 'COMPLETED' ? '완료' : `상태: ${detail.status}`);
+        loadHistory();
+      } catch (err) {
+        console.error(err);
+        setBusy(false, `실패: ${err.message}`);
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch('/compare/history?limit=30');
+        const items = await res.json();
+        if (!Array.isArray(items) || !items.length) {
+          historyList.innerHTML = '<div class="muted">이력이 없습니다.</div>';
+          return;
+        }
+        historyList.innerHTML = '';
+        items.forEach((h) => {
+          const row = document.createElement('div');
+          row.className = 'history-item';
+          row.innerHTML =
+            `<div class="history-q"></div>` +
+            `<div class="history-meta">${h.status} · ${(h.created_at || '').replace('T', ' ').slice(0, 16)}</div>`;
+          row.querySelector('.history-q').textContent = h.user_prompt || '(질문 없음)';
+          row.addEventListener('click', () => loadHistoryDetail(h.id));
+          historyList.appendChild(row);
+        });
+      } catch (err) {
+        historyList.innerHTML = `<div class="muted">이력 로드 실패: ${err.message}</div>`;
+      }
+    }
+
+    async function loadHistoryDetail(id) {
+      setBusy(true, '이력 불러오는 중...');
+      try {
+        const res = await fetch(`/compare/history/${id}`);
+        if (!res.ok) throw new Error(await res.text());
+        const detail = await res.json();
+        renderDetail(detail);
+        setBusy(false, '이력 조회 완료');
+      } catch (err) {
+        setBusy(false, `이력 조회 실패: ${err.message}`);
+      }
+    }
+
+    runBtn.addEventListener('click', runCompare);
+    window.addEventListener('load', () => { connState.textContent = '준비됨'; loadHistory(); });
+  </script>
+</body>
+
+</html>
