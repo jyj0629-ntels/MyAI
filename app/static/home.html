@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyAI · 기능 소개</title>
+  <style>
+    :root {
+      --bg: #09111f;
+      --panel: rgba(14, 24, 40, 0.92);
+      --panel-soft: #13233c;
+      --border: rgba(148, 163, 184, 0.18);
+      --primary: #6ee7f9;
+      --primary-2: #9a7bff;
+      --green: #6ee7b7;
+      --text: #edf6ff;
+      --muted: #9bb1c7;
+      --shadow: 0 20px 60px rgba(9, 17, 31, 0.6);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(110, 231, 249, 0.20), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(154, 123, 255, 0.18), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* 1. Top menu bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(9, 17, 31, 0.82);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1280px; margin: 0 auto; padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      display: grid; place-items: center; font-size: 18px; box-shadow: var(--shadow);
+    }
+    .menu { display: flex; gap: 8px; }
+    .menu a {
+      text-decoration: none; color: var(--text);
+      border: 1px solid var(--border); background: rgba(148,163,184,0.06);
+      border-radius: 999px; padding: 9px 16px; font-size: 0.9rem; transition: 0.15s;
+    }
+    .menu a:hover { border-color: var(--primary); background: rgba(110,231,249,0.10); }
+
+    /* Title section */
+    .title-wrap { max-width: 1280px; margin: 0 auto; padding: 40px 28px 10px; text-align: center; }
+    .title-wrap h1 {
+      margin: 0; font-size: 2.2rem; letter-spacing: 0.01em;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .title-wrap p { margin: 10px 0 0; color: var(--muted); font-size: 1.05rem; }
+
+    /* 2 & 3. Three vertical cards with flow images */
+    .cards {
+      max-width: 1280px; margin: 0 auto; padding: 28px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    @media (max-width: 980px) { .cards { grid-template-columns: 1fr; } }
+
+    .card {
+      display: flex; flex-direction: column;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 22px; box-shadow: var(--shadow);
+      overflow: hidden; text-decoration: none; color: inherit;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 26px 70px rgba(9,17,31,0.75);
+    }
+    .card-head { padding: 20px 22px 8px; }
+    .card-head h2 { margin: 0; font-size: 1.35rem; }
+    .card-head .tag { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .card-img { padding: 8px 16px; }
+    .card-img img {
+      width: 100%; height: auto; display: block;
+      border-radius: 14px; border: 1px solid var(--border);
+    }
+
+    .card-desc { padding: 12px 22px 8px; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+    .card-cta {
+      margin: auto 22px 22px; text-align: center;
+      border-radius: 12px; padding: 12px; font-weight: 700; color: #04121d;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 1. Top menu bar -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">AI</div>
+        <div>MyAI Platform</div>
+      </div>
+      <nav class="menu">
+        <a href="/demo">MyAI</a>
+        <a href="/demo_dpi">DPI</a>
+        <a href="/demo_compare">Compare</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-wrap">
+    <h1>MyAI Platform</h1>
+    <p>세 가지 기능을 한곳에서. 카드를 클릭하면 각 기능 화면으로 이동합니다.</p>
+  </div>
+
+  <!-- 2 & 3. Three cards, each with a flow image + summary, clickable -->
+  <div class="cards">
+    <a class="card" href="/demo">
+      <div class="card-head">
+        <h2>MyAI</h2>
+        <div class="tag">로컬 LLM 기반 개인화 멀티 AI 비서</div>
+      </div>
+      <div class="card-img"><img src="/static/images/flow_myai.png" alt="MyAI 순서도" /></div>
+      <div class="card-desc">
+        로컬 LLM(Ollama)이 사용자 선호도를 반영해 프롬프트를 만들고, 여러 Public AI에
+        병렬 질의한 뒤 응답을 교차검증·요약해 최종 답변을 제공합니다.
+      </div>
+      <div class="card-cta">MyAI 열기 →</div>
+    </a>
+
+    <a class="card" href="/demo_dpi">
+      <div class="card-head">
+        <h2>DPI 기능</h2>
+        <div class="tag">로컬 LLM 프롬프트 재작성</div>
+      </div>
+      <div class="card-img"><img src="/static/images/flow_dpi.png" alt="DPI 순서도" /></div>
+      <div class="card-desc">
+        원본 질문을 로컬 LLM이 더 정교한 프롬프트로 재작성한 뒤 Public AI에 전달해
+        응답 품질을 끌어올리고 결과를 정리해 보여줍니다.
+      </div>
+      <div class="card-cta">DPI 열기 →</div>
+    </a>
+
+    <a class="card" href="/demo_compare">
+      <div class="card-head">
+        <h2>Compare 기능</h2>
+        <div class="tag">Public AI 응답 수집 + 교차검증 요약</div>
+      </div>
+      <div class="card-img"><img src="/static/images/flow_compare.png" alt="Compare 순서도" /></div>
+      <div class="card-desc">
+        선택한 Public AI들의 웹 응답을 수집·저장하고, 로컬 LLM이 공통점과 차이점을
+        비교해 종합 결론을 만들어 줍니다. 이력도 다시 열람할 수 있습니다.
+      </div>
+      <div class="card-cta">Compare 열기 →</div>
+    </a>
+  </div>
+</body>
+
+</html>

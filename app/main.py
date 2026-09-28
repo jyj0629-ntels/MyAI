@@ -95,6 +95,12 @@ async def demo_compare_ui():
     return FileResponse(STATIC_DIR / "demo_compare.html")
 
 
+@app.get("/home")
+@app.get("/home/")
+async def home_ui():
+    return FileResponse(STATIC_DIR / "home.html")
+
+
 from app.services.provider_quota_service import ProviderQuotaService
 
 
