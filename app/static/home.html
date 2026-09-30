@@ -68,41 +68,40 @@
 
     /* 2 & 3. Three vertical cards with flow images */
     .cards {
-      max-width: 1400px; margin: 0 auto; padding: 28px;
-      display: flex; flex-direction: column; gap: 24px;
+      max-width: 1440px; margin: 0 auto; padding: 28px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
     }
+    @media (max-width: 1100px) { .cards { grid-template-columns: 1fr; } }
 
     .card {
-      display: grid;
-      grid-template-columns: 300px 1fr 1fr;
-      align-items: stretch;
+      display: flex; flex-direction: column;
       background: var(--panel); border: 1px solid var(--border);
       border-radius: 22px; box-shadow: var(--shadow);
       overflow: hidden; text-decoration: none; color: inherit;
       transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
-    @media (max-width: 980px) { .card { grid-template-columns: 1fr; } }
     .card:hover {
       transform: translateY(-4px);
       border-color: var(--primary);
       box-shadow: 0 26px 70px rgba(9,17,31,0.75);
     }
 
-    .card-left { display: flex; flex-direction: column; padding: 22px; border-right: 1px solid var(--border); }
-    @media (max-width: 980px) { .card-left { border-right: none; border-bottom: 1px solid var(--border); } }
-    .card-head h2 { margin: 0; font-size: 1.4rem; }
+    .card-left { display: flex; flex-direction: column; padding: 20px 22px 8px; }
+    .card-head h2 { margin: 0; font-size: 1.35rem; }
     .card-head .tag { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
-    .card-desc { margin: 14px 0 18px; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+    .card-desc { margin: 12px 0 6px; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
 
-    .card-img { padding: 14px; display: flex; flex-direction: column; }
-    .card-img .img-label { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; text-align: center; }
+    /* Two images side by side (연동망 왼쪽, 순서도 오른쪽) */
+    .card-images { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 16px; }
+    .card-img { display: flex; flex-direction: column; }
+    .card-img .img-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-align: center; }
     .card-img img {
       width: 100%; height: auto; display: block;
-      border-radius: 14px; border: 1px solid var(--border);
+      border-radius: 12px; border: 1px solid var(--border);
     }
 
     .card-cta {
-      margin-top: auto; text-align: center;
+      margin: auto 22px 22px; text-align: center;
       border-radius: 12px; padding: 12px; font-weight: 700; color: #04121d;
       background: linear-gradient(135deg, var(--primary), var(--primary-2));
     }
@@ -131,7 +130,7 @@
     <p>세 가지 기능을 한곳에서. 카드를 클릭하면 각 기능 화면으로 이동합니다.</p>
   </div>
 
-  <!-- Three functions stacked vertically; each row = [info | 연동망 구성도(좌) | 순서도(우)] -->
+  <!-- 3 functions in a horizontal row; inside each card: 연동망(왼쪽) + 순서도(오른쪽) -->
   <div class="cards">
     <a class="card" href="/demo">
       <div class="card-left">
@@ -143,16 +142,18 @@
           로컬 LLM(Ollama)이 사용자 선호도를 반영해 프롬프트를 만들고, 여러 Public AI에
           병렬 질의한 뒤 응답을 교차검증·요약해 최종 답변을 제공합니다.
         </div>
-        <div class="card-cta">MyAI 열기 →</div>
       </div>
-      <div class="card-img">
-        <div class="img-label">연동망 구성도</div>
-        <img src="/static/images/net_myai.png" alt="MyAI 연동망 구성도" />
+      <div class="card-images">
+        <div class="card-img">
+          <div class="img-label">연동망 구성도</div>
+          <img src="/static/images/net_myai.png" alt="MyAI 연동망 구성도" />
+        </div>
+        <div class="card-img">
+          <div class="img-label">기능 순서도</div>
+          <img src="/static/images/flow_myai.png" alt="MyAI 순서도" />
+        </div>
       </div>
-      <div class="card-img">
-        <div class="img-label">기능 순서도</div>
-        <img src="/static/images/flow_myai.png" alt="MyAI 순서도" />
-      </div>
+      <div class="card-cta">MyAI 열기 →</div>
     </a>
 
     <a class="card" href="/demo_dpi">
@@ -165,16 +166,18 @@
           원본 질문을 로컬 LLM이 더 정교한 프롬프트로 재작성한 뒤 Public AI에 전달해
           응답 품질을 끌어올리고 결과를 정리해 보여줍니다.
         </div>
-        <div class="card-cta">DPI 열기 →</div>
       </div>
-      <div class="card-img">
-        <div class="img-label">연동망 구성도</div>
-        <img src="/static/images/net_dpi.png" alt="DPI 연동망 구성도" />
+      <div class="card-images">
+        <div class="card-img">
+          <div class="img-label">연동망 구성도</div>
+          <img src="/static/images/net_dpi.png" alt="DPI 연동망 구성도" />
+        </div>
+        <div class="card-img">
+          <div class="img-label">기능 순서도</div>
+          <img src="/static/images/flow_dpi.png" alt="DPI 순서도" />
+        </div>
       </div>
-      <div class="card-img">
-        <div class="img-label">기능 순서도</div>
-        <img src="/static/images/flow_dpi.png" alt="DPI 순서도" />
-      </div>
+      <div class="card-cta">DPI 열기 →</div>
     </a>
 
     <a class="card" href="/demo_compare">
@@ -187,16 +190,18 @@
           선택한 Public AI들의 웹 응답을 수집·저장하고, 로컬 LLM이 공통점과 차이점을
           비교해 종합 결론을 만들어 줍니다. 이력도 다시 열람할 수 있습니다.
         </div>
-        <div class="card-cta">Compare 열기 →</div>
       </div>
-      <div class="card-img">
-        <div class="img-label">연동망 구성도</div>
-        <img src="/static/images/net_compare.png" alt="Compare 연동망 구성도" />
+      <div class="card-images">
+        <div class="card-img">
+          <div class="img-label">연동망 구성도</div>
+          <img src="/static/images/net_compare.png" alt="Compare 연동망 구성도" />
+        </div>
+        <div class="card-img">
+          <div class="img-label">기능 순서도</div>
+          <img src="/static/images/flow_compare.png" alt="Compare 순서도" />
+        </div>
       </div>
-      <div class="card-img">
-        <div class="img-label">기능 순서도</div>
-        <img src="/static/images/flow_compare.png" alt="Compare 순서도" />
-      </div>
+      <div class="card-cta">Compare 열기 →</div>
     </a>
   </div>
 </body>
