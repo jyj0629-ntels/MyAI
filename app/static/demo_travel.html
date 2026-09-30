@@ -94,8 +94,19 @@
     <div class="layout">
       <div>
         <div class="panel">
-          <h3>여행 질문</h3>
-          <textarea id="question" placeholder="예: 3박4일 오사카 가족여행 일정 추천해줘"></textarea>
+          <h3>여행 정보 입력</h3>
+          <label class="field-label">여행 국가</label>
+          <textarea id="country" style="min-height:40px;" placeholder="예: 태국"></textarea>
+          <label class="field-label">여행 지역</label>
+          <textarea id="region" style="min-height:40px;" placeholder="예: 치앙마이"></textarea>
+          <label class="field-label">여행 기간</label>
+          <textarea id="period" style="min-height:40px;" placeholder="예: 10월3일 ~ 10월11일"></textarea>
+          <label class="field-label">핵심 관광지</label>
+          <textarea id="mustSee" style="min-height:40px;" placeholder="예: 치앙마이 그랜드 캐년"></textarea>
+          <label class="field-label">여행기간 특이사항</label>
+          <textarea id="periodNotes" placeholder="예: 10/3 인천→치앙마이 도착, 10/10 아침 기차로 돈므앙 이동, 10/11 돈므앙→인천"></textarea>
+          <label class="field-label">비고사항 (렌터카/이동 등)</label>
+          <textarea id="remarks" placeholder="예: 국제면허 보유, 경차 저렴한 렌터카, 도착일은 Grab 이용, 기차역에서 렌터카 반납"></textarea>
 
           <label class="field-label">비교 대상 Public AI</label>
           <div class="checks">
@@ -147,14 +158,13 @@
 
     function roundBlock(title, items, note) {
       const wrap = document.createElement('details');
-      if (title.includes('1')) wrap.open = false;
       const sum = document.createElement('summary');
       sum.textContent = title;
       wrap.appendChild(sum);
       if (note) {
         const n = document.createElement('div');
         n.className = 'round-note';
-        n.textContent = '2차 질문(Ollama 생성): ' + note;
+        n.textContent = 'STEP2 일정 프롬프트(Ollama가 STEP1 취합해 자동 생성):\n' + note;
         wrap.appendChild(n);
       }
       const grid = document.createElement('div');
@@ -179,22 +189,30 @@
       finalModel.textContent = d.llm_model_used ? `· ${d.llm_model_used} · ${d.status}` : `· ${d.status}`;
       finalBox.textContent = d.final_result || '최종 결과가 없습니다.';
       rounds.innerHTML = '';
-      rounds.appendChild(roundBlock('1차 라운드 응답', d.round1, null));
-      rounds.appendChild(roundBlock('2차 라운드 응답', d.round2, d.round2_prompt));
+      rounds.appendChild(roundBlock('STEP1 · 관광지 TOP20 응답 (각 AI)', d.round1, null));
+      rounds.appendChild(roundBlock('STEP2 · 일정 계획 응답 (각 AI)', d.round2, d.round2_prompt));
     }
 
     async function run() {
-      const question = el('question').value.trim();
-      if (!question) { setBusy(false, '질문을 입력하세요.'); return; }
+      const country = el('country').value.trim();
+      const region = el('region').value.trim();
+      if (!country || !region) { setBusy(false, '여행 국가와 지역은 필수입니다.'); return; }
       const providers = selectedProviders();
       if (!providers.length) { setBusy(false, '비교 대상 AI를 선택하세요.'); return; }
 
-      setBusy(true, '2라운드 비교 중... 각 AI 2회 질의 + Local LLM 취합 (수십 초~수 분 소요)');
+      setBusy(true, 'STEP1 관광지 조사 → STEP2 일정 계획 → 최종 취합 중... (수십 초~수 분 소요)');
       finalBox.textContent = ''; rounds.innerHTML = '';
       try {
         const res = await fetch('/travel_compare/run', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question, providers, llm_model: el('llmModel').value || null, user_id: 1 }),
+          body: JSON.stringify({
+            country, region,
+            period: el('period').value.trim(),
+            must_see: el('mustSee').value.trim(),
+            period_notes: el('periodNotes').value.trim(),
+            remarks: el('remarks').value.trim(),
+            providers, llm_model: el('llmModel').value || null, user_id: 1,
+          }),
         });
         if (!res.ok) throw new Error(await res.text());
         const d = await res.json();

@@ -14,7 +14,12 @@ def _public_providers():
 
 
 class TravelRunRequest(BaseModel):
-    question: str
+    country: str
+    region: str
+    period: str = ""
+    must_see: str = ""
+    period_notes: str = ""
+    remarks: str = ""
     providers: list[str] | None = None
     llm_model: str | None = None
     user_id: int | None = 1
@@ -25,9 +30,8 @@ async def run_travel_compare(
     payload: TravelRunRequest = Body(...),
     db: Session = Depends(get_db),
 ):
-    question = (payload.question or "").strip()
-    if not question:
-        raise HTTPException(status_code=422, detail="question is required and must be non-empty.")
+    if not (payload.country or "").strip() or not (payload.region or "").strip():
+        raise HTTPException(status_code=422, detail="country and region are required.")
 
     allowed = _public_providers()
     providers = payload.providers or allowed
@@ -39,9 +43,18 @@ async def run_travel_compare(
             detail=f"providers must include at least one of {allowed}.",
         )
 
+    form = {
+        "country": payload.country.strip(),
+        "region": payload.region.strip(),
+        "period": (payload.period or "").strip(),
+        "must_see": (payload.must_see or "").strip(),
+        "period_notes": (payload.period_notes or "").strip(),
+        "remarks": (payload.remarks or "").strip(),
+    }
+
     result = await TravelCompareService(db).run(
         user_id=payload.user_id,
-        user_prompt=question,
+        form=form,
         providers=providers,
         llm_model_used=payload.llm_model,
     )
