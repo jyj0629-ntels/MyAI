@@ -29,6 +29,8 @@ import app.models.ai_prompt_run
 import app.models.compare_history
 import app.models.compare_source_response
 import app.models.forbidden_term
+import app.models.travel_compare_history
+import app.models.travel_round_response
 
 target_metadata = Base.metadata
 

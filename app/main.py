@@ -26,6 +26,7 @@ from app.api.response_format_templates import router as response_format_template
 from app.api.compare import router as compare_router
 from app.api.forbidden_terms import router as forbidden_terms_router
 from app.api.ai_dpi import router as ai_dpi_router
+from app.api.travel_compare import router as travel_compare_router
 from app.db.base import Base
 from app.db.database import engine
 from app.models.ai_prompt_run import AIPromptRun
@@ -38,6 +39,8 @@ from app.models.user import User
 from app.models.compare_history import CompareHistory
 from app.models.compare_source_response import CompareSourceResponse
 from app.models.forbidden_term import ForbiddenTerm
+from app.models.travel_compare_history import TravelCompareHistory
+from app.models.travel_round_response import TravelRoundResponse
 
 
 def ensure_database_schema():
@@ -110,6 +113,7 @@ app.include_router(response_format_templates_router)
 app.include_router(compare_router)
 app.include_router(forbidden_terms_router)
 app.include_router(ai_dpi_router)
+app.include_router(travel_compare_router)
 
 orchestrator = create_orchestrator()
 
@@ -147,6 +151,12 @@ async def home_ui():
 @app.get("/demo_dpi/")
 async def demo_dpi_ui():
     return FileResponse(STATIC_DIR / "demo_dpi.html")
+
+
+@app.get("/demo_travel")
+@app.get("/demo_travel/")
+async def demo_travel_ui():
+    return FileResponse(STATIC_DIR / "demo_travel.html")
 
 
 from app.services.provider_quota_service import ProviderQuotaService
