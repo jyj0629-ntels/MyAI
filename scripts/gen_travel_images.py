@@ -50,7 +50,7 @@ def render_flow():
     W, H = 720, 980
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
-    d.text((40, 34), "여행 2라운드 비교", font=_font(38, bold=True), fill=TEXT)
+    d.text((40, 34), "MyTrip Agent", font=_font(38, bold=True), fill=TEXT)
     d.text((40, 84), "개인 성향 반영 · 2회 질의 후 로컬 LLM 수렴", font=_font(20), fill=MUTED)
     d.line((40, 122, W - 40, 122), fill=BORDER_SOFT, width=2)
 
@@ -117,7 +117,7 @@ def render_network():
     W, H = 1000, 620
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
-    d.text((40, 30), "여행 2라운드 · 연동망 구성도", font=_font(34, bold=True), fill=TEXT)
+    d.text((40, 30), "MyTrip Agent · 연동망 구성도", font=_font(34, bold=True), fill=TEXT)
     d.text((40, 76), "브라우저 → FastAPI → (성향+2라운드) Public AI ↔ Ollama 취합", font=_font(18), fill=MUTED)
     d.line((40, 112, W - 40, 112), fill=BORDER_SOFT, width=2)
 
