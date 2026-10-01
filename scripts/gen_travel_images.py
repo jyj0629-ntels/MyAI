@@ -56,10 +56,10 @@ def render_flow():
 
     steps = [
         ("질문 입력 + 성향 로딩", "여행 질문 입력, DB의 개인 선호(가성비/후기 등)를 자동 반영."),
-        ("Round1 프롬프트 생성", "성향 포함 프롬프트를 각 Public AI에 전송."),
-        ("Round1 응답 수집", "Gemini/Groq/Mistral의 1차 답변을 병렬 수집."),
-        ("Ollama가 Round2 질문 생성", "1차 답변의 차이를 좁히는 개선 질문을 로컬 LLM이 작성(성향 포함)."),
-        ("Round2 응답 수집", "개선 질문으로 각 Public AI에 재질의, 2차 답변 수집."),
+        ("Step1 프롬프트 생성", "성향 포함 프롬프트를 각 Public AI에 전송."),
+        ("Step1 응답 수집", "Gemini/Groq/Mistral의 1차 답변을 병렬 수집."),
+        ("Ollama가 Step2 질문 생성", "1차 답변의 차이를 좁히는 개선 질문을 로컬 LLM이 작성(성향 포함)."),
+        ("Step2 응답 수집", "개선 질문으로 각 Public AI에 재질의, 2차 답변 수집."),
         ("Ollama 최종 취합·안내", "2차 답변을 교차검증해 최종 여행 안내 생성, DB 저장."),
     ]
     box_x0, box_x1 = 60, W - 60
@@ -118,21 +118,21 @@ def render_network():
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
     d.text((40, 30), "MyTrip Agent · 연동망 구성도", font=_font(34, bold=True), fill=TEXT)
-    d.text((40, 76), "브라우저 → FastAPI → (성향+2라운드) Public AI ↔ Ollama 취합", font=_font(18), fill=MUTED)
+    d.text((40, 76), "브라우저 → FastAPI → (성향+2단계) Public AI ↔ Ollama 취합", font=_font(18), fill=MUTED)
     d.line((40, 112, W - 40, 112), fill=BORDER_SOFT, width=2)
 
     _node(d, (40, 250, 240, 340), "사용자 브라우저", "/demo_travel", PRIMARY)
     _node(d, (400, 250, 620, 340), "myai-api", "FastAPI (Docker)", PRIMARY)
     _node(d, (760, 120, 960, 200), "Public AI", "Gemini/Groq/Mistral", PURPLE)
-    _node(d, (760, 250, 960, 330), "Ollama", "Round2질문·최종취합", GREEN)
-    _node(d, (760, 380, 960, 460), "PostgreSQL", "성향·라운드응답·이력", AMBER)
+    _node(d, (760, 250, 960, 330), "Ollama", "Step2질문·최종취합", GREEN)
+    _node(d, (760, 380, 960, 460), "PostgreSQL", "성향·단계별응답·이력", AMBER)
 
     _arrow(d, (240, 295), (400, 295), PRIMARY, "HTTP :8000")
-    _arrow(d, (620, 285), (760, 165), PURPLE, "R1/R2 질의")
+    _arrow(d, (620, 285), (760, 165), PURPLE, "S1/S2 질의")
     _arrow(d, (620, 295), (760, 290), GREEN, "취합/재질문 생성")
     _arrow(d, (620, 305), (760, 415), AMBER, "저장")
-    d.text((40, 500), "· Round1: 성향 반영 질의 → Ollama가 답변 종합해 Round2 질문 생성 → Round2 재질의.", font=_font(16), fill=MUTED)
-    d.text((40, 528), "· Ollama가 2차 답변을 교차검증해 최종 안내 생성. 모든 라운드 응답을 DB에 저장.", font=_font(16), fill=MUTED)
+    d.text((40, 500), "· Step1: 성향 반영 질의 → Ollama가 답변 종합해 Step2 질문 생성 → Step2 재질의.", font=_font(16), fill=MUTED)
+    d.text((40, 528), "· Ollama가 2차 답변을 교차검증해 최종 안내 생성. 모든 단계 응답을 DB에 저장.", font=_font(16), fill=MUTED)
     img.save(os.path.join(OUT_DIR, "net_travel.png"))
     print("saved net_travel.png")
 
