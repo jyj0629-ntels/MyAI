@@ -20,10 +20,11 @@ class CompareRepository:
         self.db.refresh(history)
         return history
 
-    def add_source_response(self, history_id, ai_provider, raw_response, status):
+    def add_source_response(self, history_id, ai_provider, raw_response, status, sent_prompt=None):
         source = CompareSourceResponse(
             history_id=history_id,
             ai_provider=ai_provider,
+            sent_prompt=sent_prompt,
             raw_response=raw_response,
             status=status,
         )

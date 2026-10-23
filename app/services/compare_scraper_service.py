@@ -39,14 +39,19 @@ class PublicAIScraper(ABC):
         ...
 
     async def scrape_many(self, providers: list[str], prompt: str) -> list[ScrapeResult]:
-        """Collect from several providers concurrently; failures are captured per-provider."""
-        targets = [p for p in providers if p in SUPPORTED_PROVIDERS]
+        """Collect from several providers concurrently using the SAME prompt."""
+        prompt_map = {p: prompt for p in providers}
+        return await self.scrape_many_with_prompts(prompt_map)
+
+    async def scrape_many_with_prompts(self, prompt_map: dict[str, str]) -> list[ScrapeResult]:
+        """Collect concurrently, each provider receiving ITS OWN tailored prompt."""
+        targets = [p for p in prompt_map if p in SUPPORTED_PROVIDERS]
         if not targets:
             return []
 
         async def _guarded(provider: str) -> ScrapeResult:
             try:
-                return await self.scrape(provider, prompt)
+                return await self.scrape(provider, prompt_map[provider])
             except Exception as exc:  # never let one provider kill the batch
                 return ScrapeResult(provider, f"[{provider} 수집 실패] {exc}", "ERROR")
 

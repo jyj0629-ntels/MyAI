@@ -20,11 +20,44 @@ _PROVIDER_LABELS = {
     "gemini": "Gemini",
 }
 
+# 각 Public AI의 강점에 맞춰 같은 질문을 다르게 표현하기 위한 provider별 지침.
+_PROVIDER_STYLE = {
+    "chatgpt": (
+        "[대상 AI: ChatGPT]\n"
+        "ChatGPT는 단계적 추론과 정돈된 서술형 설명에 강합니다. "
+        "질문의 맥락을 단계별로 풀어 설명하고, 핵심을 bullet로 구조화해 답하도록 요청하세요."
+    ),
+    "claude": (
+        "[대상 AI: Claude]\n"
+        "Claude는 긴 맥락 이해와 신중하고 균형 잡힌 분석, 안전한 서술에 강합니다. "
+        "장단점을 균형 있게 비교하고 근거와 함께 신중하게 답하도록 요청하세요."
+    ),
+    "gemini": (
+        "[대상 AI: Gemini]\n"
+        "Gemini는 최신 정보 종합과 표/비교 형태의 구조화된 요약에 강합니다. "
+        "핵심을 표나 비교 형식으로 간결하게 정리하도록 요청하세요."
+    ),
+}
+
 
 class CompareService:
     def __init__(self, repository: CompareRepository):
         self.repository = repository
         self.scraper = get_scraper()
+
+    @staticmethod
+    def _build_provider_prompt(provider: str, user_prompt: str) -> str:
+        """같은 사용자 질문을, 해당 Public AI의 강점에 맞게 변형한 전송 프롬프트."""
+        style = _PROVIDER_STYLE.get(
+            provider,
+            "[대상 AI]\n해당 AI의 강점을 살려 정확하고 구조화된 답변을 요청하세요.",
+        )
+        return (
+            f"{style}\n\n"
+            f"[사용자 질문]\n{user_prompt}\n\n"
+            f"[요청] 위 질문에 대해 이 AI의 강점을 최대한 활용해, "
+            f"정확하고 사용자가 이해하기 쉬운 형식으로 답변해 주세요."
+        )
 
     @staticmethod
     def _build_cross_check_prompt(user_prompt: str, collected: list[dict]) -> str:
@@ -74,8 +107,9 @@ class CompareService:
             status="PROCESSING",
         )
 
-        # 1) Scrape each selected Public AI (concurrent, per-provider failure isolation).
-        scrape_results = await self.scraper.scrape_many(providers, user_prompt)
+        # 1) Build a provider-tailored prompt per AI, then scrape concurrently.
+        prompt_map = {p: self._build_provider_prompt(p, user_prompt) for p in providers}
+        scrape_results = await self.scraper.scrape_many_with_prompts(prompt_map)
 
         collected = []
         for result in scrape_results:
@@ -84,6 +118,7 @@ class CompareService:
                 ai_provider=result.provider,
                 raw_response=result.text,
                 status=result.status,
+                sent_prompt=prompt_map.get(result.provider),
             )
             if result.status == "SUCCESS":
                 collected.append(result.as_dict())
@@ -131,6 +166,7 @@ class CompareService:
         return {
             "id": source.id,
             "ai_provider": source.ai_provider,
+            "sent_prompt": getattr(source, "sent_prompt", None),
             "raw_response": source.raw_response,
             "status": source.status,
             "created_at": source.created_at.isoformat() if source.created_at else None,

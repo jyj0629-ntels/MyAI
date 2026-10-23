@@ -32,6 +32,11 @@ class CompareSourceResponse(Base):
         nullable=False
     )
 
+    sent_prompt: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
     raw_response: Mapped[str | None] = mapped_column(
         Text,
         nullable=True
