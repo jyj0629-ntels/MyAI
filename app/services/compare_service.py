@@ -45,9 +45,24 @@ class CompareService:
         self.repository = repository
         self.scraper = get_scraper()
 
+    # 모든 Public AI가 동일한 형식으로 답하도록 하는 공통 출력 포맷.
+    # (내용/접근은 AI별 강점에 맞게 다르되, 결과 틀은 통일해야 비교가 쉽다)
+    _COMMON_OUTPUT_FORMAT = (
+        "[공통 출력 형식]\n"
+        "다른 AI의 답변과 나란히 비교하기 쉽도록, 반드시 아래 Markdown 표 형식으로 핵심을 요약해 주세요.\n"
+        "| 항목 | 내용 |\n"
+        "| --- | --- |\n"
+        "| 핵심 결론 | ... |\n"
+        "| 주요 근거 | ... |\n"
+        "| 추천/선택지 | ... |\n"
+        "| 장점 | ... |\n"
+        "| 단점/주의 | ... |\n"
+        "표 아래에 2~3문장 이내의 짧은 총평만 덧붙이고, 그 외 장황한 설명은 생략하세요."
+    )
+
     @staticmethod
     def _build_provider_prompt(provider: str, user_prompt: str) -> str:
-        """같은 사용자 질문을, 해당 Public AI의 강점에 맞게 변형한 전송 프롬프트."""
+        """같은 사용자 질문을, 해당 Public AI의 강점에 맞게 변형하되, 출력 형식은 공통 표로 통일."""
         style = _PROVIDER_STYLE.get(
             provider,
             "[대상 AI]\n해당 AI의 강점을 살려 정확하고 구조화된 답변을 요청하세요.",
@@ -55,8 +70,9 @@ class CompareService:
         return (
             f"{style}\n\n"
             f"[사용자 질문]\n{user_prompt}\n\n"
-            f"[요청] 위 질문에 대해 이 AI의 강점을 최대한 활용해, "
-            f"정확하고 사용자가 이해하기 쉬운 형식으로 답변해 주세요."
+            f"[요청] 위 질문에 대해 이 AI의 강점을 최대한 활용해 답변하되, "
+            f"여러 AI의 결과를 비교하기 쉽도록 아래 공통 출력 형식을 반드시 지켜 주세요.\n\n"
+            f"{CompareService._COMMON_OUTPUT_FORMAT}"
         )
 
     @staticmethod
