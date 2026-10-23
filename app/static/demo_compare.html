@@ -124,6 +124,23 @@
     .history-meta { font-size: 0.75rem; color: var(--muted); }
 
     .section-title { margin: 22px 0 6px; font-size: 0.95rem; color: var(--muted); }
+
+    .summary-box.clickable { cursor: pointer; }
+    .summary-box.clickable:hover { border-color: var(--primary); box-shadow: inset 0 0 0 1px rgba(110,231,249,0.25); }
+
+    .response-modal {
+      position: fixed; inset: 0; z-index: 50; display: none;
+      background: rgba(5, 10, 20, 0.72); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .response-modal.visible { display: flex; }
+    body.modal-open { overflow: hidden; }
+    .response-modal-card {
+      width: 100%; max-width: 1100px; max-height: 86vh; overflow: auto;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 20px; box-shadow: var(--shadow); padding: 22px;
+    }
+    .response-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   </style>
 </head>
 
@@ -181,10 +198,21 @@
       <div class="panel">
         <h3>종합 요약 및 교차 검증 <span class="muted" id="summaryModel"></span></h3>
         <div class="summary-box" id="summaryBox">질문을 입력하고 [비교 및 요약 실행]을 누르세요.</div>
-
-        <div class="section-title">각 Public AI 원본 응답</div>
-        <div class="response-grid" id="responseGrid"></div>
+        <div class="muted" id="summaryHint" style="margin-top:10px;font-size:0.85rem;display:none;">
+          ▶ 위 결과를 클릭하면 각 Public AI의 원본 응답을 팝업으로 볼 수 있습니다.
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Popup: per-provider raw responses -->
+  <div id="responseModal" class="response-modal" aria-hidden="true">
+    <div class="response-modal-card">
+      <div class="response-modal-header">
+        <h3 style="margin:0;">각 Public AI 원본 응답</h3>
+        <button id="closeResponseModalBtn" type="button" class="pill" style="cursor:pointer;">닫기</button>
+      </div>
+      <div class="response-grid" id="responseGrid"></div>
     </div>
   </div>
 
@@ -194,11 +222,50 @@
     const statusLine = el('statusLine');
     const summaryBox = el('summaryBox');
     const summaryModel = el('summaryModel');
+    const summaryHint = el('summaryHint');
     const responseGrid = el('responseGrid');
+    const responseModal = el('responseModal');
+    const closeResponseModalBtn = el('closeResponseModalBtn');
     const historyList = el('historyList');
     const connState = el('connState');
 
     const PROVIDER_LABELS = { chatgpt: 'ChatGPT', claude: 'Claude', gemini: 'Gemini' };
+
+    let currentSources = [];
+
+    function renderSourcesGrid(sources) {
+      responseGrid.innerHTML = '';
+      if (!sources || !sources.length) {
+        responseGrid.innerHTML = '<div class="muted">수집된 응답이 없습니다.</div>';
+        return;
+      }
+      sources.forEach((s) => {
+        const box = document.createElement('div');
+        box.className = 'provider-box';
+        const label = PROVIDER_LABELS[s.ai_provider] || s.ai_provider;
+        box.innerHTML =
+          `<div class="provider-label"><span>${label}</span>` +
+          `<span class="${badgeClass(s.status)}">${s.status}</span></div>` +
+          `<details style="margin:6px 0 10px;"><summary style="cursor:pointer;color:var(--muted);font-size:0.82rem;">전송 프롬프트 보기 (AI별 맞춤)</summary>` +
+          `<div class="sent-prompt" style="white-space:pre-wrap;font-size:0.82rem;color:var(--muted);margin-top:6px;border-left:2px solid var(--border);padding-left:10px;"></div></details>` +
+          `<div class="provider-text"></div>`;
+        box.querySelector('.sent-prompt').textContent = s.sent_prompt || '(기록된 전송 프롬프트 없음)';
+        box.querySelector('.provider-text').textContent = s.raw_response || '(응답 없음)';
+        responseGrid.appendChild(box);
+      });
+    }
+
+    function openResponseModal() {
+      if (!currentSources.length) return;
+      renderSourcesGrid(currentSources);
+      responseModal.classList.add('visible');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeResponseModal() {
+      responseModal.classList.remove('visible');
+      document.body.classList.remove('modal-open');
+    }
 
     function selectedProviders() {
       return Array.from(document.querySelectorAll('.checks input:checked')).map((c) => c.value);
@@ -222,26 +289,16 @@
       summaryModel.textContent = detail.llm_model_used ? `· ${detail.llm_model_used}` : '';
       summaryBox.textContent = detail.summary_result || '요약 결과가 없습니다.';
 
-      const sources = Array.isArray(detail.source_responses) ? detail.source_responses : [];
-      responseGrid.innerHTML = '';
-      if (!sources.length) {
-        responseGrid.innerHTML = '<div class="muted">수집된 응답이 없습니다.</div>';
-        return;
+      currentSources = Array.isArray(detail.source_responses) ? detail.source_responses : [];
+      if (currentSources.length) {
+        summaryBox.classList.add('clickable');
+        summaryBox.title = '클릭하면 각 Public AI 원본 응답을 볼 수 있습니다.';
+        summaryHint.style.display = 'block';
+      } else {
+        summaryBox.classList.remove('clickable');
+        summaryBox.removeAttribute('title');
+        summaryHint.style.display = 'none';
       }
-      sources.forEach((s) => {
-        const box = document.createElement('div');
-        box.className = 'provider-box';
-        const label = PROVIDER_LABELS[s.ai_provider] || s.ai_provider;
-        box.innerHTML =
-          `<div class="provider-label"><span>${label}</span>` +
-          `<span class="${badgeClass(s.status)}">${s.status}</span></div>` +
-          `<details style="margin:6px 0 10px;"><summary style="cursor:pointer;color:var(--muted);font-size:0.82rem;">전송 프롬프트 보기 (AI별 맞춤)</summary>` +
-          `<div class="sent-prompt" style="white-space:pre-wrap;font-size:0.82rem;color:var(--muted);margin-top:6px;border-left:2px solid var(--border);padding-left:10px;"></div></details>` +
-          `<div class="provider-text"></div>`;
-        box.querySelector('.sent-prompt').textContent = s.sent_prompt || '(기록된 전송 프롬프트 없음)';
-        box.querySelector('.provider-text').textContent = s.raw_response || '(응답 없음)';
-        responseGrid.appendChild(box);
-      });
     }
 
     async function runCompare() {
@@ -313,6 +370,12 @@
     }
 
     runBtn.addEventListener('click', runCompare);
+    summaryBox.addEventListener('click', () => {
+      if (summaryBox.classList.contains('clickable')) openResponseModal();
+    });
+    closeResponseModalBtn.addEventListener('click', closeResponseModal);
+    responseModal.addEventListener('click', (e) => { if (e.target === responseModal) closeResponseModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && responseModal.classList.contains('visible')) closeResponseModal(); });
     window.addEventListener('load', () => { connState.textContent = '준비됨'; loadHistory(); });
   </script>
 </body>
