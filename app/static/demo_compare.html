@@ -246,8 +246,9 @@
         box.innerHTML =
           `<div class="provider-label"><span>${label}</span>` +
           `<span class="${badgeClass(s.status)}">${s.status}</span></div>` +
-          `<details style="margin:6px 0 10px;"><summary style="cursor:pointer;color:var(--muted);font-size:0.82rem;">전송 프롬프트 보기 (AI별 맞춤)</summary>` +
-          `<div class="sent-prompt" style="white-space:pre-wrap;font-size:0.82rem;color:var(--muted);margin-top:6px;border-left:2px solid var(--border);padding-left:10px;"></div></details>` +
+          `<div style="font-size:0.8rem;color:var(--muted);margin:8px 0 4px;">전송 프롬프트 (AI별 맞춤)</div>` +
+          `<div class="sent-prompt" style="white-space:pre-wrap;font-size:0.82rem;color:var(--muted);border-left:2px solid var(--primary);padding-left:10px;margin-bottom:12px;"></div>` +
+          `<div style="font-size:0.8rem;color:var(--muted);margin:4px 0;">AI 응답</div>` +
           `<div class="provider-text"></div>`;
         box.querySelector('.sent-prompt').textContent = s.sent_prompt || '(기록된 전송 프롬프트 없음)';
         box.querySelector('.provider-text').textContent = s.raw_response || '(응답 없음)';
