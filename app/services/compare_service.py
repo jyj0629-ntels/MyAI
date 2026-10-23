@@ -8,34 +8,38 @@ cross-check prompt from the PRD. Nothing here touches the existing /demo or /ai/
 
 from app.ai.models.request import AIRequest
 from app.ai.providers.ollama_provider import OllamaProvider
+from app.ai.services.registry import create_orchestrator
+from app.ai.services.multi_provider_orchestrator import MultiProviderOrchestrator
 from app.core.config import settings
 
 from app.repositories.compare_repository import CompareRepository
-from app.services.compare_scraper_service import get_scraper
 
 
 _PROVIDER_LABELS = {
+    "gemini": "Gemini",
+    "groq": "Groq",
+    "mistral": "Mistral",
+    "openai": "OpenAI",
     "chatgpt": "ChatGPT",
     "claude": "Claude",
-    "gemini": "Gemini",
 }
 
 # 각 Public AI의 강점에 맞춰 같은 질문을 다르게 표현하기 위한 provider별 지침.
 _PROVIDER_STYLE = {
-    "chatgpt": (
-        "[대상 AI: ChatGPT]\n"
-        "ChatGPT는 단계적 추론과 정돈된 서술형 설명에 강합니다. "
-        "질문의 맥락을 단계별로 풀어 설명하고, 핵심을 bullet로 구조화해 답하도록 요청하세요."
-    ),
-    "claude": (
-        "[대상 AI: Claude]\n"
-        "Claude는 긴 맥락 이해와 신중하고 균형 잡힌 분석, 안전한 서술에 강합니다. "
-        "장단점을 균형 있게 비교하고 근거와 함께 신중하게 답하도록 요청하세요."
-    ),
     "gemini": (
         "[대상 AI: Gemini]\n"
         "Gemini는 최신 정보 종합과 표/비교 형태의 구조화된 요약에 강합니다. "
         "핵심을 표나 비교 형식으로 간결하게 정리하도록 요청하세요."
+    ),
+    "groq": (
+        "[대상 AI: Groq]\n"
+        "Groq는 빠르고 간결하며 실용적인 결론 도출에 강합니다. "
+        "군더더기 없이 핵심 결론과 근거 위주로 답하도록 요청하세요."
+    ),
+    "mistral": (
+        "[대상 AI: Mistral]\n"
+        "Mistral은 논리적이고 균형 잡힌 분석에 강합니다. "
+        "장단점을 근거와 함께 균형 있게 정리하도록 요청하세요."
     ),
 }
 
@@ -43,7 +47,7 @@ _PROVIDER_STYLE = {
 class CompareService:
     def __init__(self, repository: CompareRepository):
         self.repository = repository
-        self.scraper = get_scraper()
+        self.orchestrator = create_orchestrator()
 
     # 모든 Public AI가 동일한 형식으로 답하도록 하는 공통 출력 포맷.
     # (내용/접근은 AI별 강점에 맞게 다르되, 결과 틀은 통일해야 비교가 쉽다)
@@ -98,6 +102,26 @@ class CompareService:
 3. 종합적인 최종 결론을 작성하세요.
 출력은 한국어로 작성하세요."""
 
+    async def _ask_providers(self, prompt_map: dict) -> dict:
+        """각 Public AI에 그 AI 전용 프롬프트로 실제 API 호출. {provider: answer} 반환."""
+        answer_map = {}
+        for provider, prompt in prompt_map.items():
+            try:
+                request = AIRequest(question=prompt, prompt=prompt)
+                request.selected_providers = [provider]
+                multi = await MultiProviderOrchestrator(self.orchestrator.registry).ask_all(request)
+                responses = multi.get("responses", [])
+                # selected_providers로 1개만 호출되므로 첫 응답 사용.
+                match = next(
+                    (r for r in responses if str(r.get("provider", "")).lower() == provider),
+                    responses[0] if responses else None,
+                )
+                if match:
+                    answer_map[provider] = (match.get("answer") or match.get("summary") or "").strip()
+            except Exception as exc:
+                print(f"[WARN] compare ask provider {provider} failed: {exc}")
+        return answer_map
+
     async def _summarize(self, user_prompt: str, collected: list[dict]) -> str:
         prompt = self._build_cross_check_prompt(user_prompt, collected)
         request = AIRequest(
@@ -123,21 +147,24 @@ class CompareService:
             status="PROCESSING",
         )
 
-        # 1) Build a provider-tailored prompt per AI, then scrape concurrently.
+        # 1) Build a provider-tailored prompt per AI, then call each real Public AI (API).
         prompt_map = {p: self._build_provider_prompt(p, user_prompt) for p in providers}
-        scrape_results = await self.scraper.scrape_many_with_prompts(prompt_map)
+        answer_map = await self._ask_providers(prompt_map)
 
         collected = []
-        for result in scrape_results:
+        for provider in providers:
+            answer = answer_map.get(provider)
+            status = "SUCCESS" if answer else "ERROR"
+            raw = answer or "(응답을 받지 못했습니다)"
             self.repository.add_source_response(
                 history_id=history.id,
-                ai_provider=result.provider,
-                raw_response=result.text,
-                status=result.status,
-                sent_prompt=prompt_map.get(result.provider),
+                ai_provider=provider,
+                raw_response=raw,
+                status=status,
+                sent_prompt=prompt_map.get(provider),
             )
-            if result.status == "SUCCESS":
-                collected.append(result.as_dict())
+            if answer:
+                collected.append({"provider": provider, "text": answer, "status": "SUCCESS"})
 
         # 2) Local LLM cross-check summary.
         if not collected:

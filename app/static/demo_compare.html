@@ -170,9 +170,9 @@
 
           <label class="field-label">수집 대상 Public AI</label>
           <div class="checks">
-            <label class="check"><input type="checkbox" value="chatgpt" checked /> ChatGPT</label>
-            <label class="check"><input type="checkbox" value="claude" checked /> Claude</label>
             <label class="check"><input type="checkbox" value="gemini" checked /> Gemini</label>
+            <label class="check"><input type="checkbox" value="groq" checked /> Groq</label>
+            <label class="check"><input type="checkbox" value="mistral" checked /> Mistral</label>
           </div>
 
           <label class="field-label">Local LLM 요약 모델</label>
@@ -229,7 +229,7 @@
     const historyList = el('historyList');
     const connState = el('connState');
 
-    const PROVIDER_LABELS = { chatgpt: 'ChatGPT', claude: 'Claude', gemini: 'Gemini' };
+    const PROVIDER_LABELS = { gemini: 'Gemini', groq: 'Groq', mistral: 'Mistral', openai: 'OpenAI' };
 
     let currentSources = [];
 

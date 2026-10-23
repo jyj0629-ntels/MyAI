@@ -2,12 +2,16 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.db.dependencies import get_db
 from app.repositories.compare_repository import CompareRepository
 from app.services.compare_service import CompareService
-from app.services.compare_scraper_service import SUPPORTED_PROVIDERS
 
 router = APIRouter(prefix="/compare", tags=["compare"])
+
+
+def _public_providers():
+    return [p.strip().lower() for p in (settings.PUBLIC_PROVIDERS or "").split(",") if p.strip()]
 
 
 class CompareRunRequest(BaseModel):
@@ -30,13 +34,14 @@ async def run_compare(
     if not question:
         raise HTTPException(status_code=422, detail="question is required and must be non-empty.")
 
-    providers = payload.providers or list(SUPPORTED_PROVIDERS)
+    allowed = _public_providers()
+    providers = payload.providers or allowed
     providers = [p.strip().lower() for p in providers if p and p.strip()]
-    providers = [p for p in providers if p in SUPPORTED_PROVIDERS]
+    providers = [p for p in providers if p in allowed]
     if not providers:
         raise HTTPException(
             status_code=422,
-            detail=f"providers must include at least one of {list(SUPPORTED_PROVIDERS)}.",
+            detail=f"providers must include at least one of {allowed}.",
         )
 
     result = await _service(db).run(
