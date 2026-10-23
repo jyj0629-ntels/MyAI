@@ -242,6 +242,7 @@
 
       <div class="composer">
         <textarea id="questionInput" placeholder="질문을 입력하세요..."></textarea>
+        <button id="historyBtn" title="이전 대화 이력 보기">이력</button>
         <button id="sendBtn">전송</button>
       </div>
     </main>
@@ -339,6 +340,42 @@
       const conv = await res.json();
       state.conversationId = conv.id;
       return state.conversationId;
+    }
+
+    async function loadHistory() {
+      try {
+        setStatus('이력 불러오는 중...');
+        const conversationId = await ensureConversation();
+        const res = await fetch(`/conversations/${conversationId}/history`);
+        if (!res.ok) throw new Error('이력 조회 실패');
+        const data = await res.json();
+
+        messageList.innerHTML = '';
+        if (!Array.isArray(data) || !data.length) {
+          addMessage('ai', '이전 대화 이력이 없습니다. 질문을 입력해 보세요.');
+          setStatus('이력 없음');
+          return;
+        }
+
+        for (const item of data) {
+          addMessage('user', item.question);
+          let providerResponses = [];
+          try {
+            if (item.provider_response_path) {
+              const detailRes = await fetch(`/conversations/${conversationId}/history/${item.id}/provider-responses`);
+              if (detailRes.ok) {
+                const detailData = await detailRes.json();
+                providerResponses = Array.isArray(detailData.provider_responses) ? detailData.provider_responses : [];
+              }
+            }
+          } catch (e) { console.warn('provider response load failed', e); }
+          addMessage('ai', item.answer || '응답 내용이 비어 있습니다.', { providerResponses });
+        }
+        setStatus('이력 로드 완료');
+      } catch (e) {
+        console.error(e);
+        setStatus('이력 로드 실패');
+      }
     }
 
     function addMessage(role, text, meta) {
@@ -544,11 +581,15 @@
       if (e.key === 'Escape' && responseModal.classList.contains('visible')) closeModal();
     });
 
+    const historyBtn = document.getElementById('historyBtn');
+    if (historyBtn) historyBtn.addEventListener('click', loadHistory);
+
     window.addEventListener('load', async () => {
       try {
         await loadProviderStatus();
         await ensureConversation();
         await loadTerms();
+        await loadHistory();
         setStatus('Private AI 연결 완료');
       } catch (e) {
         console.error(e);
