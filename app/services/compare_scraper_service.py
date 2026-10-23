@@ -71,15 +71,48 @@ class MockPublicAIScraper(PublicAIScraper):
         "gemini": "Gemini",
     }
 
+    # provider별로 "실제 응답처럼 보이는" 목업 답변(프롬프트를 되풀이하지 않음).
+    _MOCK_ANSWER = {
+        "chatgpt": (
+            "| 항목 | 내용 |\n"
+            "| --- | --- |\n"
+            "| 핵심 결론 | 단계적으로 보면 A안이 가장 균형적입니다. |\n"
+            "| 주요 근거 | 비용·일정·난이도를 종합할 때 리스크가 가장 낮음 |\n"
+            "| 추천/선택지 | A안(우선), B안(대안) |\n"
+            "| 장점 | 실행이 단순하고 예측 가능 |\n"
+            "| 단점/주의 | 최대 성과는 다소 보수적 |\n\n"
+            "총평: 안정적으로 진행하려면 A안이 무난합니다."
+        ),
+        "claude": (
+            "| 항목 | 내용 |\n"
+            "| --- | --- |\n"
+            "| 핵심 결론 | 조건에 따라 B안이 더 나을 수 있습니다. |\n"
+            "| 주요 근거 | 장기적 유연성과 확장성 측면에서 우위 |\n"
+            "| 추천/선택지 | B안(상황에 따라), A안(안전책) |\n"
+            "| 장점 | 변화에 유연하게 대응 가능 |\n"
+            "| 단점/주의 | 초기 준비 비용이 더 큼 |\n\n"
+            "총평: 장기 관점이면 B안, 단기면 A안을 권합니다."
+        ),
+        "gemini": (
+            "| 항목 | 내용 |\n"
+            "| --- | --- |\n"
+            "| 핵심 결론 | 핵심 지표만 보면 A안과 B안이 근소한 차이입니다. |\n"
+            "| 주요 근거 | 최신 데이터 기준 비용 대비 효과가 비슷 |\n"
+            "| 추천/선택지 | A안/B안 혼합 전략 |\n"
+            "| 장점 | 두 방식의 이점을 절충 |\n"
+            "| 단점/주의 | 관리 포인트가 늘어남 |\n\n"
+            "총평: 여건이 되면 혼합 전략이 가장 효과적입니다."
+        ),
+    }
+
     async def scrape(self, provider: str, prompt: str) -> ScrapeResult:
         await asyncio.sleep(0)  # keep it awaitable / cooperative
         label = self._LABELS.get(provider, provider)
-        text = (
-            f"[{label} 웹 응답 - 임시 목업]\n"
-            f"질문: {prompt}\n"
-            f"이 텍스트는 실제 웹 스크래핑 대신 사용되는 목업 응답입니다. "
-            f"Playwright 스크래퍼가 연결되면 이 자리에 {label}의 실제 웹 답변이 채워집니다."
+        answer = self._MOCK_ANSWER.get(
+            provider,
+            "| 항목 | 내용 |\n| --- | --- |\n| 핵심 결론 | 목업 응답 |\n\n총평: 샘플 응답입니다.",
         )
+        text = f"[{label} 응답 · 데모 목업]\n{answer}"
         return ScrapeResult(provider, text, "SUCCESS")
 
 
