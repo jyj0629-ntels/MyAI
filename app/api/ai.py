@@ -694,6 +694,12 @@ async def chat(
     if response.summary:
         response.summary = MultiProviderOrchestrator.format_final_answer(response.summary)
 
+    # 기능 1: 로컬 LLM이 선호도를 반영해 생성한 프롬프트를 응답에 실어 UI에서 볼 수 있게 함.
+    response.generated_prompt = prompt
+
+    # 이력 분리: MyAI 기능으로 저장.
+    request.feature = "myai"
+
     tracker.start("6. memory_persist_and_finalize")
     await (
         ChatOrchestratorService()

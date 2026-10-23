@@ -46,7 +46,8 @@ def create_conversation(
     )
 
     return service.create(
-        request.title
+        request.title,
+        request.feature
     )
 
 
@@ -55,6 +56,7 @@ def create_conversation(
     response_model=list[ConversationResponse]
 )
 def get_conversations(
+    feature: str | None = None,
     db: Session = Depends(get_db)
 ):
 
@@ -62,7 +64,7 @@ def get_conversations(
         ConversationRepository(db)
     )
 
-    return service.get_all()
+    return service.get_all(feature)
 
 
 @router.get(

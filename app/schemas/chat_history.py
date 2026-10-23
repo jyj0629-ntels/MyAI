@@ -6,6 +6,7 @@ from typing import Optional
 class ChatHistoryResponse(BaseModel):
 
     id: int
+    feature: str = "myai"
     provider: str
     model: str
 

@@ -11,12 +11,13 @@ class ConversationService:
 
     def create(
         self,
-        title: str
+        title: str,
+        feature: str = "myai"
     ):
-        return self.repository.create(title)
+        return self.repository.create(title, feature)
 
-    def get_all(self):
-        return self.repository.get_all()
+    def get_all(self, feature: str | None = None):
+        return self.repository.get_all(feature)
 
     def get_by_id(
         self,

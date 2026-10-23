@@ -19,7 +19,8 @@ class ChatService:
         input_tokens,
         output_tokens,
         success,
-        provider_response_path=None
+        provider_response_path=None,
+        feature="myai"
     ):
         return self.repository.save(
             conversation_id,
@@ -30,7 +31,8 @@ class ChatService:
             input_tokens,
             output_tokens,
             success,
-            provider_response_path
+            provider_response_path,
+            feature
         )
 
     def get_recent_history(

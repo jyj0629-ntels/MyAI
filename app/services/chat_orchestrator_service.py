@@ -52,7 +52,8 @@ class ChatOrchestratorService:
                 input_tokens=response.input_tokens,
                 output_tokens=response.output_tokens,
                 success=response.success,
-                provider_response_path=provider_response_path
+                provider_response_path=provider_response_path,
+                feature=getattr(request, "feature", "myai") or "myai"
             )
             tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success), "provider_response_path": provider_response_path})
         except Exception as exc:

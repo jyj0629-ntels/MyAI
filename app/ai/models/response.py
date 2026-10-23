@@ -19,6 +19,8 @@ class AIResponse(BaseModel):
 
     provider_response_path: Optional[str] = None
 
+    generated_prompt: Optional[str] = None
+
     request_time_ms: Optional[float] = None
 
     response_time_ms: Optional[float] = None

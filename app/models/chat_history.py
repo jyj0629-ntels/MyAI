@@ -25,6 +25,13 @@ class ChatHistory(Base):
         nullable=True
     )
 
+    feature: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        server_default="myai",
+        default="myai"
+    )
+
     provider: Mapped[str] = mapped_column(
         String(50),
         nullable=False

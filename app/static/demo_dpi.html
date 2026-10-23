@@ -321,7 +321,7 @@
     async function ensureConversation() {
       if (state.conversationId) return state.conversationId;
       try {
-        const listRes = await fetch('/conversations/');
+        const listRes = await fetch('/conversations/?feature=dpi');
         if (listRes.ok) {
           const list = await listRes.json();
           if (Array.isArray(list) && list.length) {
@@ -334,7 +334,7 @@
       const res = await fetch('/conversations/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'DPI Session' })
+        body: JSON.stringify({ title: 'DPI Session', feature: 'dpi' })
       });
       const conv = await res.json();
       state.conversationId = conv.id;

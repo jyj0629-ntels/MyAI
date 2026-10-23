@@ -8,11 +8,13 @@ class ConversationRepository:
 
     def create(
         self,
-        title: str
+        title: str,
+        feature: str = "myai"
     ):
 
         conversation = Conversation(
-            title=title
+            title=title,
+            feature=(feature or "myai")
         )
 
         self.db.add(conversation)
@@ -21,10 +23,13 @@ class ConversationRepository:
 
         return conversation
 
-    def get_all(self):
+    def get_all(self, feature: str | None = None):
 
+        query = self.db.query(Conversation)
+        if feature:
+            query = query.filter(Conversation.feature == feature)
         return (
-            self.db.query(Conversation)
+            query
             .order_by(Conversation.id.desc())
             .all()
         )

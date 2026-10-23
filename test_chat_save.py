@@ -7,7 +7,7 @@ repo = ChatRepository(db)
 
 repo.save(
     provider="test",
-    model="test-model",
+    model="test-model",     
     question="save test",
     answer="saved"
 )

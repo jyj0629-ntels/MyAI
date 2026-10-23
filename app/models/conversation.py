@@ -22,6 +22,13 @@ class Conversation(Base):
         nullable=False
     )
 
+    feature: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        server_default="myai",
+        default="myai"
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),

@@ -32,6 +32,8 @@ class AIRequest(BaseModel):
 
     max_tokens: Optional[int] = None
 
+    feature: str = "myai"
+
     @field_validator("question", mode="before")
     @classmethod
     def normalize_question(cls, value: Any) -> str:

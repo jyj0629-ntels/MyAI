@@ -118,6 +118,7 @@ async def dpi_chat(
 
     request.prompt = public_prompt
     request.system_prompt = public_prompt
+    request.feature = "dpi"  # 이력 분리: DPI 전용으로 저장/조회
 
     # ------------------------------------------------------------------
     # 3. Public AI 병렬 호출
