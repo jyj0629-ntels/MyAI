@@ -156,8 +156,9 @@
       statusLine.innerHTML = busy ? `<span class="spinner"></span>${msg || '처리 중...'}` : (msg || '');
     }
 
-    function roundBlock(title, items, note) {
+    function roundBlock(title, items, note, expand) {
       const wrap = document.createElement('details');
+      wrap.open = !!expand;
       const sum = document.createElement('summary');
       sum.textContent = title;
       wrap.appendChild(sum);
@@ -184,13 +185,13 @@
       return wrap;
     }
 
-    function renderDetail(d) {
+    function renderDetail(d, expand) {
       if (!d) return;
       finalModel.textContent = d.llm_model_used ? `· ${d.llm_model_used} · ${d.status}` : `· ${d.status}`;
       finalBox.textContent = d.final_result || '최종 결과가 없습니다.';
       rounds.innerHTML = '';
-      rounds.appendChild(roundBlock('STEP1 · 관광지 TOP20 응답 (각 AI)', d.round1, null));
-      rounds.appendChild(roundBlock('STEP2 · 일정 계획 응답 (각 AI)', d.round2, d.round2_prompt));
+      rounds.appendChild(roundBlock('STEP1 · 관광지 TOP20 응답 (각 AI)', d.round1, null, expand));
+      rounds.appendChild(roundBlock('STEP2 · 일정 계획 응답 (각 AI)', d.round2, d.round2_prompt, expand));
     }
 
     async function run() {
@@ -246,7 +247,7 @@
       try {
         const res = await fetch(`/travel_compare/history/${id}`);
         if (!res.ok) throw new Error(await res.text());
-        renderDetail(await res.json());
+        renderDetail(await res.json(), true);
         setBusy(false, '이력 조회 완료');
       } catch (err) { setBusy(false, `이력 조회 실패: ${err.message}`); }
     }
