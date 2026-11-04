@@ -255,6 +255,10 @@
         <button class="secondary" id="closeModalBtn" type="button">닫기</button>
       </div>
       <div class="modal-body">
+        <div class="resp-box" id="sentPromptBox" style="display:none; margin-bottom:14px;">
+          <div class="resp-label"><span>Public AI에 질문한 프롬프트 (금지어 재작성 후)</span></div>
+          <pre class="resp-text"></pre>
+        </div>
         <div class="resp-grid" id="respGrid"></div>
       </div>
     </div>
@@ -375,7 +379,11 @@
               }
             } catch (e) { console.warn('provider response load failed', e); }
           }
-          addMessage('ai', item.answer || '응답 내용이 비어 있습니다.', { providerResponses });
+          addMessage('ai', item.answer || '응답 내용이 비어 있습니다.', {
+            providerResponses,
+            sentPrompt: item.generated_prompt || '',
+            forcePopup: true
+          });
         }
         setStatus('이력 로드 완료');
       } catch (e) {
@@ -394,13 +402,16 @@
       bubble.className = 'bubble';
       bubble.textContent = text;
 
-      if (meta && Array.isArray(meta.providerResponses) && meta.providerResponses.length) {
+      const respCount = meta && Array.isArray(meta.providerResponses) ? meta.providerResponses.length : 0;
+      if (meta && (respCount > 0 || meta.forcePopup)) {
         bubble.classList.add('clickable');
         const hint = document.createElement('span');
         hint.className = 'hint';
-        hint.textContent = '클릭하면 Public AI 응답 2개를 팝업으로 확인할 수 있습니다.';
+        hint.textContent = respCount > 0
+          ? `클릭하면 Public AI에 질문한 프롬프트와 응답 ${respCount}개를 팝업으로 확인할 수 있습니다.`
+          : '클릭하면 저장된 Public AI 응답 여부를 확인할 수 있습니다.';
         bubble.appendChild(hint);
-        bubble.addEventListener('click', () => openModal(meta.providerResponses));
+        bubble.addEventListener('click', () => openModal(meta.providerResponses || [], meta.sentPrompt));
       }
 
       if (meta && meta.dpi) {
@@ -429,7 +440,16 @@
       messageList.scrollTop = messageList.scrollHeight;
     }
 
-    function openModal(providerResponses) {
+    function openModal(providerResponses, sentPrompt) {
+      const promptBox = $('sentPromptBox');
+      if (promptBox) {
+        if (sentPrompt && String(sentPrompt).trim()) {
+          promptBox.style.display = 'block';
+          promptBox.querySelector('.resp-text').textContent = sentPrompt;
+        } else {
+          promptBox.style.display = 'none';
+        }
+      }
       respGrid.innerHTML = '';
       if (!Array.isArray(providerResponses) || !providerResponses.length) {
         respGrid.innerHTML = '<div class="resp-box"><div class="resp-label">응답 정보</div><pre class="resp-text">저장된 Public AI 응답이 없습니다.</pre></div>';
@@ -495,7 +515,11 @@
         const answer = data.answer || data.summary || '응답이 비어 있습니다.';
         const providerResponses = Array.isArray(data.provider_responses) ? data.provider_responses : [];
         const dpi = data.performance && data.performance.dpi ? data.performance.dpi : null;
-        addMessage('ai', answer, { providerResponses, dpi });
+        addMessage('ai', answer, {
+          providerResponses,
+          dpi,
+          sentPrompt: data.generated_prompt || (dpi && dpi.rewritten_prompt) || ''
+        });
         setStatus('응답 완료');
       } catch (err) {
         console.error(err);

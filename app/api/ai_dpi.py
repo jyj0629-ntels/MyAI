@@ -226,6 +226,10 @@ async def dpi_chat(
         final_text or response.answer or ""
     )
 
+    # Public AI에 실제로 전송한 프롬프트(금지어 재작성 후). 이력 팝업에서 응답과 함께 보여주기 위해
+    # 응답에 싣고 chat_history.generated_prompt 로 저장한다.
+    response.generated_prompt = public_prompt
+
     # demo_dpi 부가 정보(프론트에서 재작성 배지 표시용)
     response.performance = {
         "dpi": {
