@@ -58,6 +58,20 @@ class ChatHistory(Base):
         default=None
     )
 
+    # Local LLM이 선호도를 반영해 만든 프롬프트(이력 클릭 시 UI에 복원).
+    generated_prompt: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        default=None
+    )
+
+    # Public AI별 응답(JSON). 컨테이너 재생성으로 md 파일이 사라져도 팝업이 복원되도록 DB에 보관.
+    provider_responses_json: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        default=None
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),

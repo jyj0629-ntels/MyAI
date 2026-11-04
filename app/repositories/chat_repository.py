@@ -17,7 +17,9 @@ class ChatRepository:
         output_tokens,
         success,
         provider_response_path=None,
-        feature="myai"
+        feature="myai",
+        generated_prompt=None,
+        provider_responses_json=None
     ):
 
         model_name = str(model or provider or "unknown").strip() or "unknown"
@@ -25,6 +27,8 @@ class ChatRepository:
         chat = ChatHistory(
             conversation_id=conversation_id,
             feature=(feature or "myai"),
+            generated_prompt=generated_prompt,
+            provider_responses_json=provider_responses_json,
             provider=str(provider or "unknown").strip() or "unknown",
             model=model_name,
             question=question or "",

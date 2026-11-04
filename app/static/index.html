@@ -926,6 +926,15 @@
       document.body.classList.remove('modal-open');
     }
 
+    function showGeneratedPrompt(text) {
+      const box = document.getElementById('generatedPrompt');
+      if (!box) return;
+      box.value = text && String(text).trim()
+        ? text
+        : '(이 이력에는 저장된 Local LLM 생성 프롬프트가 없습니다. 이전 버전에서 만든 대화일 수 있습니다.)';
+      box.scrollTop = 0;
+    }
+
     function addMessage(role, content, meta = null) {
       const row = document.createElement('div');
       row.className = `message ${role === 'user' ? 'user' : ''}`;
@@ -937,10 +946,26 @@
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
 
-      if (role !== 'user' && meta && Array.isArray(meta.providerResponses) && meta.providerResponses.length) {
+      const hasPopup = role !== 'user' && meta && Array.isArray(meta.providerResponses) && meta.providerResponses.length;
+      const hasPrompt = !!(meta && meta.hasPromptInfo);
+
+      if (hasPopup) {
         bubble.classList.add('ai-summary');
-        bubble.title = '클릭하면 각 Public AI 응답을 확인할 수 있습니다.';
-        bubble.addEventListener('click', () => openProviderResponsesModal(meta.providerResponses));
+        bubble.title = '클릭하면 각 Public AI 응답과 Local LLM 생성 프롬프트를 확인할 수 있습니다.';
+      } else if (hasPrompt) {
+        bubble.style.cursor = 'pointer';
+        bubble.title = '클릭하면 이 질문에 사용된 Local LLM 생성 프롬프트를 확인할 수 있습니다.';
+      }
+
+      if (hasPopup || hasPrompt) {
+        bubble.addEventListener('click', () => {
+          if (hasPrompt) {
+            showGeneratedPrompt(meta.generatedPrompt);
+          }
+          if (hasPopup) {
+            openProviderResponsesModal(meta.providerResponses);
+          }
+        });
       }
 
       bubble.textContent = content;
@@ -1102,22 +1127,37 @@
         }
 
         for (const item of data) {
-          addMessage('user', item.question);
+          const promptMeta = { generatedPrompt: item.generated_prompt || '', hasPromptInfo: true };
+          addMessage('user', item.question, promptMeta);
 
+          // 1순위: DB에 저장된 Public AI 응답(JSON). 컨테이너를 재생성해도 유지된다.
           let providerResponses = [];
-          try {
-            if (item.provider_response_path) {
+          if (item.provider_responses_json) {
+            try {
+              const parsed = JSON.parse(item.provider_responses_json);
+              if (Array.isArray(parsed)) providerResponses = parsed;
+            } catch (error) {
+              console.warn('provider_responses_json parse failed', error);
+            }
+          }
+
+          // 2순위(구버전 이력): md 파일에서 복원.
+          if (!providerResponses.length && item.provider_response_path) {
+            try {
               const detailRes = await fetch(`/conversations/${conversationId}/history/${item.id}/provider-responses`);
               if (detailRes.ok) {
                 const detailData = await detailRes.json();
                 providerResponses = Array.isArray(detailData.provider_responses) ? detailData.provider_responses : [];
               }
+            } catch (error) {
+              console.warn('provider response history load failed', error);
             }
-          } catch (error) {
-            console.warn('provider response history load failed', error);
           }
 
-          addMessage('ai', item.answer || item.summary || '응답 내용이 비어 있습니다.', { providerResponses });
+          addMessage('ai', item.answer || item.summary || '응답 내용이 비어 있습니다.', {
+            providerResponses,
+            ...promptMeta
+          });
         }
 
         setStatus('기록 로드 완료');
@@ -1202,10 +1242,13 @@
         const data = await res.json();
         const answer = data.answer || data.summary || '응답이 비어 있습니다.';
         const providerResponses = Array.isArray(data.provider_responses) ? data.provider_responses : [];
-        addMessage('ai', answer, { providerResponses });
+        addMessage('ai', answer, {
+          providerResponses,
+          generatedPrompt: data.generated_prompt || '',
+          hasPromptInfo: true
+        });
         if (data.generated_prompt) {
-          const gp = document.getElementById('generatedPrompt');
-          if (gp) gp.value = data.generated_prompt;
+          showGeneratedPrompt(data.generated_prompt);
         }
         setStatus('AI 응답 완료');
       } catch (error) {

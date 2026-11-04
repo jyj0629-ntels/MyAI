@@ -88,7 +88,30 @@ def seed_forbidden_terms():
         print(f"[WARN] forbidden term seed failed: {exc}")
 
 
+def ensure_schema_columns():
+    """create_all()은 이미 있는 테이블에 컬럼을 추가하지 않는다.
+
+    이 서버 DB는 alembic 이력이 없어 `alembic upgrade`를 쓸 수 없으므로, 기능 추가로 늘어난
+    컬럼을 시작 시 멱등(IF NOT EXISTS)으로 보강한다. 각 문장을 독립 실행해 하나가 실패해도
+    나머지는 적용된다. (PostgreSQL 전용 구문이며, 다른 DB에서는 경고만 남기고 넘어간다.)
+    """
+    statements = [
+        "ALTER TABLE conversation ADD COLUMN IF NOT EXISTS feature VARCHAR(20) NOT NULL DEFAULT 'myai'",
+        "ALTER TABLE chat_history ADD COLUMN IF NOT EXISTS feature VARCHAR(20) NOT NULL DEFAULT 'myai'",
+        "ALTER TABLE chat_history ADD COLUMN IF NOT EXISTS generated_prompt TEXT",
+        "ALTER TABLE chat_history ADD COLUMN IF NOT EXISTS provider_responses_json TEXT",
+        "ALTER TABLE compare_source_responses ADD COLUMN IF NOT EXISTS sent_prompt TEXT",
+    ]
+    for statement in statements:
+        try:
+            with engine.begin() as connection:
+                connection.execute(text(statement))
+        except Exception as exc:
+            print(f"[WARN] schema column ensure skipped: {statement} -> {exc}")
+
+
 ensure_database_schema()
+ensure_schema_columns()
 seed_forbidden_terms()
 prompt_builder = PromptBuilder()
 BASE_DIR = Path(__file__).resolve().parent

@@ -20,7 +20,9 @@ class ChatService:
         output_tokens,
         success,
         provider_response_path=None,
-        feature="myai"
+        feature="myai",
+        generated_prompt=None,
+        provider_responses_json=None
     ):
         return self.repository.save(
             conversation_id,
@@ -32,7 +34,9 @@ class ChatService:
             output_tokens,
             success,
             provider_response_path,
-            feature
+            feature,
+            generated_prompt,
+            provider_responses_json
         )
 
     def get_recent_history(

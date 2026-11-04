@@ -1,3 +1,5 @@
+import json
+
 from app.models.memory_item import MemoryItem
 from app.repositories.chat_repository import ChatRepository
 
@@ -42,6 +44,14 @@ class ChatOrchestratorService:
             except Exception as exc:
                 print(f"[WARN] provider response markdown save failed: {exc}")
 
+        # Public AI 응답을 DB에도 보관(컨테이너 재생성으로 md 파일이 사라져도 이력 팝업 복원).
+        provider_responses_json = None
+        if provider_responses:
+            try:
+                provider_responses_json = json.dumps(provider_responses, ensure_ascii=False, default=str)
+            except Exception as exc:
+                print(f"[WARN] provider responses json serialize failed: {exc}")
+
         try:
             chat_service.save_chat(
                 conversation_id=request.conversation_id,
@@ -53,7 +63,9 @@ class ChatOrchestratorService:
                 output_tokens=response.output_tokens,
                 success=response.success,
                 provider_response_path=provider_response_path,
-                feature=getattr(request, "feature", "myai") or "myai"
+                feature=getattr(request, "feature", "myai") or "myai",
+                generated_prompt=getattr(response, "generated_prompt", None),
+                provider_responses_json=provider_responses_json
             )
             tracker.finish("conversation_save", metadata={"conversation_id": request.conversation_id, "provider": response.provider, "success": bool(response.success), "provider_response_path": provider_response_path})
         except Exception as exc:

@@ -360,15 +360,21 @@
         for (const item of data) {
           addMessage('user', item.question);
           let providerResponses = [];
-          try {
-            if (item.provider_response_path) {
+          if (item.provider_responses_json) {
+            try {
+              const parsed = JSON.parse(item.provider_responses_json);
+              if (Array.isArray(parsed)) providerResponses = parsed;
+            } catch (e) { console.warn('provider_responses_json parse failed', e); }
+          }
+          if (!providerResponses.length && item.provider_response_path) {
+            try {
               const detailRes = await fetch(`/conversations/${conversationId}/history/${item.id}/provider-responses`);
               if (detailRes.ok) {
                 const detailData = await detailRes.json();
                 providerResponses = Array.isArray(detailData.provider_responses) ? detailData.provider_responses : [];
               }
-            }
-          } catch (e) { console.warn('provider response load failed', e); }
+            } catch (e) { console.warn('provider response load failed', e); }
+          }
           addMessage('ai', item.answer || '응답 내용이 비어 있습니다.', { providerResponses });
         }
         setStatus('이력 로드 완료');
